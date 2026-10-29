@@ -36,7 +36,7 @@ export default function Home() {
     if (!pos || !address) { setMsg("Address likho"); return; }
     const items = Object.entries(cart).map(([product_id, qty]) => ({ product_id, qty }));
     const { data, error } = await supabase.rpc("place_order", { p_lat: pos.lat, p_lng: pos.lng, p_address: address, p_items: items });
-    if (error) setMsg(error.message); else { setMsg("Order place ho gaya! ID: " + data); setCart({}); }
+    if (error) setMsg(error.message); else { window.location.href = "/orders/" + data; }
   }
 
   return (<>

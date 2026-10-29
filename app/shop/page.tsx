@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-type O = { id: string; status: string; total: number; address: string };
+import { QRCodeSVG } from "qrcode.react";
+type O = { pickup_token: string; id: string; status: string; total: number; address: string };
 export default function Shop() {
   const [orders, setOrders] = useState<O[]>([]);
   const audio = useRef<HTMLAudioElement | null>(null);
   const load = async () => {
-    const { data } = await supabase.from("orders").select("id,status,total,address").in("status", ["placed", "accepted", "packed"]).order("created_at");
+    const { data } = await supabase.from("orders").select("id,status,total,address,pickup_token").in("status", ["placed", "accepted", "packed"]).order("created_at");
     setOrders((data as O[]) || []);
   };
   useEffect(() => {
@@ -27,5 +28,6 @@ export default function Shop() {
       <b>₹{o.total}</b> · {o.status}<div>{o.address}</div>
       {o.status === "placed" && <><button onClick={() => setStatus(o.id, "accepted")}>Accept</button> <button className="alt" onClick={() => reject(o.id)}>Reject</button></>}
       {o.status === "accepted" && <button onClick={() => setStatus(o.id, "packed")}>Packed</button>}
+      {o.status === "packed" && <div><p>Is QR ko bag pe lagao. Rider scan karega:</p><QRCodeSVG value={o.pickup_token} size={140} /></div>}
     </div>))}</div>);
 }

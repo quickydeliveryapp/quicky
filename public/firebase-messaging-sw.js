@@ -3,10 +3,10 @@ importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-com
 
 // TODO: Firebase Console > Project settings > Your apps (Web) se ye 4 values yahan paste karo
 firebase.initializeApp({
-  apiKey: "AIzaSyBwwNK1BiPU9UV1b3hPykBVfuhQ_YJ4dps",
-  projectId: "quicky-delivery-app",
-  messagingSenderId: "464622372034",
-  appId: "1:464622372034:web:4a783ddce47fbb12cca75b",
+  apiKey: "PASTE_API_KEY",
+  projectId: "PASTE_PROJECT_ID",
+  messagingSenderId: "PASTE_SENDER_ID",
+  appId: "PASTE_APP_ID",
 });
 
 firebase.messaging().onBackgroundMessage((payload) => {

@@ -10,6 +10,7 @@ export default function Home() {
   const [cart, setCart] = useState<Record<string, number>>({});
   const [address, setAddress] = useState("");
   const [msg, setMsg] = useState("");
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -22,6 +23,7 @@ export default function Home() {
     if (!pos) return;
     supabase.rpc("browse_products", { p_lat: pos.lat, p_lng: pos.lng }).then(({ data, error }) => {
       if (error) setMsg(error.message); else setProducts(data as P[]);
+      setLoaded(true);
     });
   }, [pos]);
 
@@ -41,6 +43,8 @@ export default function Home() {
 
   return (<>
     {msg && <p>{msg}</p>}
+    {!pos && !msg && <p>Location dhoondh rahe hain...</p>}
+    {loaded && !products.length && !msg && <p>Is area mein abhi koi shop ya product available nahi hai.</p>}
     <div className="grid">
       {products.map((p) => (
         <div className="card" key={p.id}>

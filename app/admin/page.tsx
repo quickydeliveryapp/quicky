@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-type Tab = "orders" | "riders" | "shops" | "commission" | "settlement" | "cash";
+type Tab = "orders" | "riders" | "shops" | "commission" | "settlement" | "cash" | "fees";
 
 export default function Admin() {
   const [role, setRole] = useState<string | null>(null);
@@ -13,6 +13,10 @@ export default function Admin() {
   const [rates, setRates] = useState<any[]>([]);
   const [settle, setSettle] = useState<any[]>([]);
   const [cash, setCash] = useState<any[]>([]);
+  const [fees, setFees] = useState<any>(null);
+  const [summary, setSummary] = useState<any>(null);
+  const [riderCost, setRiderCost] = useState("");
+  const [packCost, setPackCost] = useState("");
   const [msg, setMsg] = useState("");
   const [now, setNow] = useState(Date.now());
 
@@ -33,6 +37,8 @@ export default function Admin() {
         supabase.from("category_commissions").select("category,rate").order("category")]);
       setShops(s.data || []); setRates(c.data || []);
       const st = await supabase.rpc("shop_summary"); setSettle(st.data || []);
+      const fe = await supabase.from("fee_settings").select("*").eq("id", 1).single(); setFees(fe.data);
+      const sm = await supabase.rpc("quicky_summary"); setSummary(sm.data?.[0] ?? null);
     }
   }
   useEffect(() => { load(); const t = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(t); }, []);
@@ -46,7 +52,7 @@ export default function Admin() {
 
   if (role === null) return <p>Loading...</p>;
   if (role !== "admin" && role !== "area_manager") return <p>Is page ka access nahi hai.</p>;
-  const tabs: Tab[] = role === "admin" ? ["orders", "riders", "shops", "commission", "settlement", "cash"] : ["orders", "riders", "cash"];
+  const tabs: Tab[] = role === "admin" ? ["orders", "riders", "shops", "commission", "settlement", "cash", "fees"] : ["orders", "riders", "cash"];
 
   return (<div>
     <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
@@ -97,5 +103,25 @@ export default function Admin() {
         <div>Cash liya ₹{r.collected} · Jama kiya ₹{r.deposited} · <b>Baaki ₹{r.pending}</b></div>
         <button onClick={() => { const a = Number(window.prompt("Rider ne kitna cash jama kiya (₹)?")); if (a > 0) run(supabase.rpc("record_cash_deposit", { p_rider: r.out_rider, p_amount: a })); }}>Cash jama record karo</button>
       </div>))}
+    {tab === "fees" && fees && <div>
+      {[["delivery_fee", "Delivery fee ₹"], ["free_delivery_above", "Free delivery iske upar (₹)"], ["small_cart_threshold", "Small cart: isse kam cart pe fee (₹)"], ["small_cart_fee", "Small cart fee ₹"]].map(([k, l]) => (
+        <div className="card" key={k} style={{ marginBottom: 8 }}><b>{l}</b>{" "}
+          <input style={{ width: 90 }} defaultValue={fees[k]} inputMode="decimal"
+            onBlur={(e) => Number(e.target.value) !== Number(fees[k]) && run(supabase.from("fee_settings").update({ [k]: Number(e.target.value) }).eq("id", 1))} /></div>))}
+      <h3>Unit economics (delivered orders pe)</h3>
+      {summary && Number(summary.delivered) > 0 ? (() => {
+        const n = Number(summary.delivered);
+        const rev = (Number(summary.commission) + Number(summary.fees)) / n;
+        const profit = rev - Number(riderCost || 0) - Number(packCost || 0);
+        return (<div className="card" style={{ lineHeight: 1.9 }}>
+          Delivered orders: <b>{n}</b><br />
+          Commission: ₹{summary.commission} · Fees: ₹{summary.fees}<br />
+          Quicky ki kamayi per order: <b>₹{rev.toFixed(2)}</b><br />
+          Rider ka kharcha per order ₹ <input style={{ width: 70 }} value={riderCost} onChange={(e) => setRiderCost(e.target.value)} inputMode="decimal" /><br />
+          Packing/baaki kharcha per order ₹ <input style={{ width: 70 }} value={packCost} onChange={(e) => setPackCost(e.target.value)} inputMode="decimal" /><br />
+          <span style={{ fontSize: 20, color: profit < 0 ? "#DC2626" : "#16A34A" }}>Profit per order: <b>₹{profit.toFixed(2)}</b></span>
+        </div>);
+      })() : <p>Abhi koi delivered order nahi (naye fees ke saath).</p>}
+    </div>}
   </div>);
 }

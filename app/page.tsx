@@ -11,12 +11,17 @@ export default function Home() {
   const [address, setAddress] = useState("");
   const [msg, setMsg] = useState("");
   const [loaded, setLoaded] = useState(false);
+  const [fees, setFees] = useState<any>(null);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (p) => setPos({ lat: p.coords.latitude, lng: p.coords.longitude }),
       () => setMsg("Location allow karo, tabhi products dikhenge")
     );
+  }, []);
+
+  useEffect(() => {
+    supabase.from("fee_settings").select("*").eq("id", 1).single().then(({ data }) => setFees(data));
   }, []);
 
   useEffect(() => {
@@ -31,6 +36,8 @@ export default function Home() {
     setCart((c) => { const q = Math.max(0, (c[id] || 0) + d); const n = { ...c }; q ? (n[id] = q) : delete n[id]; return n; });
 
   const total = products.reduce((s, p) => s + (cart[p.id] || 0) * Number(p.price), 0);
+  const del = fees ? (total >= Number(fees.free_delivery_above) ? 0 : Number(fees.delivery_fee)) : 0;
+  const small = fees && total < Number(fees.small_cart_threshold) ? Number(fees.small_cart_fee) : 0;
 
   async function checkout() {
     const { data: u } = await supabase.auth.getUser();
@@ -54,7 +61,13 @@ export default function Home() {
         </div>))}
     </div>
     {total > 0 && <div style={{ marginTop: 16 }}>
-      <h3>Cart: ₹{total.toFixed(2)} (Cash on Delivery)</h3>
+      <div className="card" style={{ marginBottom: 8 }}>
+        <div>Items: ₹{total.toFixed(2)}</div>
+        <div>Delivery: {del === 0 ? "FREE" : "₹" + del}</div>
+        {small > 0 && <div>Small cart fee: ₹{small}</div>}
+        <h3>Total: ₹{(total + del + small).toFixed(2)} (Cash on Delivery)</h3>
+        {fees && del > 0 && <small>₹{(Number(fees.free_delivery_above) - total).toFixed(0)} aur add karo, delivery free!</small>}
+      </div>
       <input placeholder="Delivery address" value={address} onChange={(e) => setAddress(e.target.value)} />
       <button onClick={checkout}>Order karo</button>
     </div>}

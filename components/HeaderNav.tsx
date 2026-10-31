@@ -26,7 +26,7 @@ export default function HeaderNav() {
   const staff = role === "admin" || role === "area_manager";
 
   return (<span>
-    {shop && <><a href="/shop" style={link}>Orders</a><a href="/shop/inventory" style={link}>Inventory</a></>}
+    {shop && <><a href="/shop" style={link}>Orders</a><a href="/shop/inventory" style={link}>Inventory</a><a href="/shop/earnings" style={link}>Kamayi</a></>}
     {rider && <a href="/rider" style={link}>Rider</a>}
     {staff && <a href="/admin" style={link}>Admin</a>}
     {loggedIn

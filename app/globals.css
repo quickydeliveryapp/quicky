@@ -47,3 +47,5 @@ input[type=checkbox]{width:auto}
 .cartbar h3{margin:4px 0}
 .cartbar button{width:100%;margin-top:4px}
 .free{color:var(--g);font-weight:600}
+.tagline{margin:2px 0 16px;font-size:18px;font-style:italic;color:var(--g)}
+.tagline b{border-bottom:3px solid var(--lime);padding-bottom:1px}

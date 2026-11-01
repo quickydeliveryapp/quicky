@@ -112,7 +112,7 @@ input[type=checkbox]{width:auto}
 .row{display:flex;gap:12px;padding-bottom:6px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none}
 .row::-webkit-scrollbar{display:none}
 .row .pcard{flex:none;width:160px;scroll-snap-align:start}
-@media(min-width:820px){.row{display:grid;grid-template-columns:repeat(5,1fr);overflow:visible}.row .pcard{width:auto}.row .pcard:nth-child(n+6){display:none}
+
 .shell{display:block}
 .cats{display:flex;gap:10px;margin:0 -16px 6px;padding:4px 16px 12px;overflow-x:auto;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}

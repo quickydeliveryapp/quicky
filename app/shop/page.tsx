@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { friendly } from "@/lib/messages";
 import { QRCodeSVG } from "qrcode.react";
 type O = { pickup_token: string; id: string; status: string; total: number; address: string };
 export default function Shop() {
@@ -23,12 +24,12 @@ export default function Shop() {
   }, [pending]);
   const setStatus = async (id: string, status: string) => {
     const { data, error } = await supabase.from("orders").update({ status }).eq("id", id).select("id");
-    setMsg(error ? error.message : !data?.length ? "Update nahi hua: is order pe aapka haq nahi (shop owner/RLS check karo)" : "");
+    setMsg(error ? friendly(error.message) : !data?.length ? "Update failed: you don't have permission for this order" : "");
     load();
   };
   const reject = async (id: string) => {
     const { error } = await supabase.rpc("reject_order", { p_order_id: id });
-    setMsg(error ? error.message : ""); load();
+    setMsg(error ? friendly(error.message) : ""); load();
   };
   return (<div><h3>Live orders</h3>
     {msg && <p style={{ color: "#DC2626", fontWeight: 600 }}>{msg}</p>}
@@ -37,6 +38,6 @@ export default function Shop() {
       <b>₹{o.total}</b> · {o.status}<div>{o.address}</div>
       {o.status === "placed" && <><button onClick={() => setStatus(o.id, "accepted")}>Accept</button> <button className="alt" onClick={() => reject(o.id)}>Reject</button></>}
       {o.status === "accepted" && <button onClick={() => setStatus(o.id, "packed")}>Packed</button>}
-      {o.status === "packed" && <div><p>Is QR ko bag pe lagao. Rider scan karega:</p><QRCodeSVG value={o.pickup_token} size={140} /></div>}
+      {o.status === "packed" && <div><p>Attach this QR to the bag. The rider will scan it:</p><QRCodeSVG value={o.pickup_token} size={140} /></div>}
     </div>))}</div>);
 }

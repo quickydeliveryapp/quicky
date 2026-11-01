@@ -17,7 +17,7 @@ export default function EnablePush() {
   }, []);
   if (!show && !msg) return null;
   return (<div className="banner">
-    {show && <button className="alt" onClick={() => enablePush().then(() => { setShow(false); setMsg(""); }).catch((e) => setMsg(e.message))}>🔔 Order alerts chalu karo</button>}
+    {show && <button className="alt" onClick={() => enablePush().then(() => { setShow(false); setMsg(""); }).catch((e) => setMsg(e.message))}>🔔 Enable order alerts</button>}
     {msg && <div>{msg}</div>}
   </div>);
 }

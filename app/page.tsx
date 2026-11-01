@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { friendly } from "@/lib/messages";
 
 type P = { id: string; name: string; unit: string; image_url: string | null; price: number };
 
@@ -16,7 +17,7 @@ export default function Home() {
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (p) => setPos({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => setMsg("Location allow karo, tabhi products dikhenge")
+      () => setMsg("Please allow location access to see products near you")
     );
   }, []);
 
@@ -27,7 +28,7 @@ export default function Home() {
   useEffect(() => {
     if (!pos) return;
     supabase.rpc("browse_products", { p_lat: pos.lat, p_lng: pos.lng }).then(({ data, error }) => {
-      if (error) setMsg(error.message); else setProducts(data as P[]);
+      if (error) setMsg(friendly(error.message)); else setProducts(data as P[]);
       setLoaded(true);
     });
   }, [pos]);
@@ -42,16 +43,16 @@ export default function Home() {
   async function checkout() {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) { window.location.href = "/login"; return; }
-    if (!pos || !address) { setMsg("Address likho"); return; }
+    if (!pos || !address) { setMsg("Please enter your delivery address"); return; }
     const items = Object.entries(cart).map(([product_id, qty]) => ({ product_id, qty }));
     const { data, error } = await supabase.rpc("place_order", { p_lat: pos.lat, p_lng: pos.lng, p_address: address, p_items: items });
-    if (error) setMsg(error.message); else { window.location.href = "/orders/" + data; }
+    if (error) setMsg(friendly(error.message)); else { window.location.href = "/orders/" + data; }
   }
 
   return (<>
     {msg && <p>{msg}</p>}
-    {!pos && !msg && <p>Location dhoondh rahe hain...</p>}
-    {loaded && !products.length && !msg && <p>Is area mein abhi koi shop ya product available nahi hai.</p>}
+    {!pos && !msg && <p>Finding your location...</p>}
+    {loaded && !products.length && !msg && <p>No shops or products are available in your area yet.</p>}
     <div className="grid">
       {products.map((p) => (
         <div className="pcard" key={p.id}>
@@ -61,7 +62,7 @@ export default function Home() {
           <div className="prow">
             <span className="price">₹{p.price}</span>
             {cart[p.id]
-              ? <span className="stepper"><button aria-label="Kam karo" onClick={() => add(p.id, -1)}>−</button><span>{cart[p.id]}</span><button aria-label="Zyada karo" onClick={() => add(p.id, 1)}>+</button></span>
+              ? <span className="stepper"><button aria-label="Decrease quantity" onClick={() => add(p.id, -1)}>−</button><span>{cart[p.id]}</span><button aria-label="Increase quantity" onClick={() => add(p.id, 1)}>+</button></span>
               : <button className="add" onClick={() => add(p.id, 1)}>Add</button>}
           </div>
         </div>))}
@@ -72,10 +73,10 @@ export default function Home() {
         <div>Delivery: {del === 0 ? <span className="free">FREE</span> : "₹" + del}</div>
         {small > 0 && <div>Small cart fee: ₹{small}</div>}
         <h3>Total: ₹{(total + del + small).toFixed(2)} (Cash on Delivery)</h3>
-        {fees && del > 0 && <small>₹{(Number(fees.free_delivery_above) - total).toFixed(0)} aur add karo, delivery free!</small>}
+        {fees && del > 0 && <small>Add ₹{(Number(fees.free_delivery_above) - total).toFixed(0)} more for free delivery</small>}
       </div>
       <input placeholder="Delivery address" value={address} onChange={(e) => setAddress(e.target.value)} />
-      <button onClick={checkout}>Order karo</button>
+      <button onClick={checkout}>Place order</button>
     </div>}
   </>);
 }

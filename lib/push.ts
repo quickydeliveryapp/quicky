@@ -3,8 +3,8 @@ import { getMessaging, getToken } from "firebase/messaging";
 import { supabase } from "./supabase";
 
 export async function enablePush() {
-  if (!("serviceWorker" in navigator) || !("Notification" in window)) throw new Error("Ye browser push support nahi karta");
-  if ((await Notification.requestPermission()) !== "granted") throw new Error("Notification permission nahi mili");
+  if (!("serviceWorker" in navigator) || !("Notification" in window)) throw new Error("This browser doesn't support push notifications");
+  if ((await Notification.requestPermission()) !== "granted") throw new Error("Notification permission was not granted");
   const app = getApps()[0] ?? initializeApp({
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,

@@ -5,8 +5,8 @@ import { supabase } from "@/lib/supabase";
 
 type O = { status: string; total: number; expected_delivery_at: string | null };
 const label: Record<string, string> = {
-  placed: "Shop ko order bheja gaya", accepted: "Shop ne accept kiya", packed: "Packing ho gayi, rider aa raha hai",
-  picked_up: "Rider nikal chuka hai 🛵", delivered: "Deliver ho gaya ✅", cancelled: "Order cancel ho gaya" };
+  placed: "Order sent to the shop", accepted: "Shop accepted your order", packed: "Packed, waiting for a rider to pick up",
+  picked_up: "Rider is on the way 🛵", delivered: "Delivered ✅", cancelled: "Order cancelled" };
 
 export default function Track() {
   const { id } = useParams<{ id: string }>();

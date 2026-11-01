@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 import { getState, setState, useStore } from "@/lib/store";
-import { catKey, catName, iconFor, sortGroups } from "@/lib/categories";
+import { CATS, OTHER, categorize, isEnabled } from "@/lib/categories";
 import ProductCard, { P } from "@/components/ProductCard";
 
 export default function Home() {
@@ -38,57 +38,67 @@ export default function Home() {
     if (changed) setState({ cart: n });
   }, [products]);
 
+  // Band (disabled) categories ke products customer ko nahi dikhte
+  const visible = useMemo(() => products.filter((p) => isEnabled(categorize(p.category))), [products]);
+
   const groups = useMemo(() => {
-    const m = new Map<string, { name: string; items: P[] }>();
-    for (const p of products) {
-      const k = catKey(p.category);
-      if (!m.has(k)) m.set(k, { name: catName(p.category), items: [] });
-      m.get(k)!.items.push(p);
-    }
-    return sortGroups([...m.entries()]);
-  }, [products]);
+    const m = new Map<string, P[]>();
+    for (const p of visible) { const k = categorize(p.category); m.set(k, [...(m.get(k) || []), p]); }
+    return m;
+  }, [visible]);
+
+  const sidebar = [...CATS.filter((c) => c.enabled), ...(groups.has(OTHER) ? [{ name: OTHER, icon: "🛒", enabled: true }] : [])];
 
   const results = useMemo(() => {
     const t = q.trim().toLowerCase();
-    return t ? products.filter((p) => p.name.toLowerCase().includes(t) || (p.category || "").toLowerCase().includes(t)) : [];
-  }, [products, q]);
+    return t ? visible.filter((p) => p.name.toLowerCase().includes(t) || (p.category || "").toLowerCase().includes(t)) : [];
+  }, [visible, q]);
 
   const searching = q.trim().length > 0;
-  const active = groups.find(([k]) => k === sel);
-  const pick = (k: string | null) => { setSel(k); window.scrollTo({ top: 0 }); };
+  const active = sel && sidebar.some((c) => c.name === sel) ? sel : null;
+  const pick = (name: string | null) => { setSel(name); window.scrollTo({ top: 0 }); };
 
-  return (<>
-    {msg && <p>{msg}</p>}
-    {!loc && <p>Choose your delivery location to see products near you.</p>}
-    {loc && !loaded && <p className="muted">Loading products...</p>}
-    {loc && loaded && !products.length && !msg && <p>No shops or products are available in your area yet.</p>}
+  return (
+    <div className={"shell" + (searching || !visible.length ? " nosb" : "")}>
+      {!searching && visible.length > 0 && (
+        <aside className="cats" aria-label="Categories">
+          <button className={"cat" + (!active ? " on" : "")} onClick={() => pick(null)}><span className="ic">🛍️</span><span>All</span></button>
+          {sidebar.map((c) => (
+            <button key={c.name} className={"cat" + (active === c.name ? " on" : "") + (groups.has(c.name) ? "" : " dim")} onClick={() => pick(c.name)}>
+              <span className="ic">{c.icon}</span><span>{c.name}</span>
+            </button>
+          ))}
+        </aside>
+      )}
 
-    {fees && products.length > 0 && !searching && <div className="strip">Free delivery on orders above ₹{Number(fees.free_delivery_above)}</div>}
+      <div className="content">
+        {msg && <p>{msg}</p>}
+        {!loc && <p>Choose your delivery location to see products near you.</p>}
+        {loc && !loaded && <p className="muted">Loading products...</p>}
+        {loc && loaded && !visible.length && !msg && <p>No shops or products are available in your area yet.</p>}
 
-    {!searching && groups.length > 0 && (
-      <div className="cats" aria-label="Categories">
-        <button className={"cat" + (!active ? " on" : "")} onClick={() => pick(null)}><span className="ic">🛍️</span>All</button>
-        {groups.map(([k, g]) => (
-          <button key={k} className={"cat" + (active?.[0] === k ? " on" : "")} onClick={() => pick(k)}><span className="ic">{iconFor(g.name)}</span>{g.name}</button>
-        ))}
+        {fees && visible.length > 0 && !searching && <div className="strip">Free delivery on orders above ₹{Number(fees.free_delivery_above)}</div>}
+
+        {searching ? (<>
+          <h3>Results for &ldquo;{q}&rdquo;</h3>
+          {!results.length && visible.length > 0 && <p>No products match your search.</p>}
+          <div className="grid">{results.map((p) => <ProductCard key={p.id} p={p} />)}</div>
+        </>) : active ? (<>
+          <h3>{active}</h3>
+          {!groups.get(active)?.length && <p className="muted">No products in this category near you yet.</p>}
+          <div className="grid">{(groups.get(active) || []).map((p) => <ProductCard key={p.id} p={p} />)}</div>
+        </>) : sidebar.filter((c) => groups.has(c.name)).map((c) => {
+          const items = groups.get(c.name)!;
+          return (
+            <section className="sec" key={c.name}>
+              <div className="sechead">
+                <h3>{c.name}</h3>
+                {items.length > 4 && <button className="seeall" onClick={() => pick(c.name)}>See all</button>}
+              </div>
+              <div className="row">{items.slice(0, 10).map((p) => <ProductCard key={p.id} p={p} />)}</div>
+            </section>);
+        })}
       </div>
-    )}
-
-    {searching ? (<>
-      <h3>Results for &ldquo;{q}&rdquo;</h3>
-      {!results.length && products.length > 0 && <p>No products match your search.</p>}
-      <div className="grid">{results.map((p) => <ProductCard key={p.id} p={p} />)}</div>
-    </>) : active ? (<>
-      <h3>{active[1].name}</h3>
-      <div className="grid">{active[1].items.map((p) => <ProductCard key={p.id} p={p} />)}</div>
-    </>) : groups.map(([k, g]) => (
-      <section className="sec" key={k}>
-        <div className="sechead">
-          <h3>{g.name}</h3>
-          {g.items.length > 5 && <button className="seeall" onClick={() => pick(k)}>See all</button>}
-        </div>
-        <div className="row">{g.items.slice(0, 10).map((p) => <ProductCard key={p.id} p={p} />)}</div>
-      </section>
-    ))}
-  </>);
+    </div>
+  );
 }

@@ -56,7 +56,8 @@ main{max-width:var(--wrap);margin:0 auto;padding:20px 24px 48px}
 .cat:hover{background:var(--tint)}
 .cat.on{border-color:var(--g);background:var(--g);color:#fff}
 .cat.on:hover{background:var(--g2)}
-.cat.dim{opacity:.5}
+.cat.dim{color:var(--muted)}
+.cat.dim .ic{opacity:.65}
 .sec{margin:0 0 28px}
 .sechead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
 .sechead h3{margin:0}
@@ -85,7 +86,7 @@ main{max-width:var(--wrap);margin:0 auto;padding:20px 24px 48px}
 .shell{display:grid;grid-template-columns:220px minmax(0,1fr);gap:32px;align-items:start}
 .shell.nosb{grid-template-columns:minmax(0,1fr)}
 .cats{position:sticky;top:84px;flex-direction:column;gap:2px;max-height:calc(100vh - 100px);margin:0;padding:0 6px 0 0;overflow-y:auto}
-.cat{gap:12px;width:100%;padding:6px 8px;border:0;border-radius:12px;background:none;font-size:13px;white-space:normal}
+.cat{gap:12px;width:100%;padding:6px 8px;border:0;border-radius:12px;background:none;font-size:13px;text-align:left;white-space:normal}
 .cat .ic{display:grid;flex:none;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--tint);font-size:19px}
 .cat:hover{background:var(--tint)}
 .cat.on{background:var(--tint);color:var(--g);font-weight:700}

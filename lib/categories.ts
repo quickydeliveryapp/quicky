@@ -60,5 +60,5 @@ export function categorize(raw: string | null | undefined): string {
 
 export const isEnabled = (name: string) => name === OTHER || !!CATS.find((c) => c.name === name)?.enabled;
 
-// true karoge toh jin categories mein abhi products nahi hain wo bhi (halki) dikhengi. false = sirf wahi jinme products hain
-export const SHOW_EMPTY_CATEGORIES = false;
+// true = saari categories hamesha dikhengi (Blinkit jaisa). false = sirf wahi jinme abhi products hain
+export const SHOW_EMPTY_CATEGORIES = true;

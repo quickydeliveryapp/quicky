@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 import { getState, setState, useStore } from "@/lib/store";
-import { CATS, OTHER, categorize, isEnabled } from "@/lib/categories";
+import { CATS, OTHER, SHOW_EMPTY_CATEGORIES, categorize, isEnabled } from "@/lib/categories";
 import ProductCard, { P } from "@/components/ProductCard";
 
 export default function Home() {
@@ -47,7 +47,7 @@ export default function Home() {
     return m;
   }, [visible]);
 
-  const sidebar = [...CATS.filter((c) => c.enabled), ...(groups.has(OTHER) ? [{ name: OTHER, icon: "🛒", enabled: true }] : [])];
+  const sidebar = [...CATS.filter((c) => c.enabled && (SHOW_EMPTY_CATEGORIES || groups.has(c.name))), ...(groups.has(OTHER) ? [{ name: OTHER, icon: "🛒", enabled: true }] : [])];
 
   const results = useMemo(() => {
     const t = q.trim().toLowerCase();

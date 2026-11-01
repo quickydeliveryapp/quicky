@@ -1,5 +1,6 @@
 "use client";
 import { changeQty, useStore } from "@/lib/store";
+import { CATS, categorize } from "@/lib/categories";
 
 export type P = { id: string; name: string; unit: string | null; image_url: string | null; category: string | null; price: number };
 
@@ -7,9 +8,12 @@ export default function ProductCard({ p }: { p: P }) {
   const { cart } = useStore();
   const qty = cart[p.id]?.qty || 0;
   const info = { name: p.name, unit: p.unit || "", price: Number(p.price) };
+  const icon = CATS.find((c) => c.name === categorize(p.category))?.icon ?? "🛒";
   return (
     <div className="pcard">
-      {p.image_url && <img className="pimg" src={p.image_url} alt="" loading="lazy" width={160} height={160} />}
+      {p.image_url
+        ? <img className="pimg" src={p.image_url} alt="" loading="lazy" width={160} height={160} />
+        : <div className="pph" aria-hidden="true">{icon}</div>}
       <div className="pname">{p.name}</div>
       <div className="muted">{p.unit}</div>
       <div className="prow">

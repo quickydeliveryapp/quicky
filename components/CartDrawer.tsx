@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 import { changeQty, setState, useStore } from "@/lib/store";
+import { Icon } from "@/lib/icons";
 
 export default function CartDrawer() {
   const { cart, cartOpen, loc } = useStore();
@@ -49,13 +50,13 @@ export default function CartDrawer() {
   return (
     <div className="drawer-bg" onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
       <aside className="drawer" role="dialog" aria-modal="true" aria-label="My Cart">
-        <div className="dhead">My Cart<button className="dx" aria-label="Close cart" onClick={close}>✕</button></div>
+        <div className="dhead">My Cart<button className="dx" aria-label="Close cart" onClick={close}><Icon name="x" size={18} sw={2} /></button></div>
         <div className="dbody">
           {!entries.length ? <div className="empty">Your cart is empty</div> : <>
             {entries.map(([id, i]) => (
               <div className="ditem" key={id}>
                 <div className="n"><div className="pname">{i.name}</div><div className="muted">{i.unit}</div></div>
-                <span className="stepper"><button aria-label="Decrease quantity" onClick={() => changeQty(id, -1)}>−</button><span>{i.qty}</span><button aria-label="Increase quantity" onClick={() => changeQty(id, 1)}>+</button></span>
+                <span className="stepper"><button aria-label="Decrease quantity" onClick={() => changeQty(id, -1)}><Icon name="minus" size={14} sw={2.2} /></button><span>{i.qty}</span><button aria-label="Increase quantity" onClick={() => changeQty(id, 1)}><Icon name="plus" size={14} sw={2.2} /></button></span>
                 <b>₹{(i.qty * i.price).toFixed(0)}</b>
               </div>))}
             <div className="bill">

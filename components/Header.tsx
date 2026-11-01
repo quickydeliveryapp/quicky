@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { getState, initStore, setState, useStore } from "@/lib/store";
 import { detectAndSet } from "@/lib/geo";
+import { Icon } from "@/lib/icons";
 
 export default function Header() {
   const { loc, q, cart } = useStore();
@@ -60,9 +61,9 @@ export default function Header() {
       </Link>
 
       <button className="hloc" onClick={() => setState({ locOpen: true })} aria-label="Change delivery location">
-        <span className="hl1"><span className="eta-l">{etaText}</span><span className="eta-s">{typeof eta === "number" ? "⚡ " : ""}{etaShort}</span></span>
-        <span className="hl2"><span className="t">{loc ? loc.label : "Choose location"}</span>
-          <svg width="12" height="8" viewBox="0 0 12 8" aria-hidden="true"><path d="M0 0h12L6 8z" fill="currentColor" /></svg></span>
+        <span className="hl1"><span className="eta-l">{etaText}</span><span className="eta-s">{typeof eta === "number" && <Icon name="bolt" size={13} />}{etaShort}</span></span>
+        <span className="hl2"><span className="pin"><Icon name="pin" size={15} /></span><span className="t">{loc ? loc.label : "Choose location"}</span>
+          <Icon name="chevronDown" size={16} sw={2} /></span>
       </button>
 
       <label className="hsearch">

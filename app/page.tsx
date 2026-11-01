@@ -5,6 +5,7 @@ import { friendly } from "@/lib/messages";
 import { getState, setState, useStore } from "@/lib/store";
 import { CATS, OTHER, SHOW_EMPTY_CATEGORIES, categorize, isEnabled } from "@/lib/categories";
 import ProductCard, { P } from "@/components/ProductCard";
+import { Icon } from "@/lib/icons";
 
 export default function Home() {
   const { loc, q } = useStore();
@@ -56,7 +57,7 @@ export default function Home() {
     return m;
   }, [visible]);
 
-  const sidebar = [...CATS.filter((c) => c.enabled && (SHOW_EMPTY_CATEGORIES || groups.has(c.name))), ...(groups.has(OTHER) ? [{ name: OTHER, icon: "🛒", enabled: true }] : [])];
+  const sidebar = [...CATS.filter((c) => c.enabled && (SHOW_EMPTY_CATEGORIES || groups.has(c.name))), ...(groups.has(OTHER) ? [{ name: OTHER, icon: "bag", enabled: true }] : [])];
 
   const results = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -71,41 +72,41 @@ export default function Home() {
     <div className={"shell" + (searching || !visible.length ? " nosb" : "")}>
       {!searching && visible.length > 0 && (
         <aside className="cats" aria-label="Categories">
-          <button className={"cat" + (!active ? " on" : "")} onClick={() => pick(null)}><span className="ic">🛍️</span><span>All</span></button>
+          <button className={"cat" + (!active ? " on" : "")} onClick={() => pick(null)}><span className="ic"><Icon name="bag" size={20} /></span><span>All</span></button>
           {sidebar.map((c) => (
             <button key={c.name} className={"cat" + (active === c.name ? " on" : "") + (groups.has(c.name) ? "" : " dim")} onClick={() => pick(c.name)}>
-              <span className="ic">{c.icon}</span><span>{c.name}</span>
+              <span className="ic"><Icon name={c.icon} size={20} /></span><span>{c.name}</span>
             </button>
           ))}
         </aside>
       )}
 
       <div className="content">
-        {!searching && active && <button className="alt backrow" onClick={() => pick(null)}>← All categories</button>}
+        {!searching && active && <button className="alt backrow" onClick={() => pick(null)}><Icon name="arrowLeft" size={16} sw={2} /> All categories</button>}
 
         {!searching && !active && <>
           <section className="hero">
             <div>
               <h2>Fresh groceries<br />at your <em>doorstep</em></h2>
               <p>{fees ? `Free delivery on orders above ₹${Number(fees.free_delivery_above)}` : "Delivered fast, right to your door"}</p>
-              <button onClick={() => document.getElementById("categories")?.scrollIntoView({ behavior: "smooth", block: "start" })}>Shop Now →</button>
+              <button onClick={() => document.getElementById("categories")?.scrollIntoView({ behavior: "smooth", block: "start" })}>Shop Now <Icon name="arrowRight" size={16} sw={2} /></button>
             </div>
-            <div className="art" aria-hidden="true">🥬🍅</div>
+            <div className="art" aria-hidden="true"><Icon name="hero" size={104} sw={1} /></div>
           </section>
           <div className="trust">
-            <div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h6l-1 8 9-12h-6z" /></svg><span>Quick<br />Delivery</span></div>
-            <div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /><path d="M8.5 12l2.5 2.5 4.5-5" /></svg><span>Quality<br />Products</span></div>
-            <div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><path d="M9 9.5h.01M15 9.5h.01" /></svg><span>Hassle-Free<br />Shopping</span></div>
+            <div><Icon name="bolt" size={22} /><span>Quick<br />Delivery</span></div>
+            <div><Icon name="shield" size={22} /><span>Quality<br />Products</span></div>
+            <div><Icon name="smile" size={22} /><span>Hassle-Free<br />Shopping</span></div>
           </div>
           <section id="categories" className="mobsec">
             <div className="sechead">
               <h3>Shop by Category</h3>
-              <button className="seeall" onClick={() => setAllCats((a) => !a)}>{allCats ? "Show less" : "See All →"}</button>
+              <button className="seeall" onClick={() => setAllCats((a) => !a)}>{allCats ? "Show less" : <>See All <Icon name="arrowRight" size={15} sw={2} /></>}</button>
             </div>
             <div className="catgrid">
               {(allCats ? sidebar : sidebar.slice(0, 8)).map((c) => (
                 <button key={c.name} className={"ctile" + (groups.has(c.name) ? "" : " dim")} onClick={() => pick(c.name)}>
-                  <span className="ci">{c.icon}</span><span>{c.name}</span>
+                  <span className="ci"><Icon name={c.icon} size={30} sw={1.5} /></span><span>{c.name}</span>
                 </button>))}
             </div>
           </section>

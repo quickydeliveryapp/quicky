@@ -9,7 +9,7 @@ small,.muted{color:var(--muted);font-size:14px}
 :focus-visible{outline:3px solid var(--lime);outline-offset:2px}
 
 header{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
-header img{display:block;height:33px;width:auto}
+
 nav{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .navlink{color:var(--g);text-decoration:none;font-weight:600;font-size:14px;padding:6px 8px;border-radius:8px;background:none;border:0;cursor:pointer}
 .navlink:hover{background:var(--tint)}
@@ -47,4 +47,7 @@ input[type=checkbox]{width:auto}
 .cartbar h3{margin:4px 0}
 .cartbar button{width:100%;margin-top:4px}
 .free{color:var(--g);font-weight:600}
-.hero{display:block;width:100%;max-width:380px;height:auto;margin:4px auto 18px}
+.brand{display:flex;flex-direction:column;gap:3px;text-decoration:none;line-height:1}
+.brand img{display:block;height:34px;width:auto}
+.tag{font-size:10.5px;font-style:italic;color:var(--g);white-space:nowrap}
+.tag b{border-bottom:2px solid var(--lime)}

@@ -2,15 +2,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
-import { changeQty, getState, setState, useStore } from "@/lib/store";
-
-type P = { id: string; name: string; unit: string | null; image_url: string | null; category: string | null; price: number };
+import { getState, setState, useStore } from "@/lib/store";
+import { catKey, catName, iconFor, sortGroups } from "@/lib/categories";
+import ProductCard, { P } from "@/components/ProductCard";
 
 export default function Home() {
-  const { loc, q, cart } = useStore();
+  const { loc, q } = useStore();
   const [products, setProducts] = useState<P[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [msg, setMsg] = useState("");
+  const [fees, setFees] = useState<any>(null);
+  const [sel, setSel] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.from("fee_settings").select("free_delivery_above").eq("id", 1).single().then(({ data }) => setFees(data));
+  }, []);
 
   useEffect(() => {
     if (!loc) { setLoaded(false); return; }
@@ -32,33 +38,57 @@ export default function Home() {
     if (changed) setState({ cart: n });
   }, [products]);
 
-  const shown = useMemo(() => {
+  const groups = useMemo(() => {
+    const m = new Map<string, { name: string; items: P[] }>();
+    for (const p of products) {
+      const k = catKey(p.category);
+      if (!m.has(k)) m.set(k, { name: catName(p.category), items: [] });
+      m.get(k)!.items.push(p);
+    }
+    return sortGroups([...m.entries()]);
+  }, [products]);
+
+  const results = useMemo(() => {
     const t = q.trim().toLowerCase();
-    return t ? products.filter((p) => p.name.toLowerCase().includes(t) || (p.category || "").toLowerCase().includes(t)) : products;
+    return t ? products.filter((p) => p.name.toLowerCase().includes(t) || (p.category || "").toLowerCase().includes(t)) : [];
   }, [products, q]);
+
+  const searching = q.trim().length > 0;
+  const active = groups.find(([k]) => k === sel);
+  const pick = (k: string | null) => { setSel(k); window.scrollTo({ top: 0 }); };
 
   return (<>
     {msg && <p>{msg}</p>}
     {!loc && <p>Choose your delivery location to see products near you.</p>}
+    {loc && !loaded && <p className="muted">Loading products...</p>}
     {loc && loaded && !products.length && !msg && <p>No shops or products are available in your area yet.</p>}
-    {loc && loaded && products.length > 0 && !shown.length && <p>No products match &ldquo;{q}&rdquo;.</p>}
-    <div className="grid">
-      {shown.map((p) => {
-        const qty = cart[p.id]?.qty || 0;
-        const info = { name: p.name, unit: p.unit || "", price: Number(p.price) };
-        return (
-          <div className="pcard" key={p.id}>
-            {p.image_url && <img className="pimg" src={p.image_url} alt="" loading="lazy" width={160} height={160} />}
-            <div className="pname">{p.name}</div>
-            <div className="muted">{p.unit}</div>
-            <div className="prow">
-              <span className="price">₹{p.price}</span>
-              {qty
-                ? <span className="stepper"><button aria-label="Decrease quantity" onClick={() => changeQty(p.id, -1)}>−</button><span>{qty}</span><button aria-label="Increase quantity" onClick={() => changeQty(p.id, 1, info)}>+</button></span>
-                : <button className="add" onClick={() => changeQty(p.id, 1, info)}>Add</button>}
-            </div>
-          </div>);
-      })}
-    </div>
+
+    {fees && products.length > 0 && !searching && <div className="strip">Free delivery on orders above ₹{Number(fees.free_delivery_above)}</div>}
+
+    {!searching && groups.length > 0 && (
+      <div className="cats" aria-label="Categories">
+        <button className={"cat" + (!active ? " on" : "")} onClick={() => pick(null)}><span className="ic">🛍️</span>All</button>
+        {groups.map(([k, g]) => (
+          <button key={k} className={"cat" + (active?.[0] === k ? " on" : "")} onClick={() => pick(k)}><span className="ic">{iconFor(g.name)}</span>{g.name}</button>
+        ))}
+      </div>
+    )}
+
+    {searching ? (<>
+      <h3>Results for &ldquo;{q}&rdquo;</h3>
+      {!results.length && products.length > 0 && <p>No products match your search.</p>}
+      <div className="grid">{results.map((p) => <ProductCard key={p.id} p={p} />)}</div>
+    </>) : active ? (<>
+      <h3>{active[1].name}</h3>
+      <div className="grid">{active[1].items.map((p) => <ProductCard key={p.id} p={p} />)}</div>
+    </>) : groups.map(([k, g]) => (
+      <section className="sec" key={k}>
+        <div className="sechead">
+          <h3>{g.name}</h3>
+          {g.items.length > 5 && <button className="seeall" onClick={() => pick(k)}>See all</button>}
+        </div>
+        <div className="row">{g.items.slice(0, 10).map((p) => <ProductCard key={p.id} p={p} />)}</div>
+      </section>
+    ))}
   </>);
 }

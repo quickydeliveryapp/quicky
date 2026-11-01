@@ -1,9 +1,8 @@
 import Link from "next/link";
 
-// Compact logo (5 KB image) + neeche live-text tagline: chhota, saaf aur extra image load nahi
+// Logo image mein tagline pehle se hai, isliye sirf image. Ratio 335:112 locked, stretch nahi hoga.
 export default function HeaderLogo() {
   return (<Link href="/" className="brand" aria-label="Quicky: Groceries & More. Delivered Fast.">
-    <img src="/logo.webp" alt="" width={128} height={34} decoding="async" />
-    <span className="tag">Groceries &amp; More. <b>Delivered Fast.</b></span>
+    <img src="/logo-nav.webp" alt="Quicky" width={168} height={56} decoding="async" />
   </Link>);
 }

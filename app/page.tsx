@@ -42,7 +42,7 @@ export default function Home() {
 
   async function checkout() {
     const { data: u } = await supabase.auth.getUser();
-    if (!u.user) { window.location.href = "/login"; return; }
+    if (!u.user) { window.dispatchEvent(new Event("open-login")); return; }
     if (!pos || !address) { setMsg("Please enter your delivery address"); return; }
     const items = Object.entries(cart).map(([product_id, qty]) => ({ product_id, qty }));
     const { data, error } = await supabase.rpc("place_order", { p_lat: pos.lat, p_lng: pos.lng, p_address: address, p_items: items });

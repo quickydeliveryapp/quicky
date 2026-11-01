@@ -30,6 +30,6 @@ export default function HeaderNav() {
     {staff && <Link className="navlink" href="/admin">Admin</Link>}
     {loggedIn
       ? <button className="navlink" onClick={async () => { await supabase.auth.signOut(); window.location.href = "/"; }}>Logout</button>
-      : <Link className="navlink navlogin" href="/login">Login</Link>}
+      : <button className="navlink navlogin" onClick={() => window.dispatchEvent(new Event("open-login"))}>Login</button>}
   </nav>);
 }

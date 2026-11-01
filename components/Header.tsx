@@ -42,6 +42,8 @@ export default function Header() {
     : eta === null ? "Not serviceable yet"
     : `Delivery in ${Math.min(eta, 60)}${eta > 60 ? "+" : ""} minutes`;
 
+  const etaShort = !loc ? "Set location" : eta === undefined ? "Fast delivery" : eta === null ? "Not serviceable" : `${Math.min(eta, 60)}${eta > 60 ? "+" : ""} min`;
+
   const shop = role === "shop_owner" || role === "admin";
   const rider = role === "rider" || role === "admin";
   const staff = role === "admin" || role === "area_manager";
@@ -58,7 +60,7 @@ export default function Header() {
       </Link>
 
       <button className="hloc" onClick={() => setState({ locOpen: true })} aria-label="Change delivery location">
-        <span className="hl1">{etaText}</span>
+        <span className="hl1"><span className="eta-l">{etaText}</span><span className="eta-s">{typeof eta === "number" ? "⚡ " : ""}{etaShort}</span></span>
         <span className="hl2"><span className="t">{loc ? loc.label : "Choose location"}</span>
           <svg width="12" height="8" viewBox="0 0 12 8" aria-hidden="true"><path d="M0 0h12L6 8z" fill="currentColor" /></svg></span>
       </button>

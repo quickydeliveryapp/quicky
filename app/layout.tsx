@@ -4,6 +4,7 @@ import EnablePush from "@/components/EnablePush";
 import Header from "@/components/Header";
 import LocationModal from "@/components/LocationModal";
 import CartDrawer from "@/components/CartDrawer";
+import BottomNav from "@/components/BottomNav";
 import LoginModal from "@/components/LoginModal";
 
 // Montserrat: build time pe self-host hota hai (runtime pe Google call nahi).
@@ -24,5 +25,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <LocationModal />
     <CartDrawer />
     <main>{children}</main>
+    <BottomNav />
   </body></html>);
 }

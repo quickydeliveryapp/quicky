@@ -13,6 +13,7 @@ export default function Home() {
   const [msg, setMsg] = useState("");
   const [fees, setFees] = useState<any>(null);
   const [sel, setSel] = useState<string | null>(null);
+  const [allCats, setAllCats] = useState(false);
 
   useEffect(() => {
     supabase.from("fee_settings").select("free_delivery_above").eq("id", 1).single().then(({ data }) => setFees(data));
@@ -26,6 +27,14 @@ export default function Home() {
       setLoaded(true);
     });
   }, [loc?.lat, loc?.lng]);
+
+  // Bottom tab ka "Categories": saari categories kholo aur wahan scroll karo
+  useEffect(() => {
+    const go = () => { setSel(null); setAllCats(true); setTimeout(() => document.getElementById("categories")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80); };
+    try { if (sessionStorage.getItem("qk_cats")) { sessionStorage.removeItem("qk_cats"); go(); } } catch {}
+    window.addEventListener("show-categories", go);
+    return () => window.removeEventListener("show-categories", go);
+  }, []);
 
   // Cart mein purane price/naam ho toh taaza kar do
   useEffect(() => {
@@ -72,6 +81,36 @@ export default function Home() {
       )}
 
       <div className="content">
+        {!searching && active && <button className="alt backrow" onClick={() => pick(null)}>← All categories</button>}
+
+        {!searching && !active && <>
+          <section className="hero">
+            <div>
+              <h2>Fresh groceries<br />at your <em>doorstep</em></h2>
+              <p>{fees ? `Free delivery on orders above ₹${Number(fees.free_delivery_above)}` : "Delivered fast, right to your door"}</p>
+              <button onClick={() => document.getElementById("categories")?.scrollIntoView({ behavior: "smooth", block: "start" })}>Shop Now →</button>
+            </div>
+            <div className="art" aria-hidden="true">🥬🍅</div>
+          </section>
+          <div className="trust">
+            <div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h6l-1 8 9-12h-6z" /></svg><span>Quick<br />Delivery</span></div>
+            <div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /><path d="M8.5 12l2.5 2.5 4.5-5" /></svg><span>Quality<br />Products</span></div>
+            <div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><path d="M9 9.5h.01M15 9.5h.01" /></svg><span>Hassle-Free<br />Shopping</span></div>
+          </div>
+          <section id="categories" className="mobsec">
+            <div className="sechead">
+              <h3>Shop by Category</h3>
+              <button className="seeall" onClick={() => setAllCats((a) => !a)}>{allCats ? "Show less" : "See All →"}</button>
+            </div>
+            <div className="catgrid">
+              {(allCats ? sidebar : sidebar.slice(0, 8)).map((c) => (
+                <button key={c.name} className={"ctile" + (groups.has(c.name) ? "" : " dim")} onClick={() => pick(c.name)}>
+                  <span className="ci">{c.icon}</span><span>{c.name}</span>
+                </button>))}
+            </div>
+          </section>
+        </>}
+
         {msg && <p>{msg}</p>}
         {!loc && <p>Choose your delivery location to see products near you.</p>}
         {loc && !loaded && <p className="muted">Loading products...</p>}

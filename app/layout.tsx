@@ -1,8 +1,9 @@
 import "./globals.css";
 import { Montserrat } from "next/font/google";
 import EnablePush from "@/components/EnablePush";
-import HeaderNav from "@/components/HeaderNav";
-import HeaderLogo from "@/components/HeaderLogo";
+import Header from "@/components/Header";
+import LocationModal from "@/components/LocationModal";
+import CartDrawer from "@/components/CartDrawer";
 import LoginModal from "@/components/LoginModal";
 
 // Montserrat: build time pe self-host hota hai (runtime pe Google call nahi).
@@ -17,12 +18,11 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (<html lang="en"><body className={font.variable}>
-    <header>
-      <HeaderLogo />
-      <HeaderNav />
-    </header>
+    <Header />
     <EnablePush />
     <LoginModal />
+    <LocationModal />
+    <CartDrawer />
     <main>{children}</main>
   </body></html>);
 }

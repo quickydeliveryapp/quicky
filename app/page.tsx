@@ -1,82 +1,64 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
+import { changeQty, getState, setState, useStore } from "@/lib/store";
 
-type P = { id: string; name: string; unit: string; image_url: string | null; price: number };
+type P = { id: string; name: string; unit: string | null; image_url: string | null; category: string | null; price: number };
 
 export default function Home() {
-  const [pos, setPos] = useState<{ lat: number; lng: number } | null>(null);
+  const { loc, q, cart } = useStore();
   const [products, setProducts] = useState<P[]>([]);
-  const [cart, setCart] = useState<Record<string, number>>({});
-  const [address, setAddress] = useState("");
-  const [msg, setMsg] = useState("");
   const [loaded, setLoaded] = useState(false);
-  const [fees, setFees] = useState<any>(null);
+  const [msg, setMsg] = useState("");
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (p) => setPos({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => setMsg("Please allow location access to see products near you")
-    );
-  }, []);
-
-  useEffect(() => {
-    supabase.from("fee_settings").select("*").eq("id", 1).single().then(({ data }) => setFees(data));
-  }, []);
-
-  useEffect(() => {
-    if (!pos) return;
-    supabase.rpc("browse_products", { p_lat: pos.lat, p_lng: pos.lng }).then(({ data, error }) => {
-      if (error) setMsg(friendly(error.message)); else setProducts(data as P[]);
+    if (!loc) { setLoaded(false); return; }
+    setLoaded(false);
+    supabase.rpc("browse_products", { p_lat: loc.lat, p_lng: loc.lng }).then(({ data, error }) => {
+      if (error) setMsg(friendly(error.message)); else { setProducts(data as P[]); setMsg(""); }
       setLoaded(true);
     });
-  }, [pos]);
+  }, [loc?.lat, loc?.lng]);
 
-  const add = (id: string, d: number) =>
-    setCart((c) => { const q = Math.max(0, (c[id] || 0) + d); const n = { ...c }; q ? (n[id] = q) : delete n[id]; return n; });
+  // Cart mein purane price/naam ho toh taaza kar do
+  useEffect(() => {
+    if (!products.length) return;
+    const n = { ...getState().cart }; let changed = false;
+    for (const p of products) {
+      const it = n[p.id];
+      if (it && (it.price !== Number(p.price) || it.name !== p.name)) { n[p.id] = { ...it, price: Number(p.price), name: p.name }; changed = true; }
+    }
+    if (changed) setState({ cart: n });
+  }, [products]);
 
-  const total = products.reduce((s, p) => s + (cart[p.id] || 0) * Number(p.price), 0);
-  const del = fees ? (total >= Number(fees.free_delivery_above) ? 0 : Number(fees.delivery_fee)) : 0;
-  const small = fees && total < Number(fees.small_cart_threshold) ? Number(fees.small_cart_fee) : 0;
-
-  async function checkout() {
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) { window.dispatchEvent(new Event("open-login")); return; }
-    if (!pos || !address) { setMsg("Please enter your delivery address"); return; }
-    const items = Object.entries(cart).map(([product_id, qty]) => ({ product_id, qty }));
-    const { data, error } = await supabase.rpc("place_order", { p_lat: pos.lat, p_lng: pos.lng, p_address: address, p_items: items });
-    if (error) setMsg(friendly(error.message)); else { window.location.href = "/orders/" + data; }
-  }
+  const shown = useMemo(() => {
+    const t = q.trim().toLowerCase();
+    return t ? products.filter((p) => p.name.toLowerCase().includes(t) || (p.category || "").toLowerCase().includes(t)) : products;
+  }, [products, q]);
 
   return (<>
     {msg && <p>{msg}</p>}
-    {!pos && !msg && <p>Finding your location...</p>}
-    {loaded && !products.length && !msg && <p>No shops or products are available in your area yet.</p>}
+    {!loc && <p>Choose your delivery location to see products near you.</p>}
+    {loc && loaded && !products.length && !msg && <p>No shops or products are available in your area yet.</p>}
+    {loc && loaded && products.length > 0 && !shown.length && <p>No products match &ldquo;{q}&rdquo;.</p>}
     <div className="grid">
-      {products.map((p) => (
-        <div className="pcard" key={p.id}>
-          {p.image_url && <img className="pimg" src={p.image_url} alt="" loading="lazy" width={160} height={160} />}
-          <div className="pname">{p.name}</div>
-          <div className="muted">{p.unit}</div>
-          <div className="prow">
-            <span className="price">₹{p.price}</span>
-            {cart[p.id]
-              ? <span className="stepper"><button aria-label="Decrease quantity" onClick={() => add(p.id, -1)}>−</button><span>{cart[p.id]}</span><button aria-label="Increase quantity" onClick={() => add(p.id, 1)}>+</button></span>
-              : <button className="add" onClick={() => add(p.id, 1)}>Add</button>}
-          </div>
-        </div>))}
+      {shown.map((p) => {
+        const qty = cart[p.id]?.qty || 0;
+        const info = { name: p.name, unit: p.unit || "", price: Number(p.price) };
+        return (
+          <div className="pcard" key={p.id}>
+            {p.image_url && <img className="pimg" src={p.image_url} alt="" loading="lazy" width={160} height={160} />}
+            <div className="pname">{p.name}</div>
+            <div className="muted">{p.unit}</div>
+            <div className="prow">
+              <span className="price">₹{p.price}</span>
+              {qty
+                ? <span className="stepper"><button aria-label="Decrease quantity" onClick={() => changeQty(p.id, -1)}>−</button><span>{qty}</span><button aria-label="Increase quantity" onClick={() => changeQty(p.id, 1, info)}>+</button></span>
+                : <button className="add" onClick={() => changeQty(p.id, 1, info)}>Add</button>}
+            </div>
+          </div>);
+      })}
     </div>
-    {total > 0 && <div className="cartbar">
-      <div className="card" style={{ marginBottom: 8 }}>
-        <div>Items: ₹{total.toFixed(2)}</div>
-        <div>Delivery: {del === 0 ? <span className="free">FREE</span> : "₹" + del}</div>
-        {small > 0 && <div>Small cart fee: ₹{small}</div>}
-        <h3>Total: ₹{(total + del + small).toFixed(2)} (Cash on Delivery)</h3>
-        {fees && del > 0 && <small>Add ₹{(Number(fees.free_delivery_above) - total).toFixed(0)} more for free delivery</small>}
-      </div>
-      <input placeholder="Delivery address" value={address} onChange={(e) => setAddress(e.target.value)} />
-      <button onClick={checkout}>Place order</button>
-    </div>}
   </>);
 }

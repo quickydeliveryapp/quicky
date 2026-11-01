@@ -49,7 +49,7 @@ export default function Home() {
   }
 
   return (<>
-    <p className="tagline">Groceries &amp; More. <b>Delivered Fast.</b></p>
+    <img className="hero" src="/logo-full.webp" alt="Quicky: Groceries &amp; More. Delivered Fast." width={380} height={127} />
     {msg && <p>{msg}</p>}
     {!pos && !msg && <p>Location dhoondh rahe hain...</p>}
     {loaded && !products.length && !msg && <p>Is area mein abhi koi shop ya product available nahi hai.</p>}

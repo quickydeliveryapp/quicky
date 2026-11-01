@@ -1,5 +1,5 @@
 import "./globals.css";
-import Link from "next/link";
+import HeaderLogo from "@/components/HeaderLogo";
 import EnablePush from "@/components/EnablePush";
 import HeaderNav from "@/components/HeaderNav";
 
@@ -13,7 +13,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (<html lang="en"><body>
     <header>
-      <Link href="/" aria-label="Quicky home"><img src="/logo.webp" alt="Quicky" width={124} height={33} decoding="async" /></Link>
+      <HeaderLogo />
       <HeaderNav />
     </header>
     <EnablePush />

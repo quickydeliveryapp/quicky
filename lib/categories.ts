@@ -1,26 +1,27 @@
 // Sidebar ki fixed categories (display order). enabled:false = abhi customer ko nahi dikhegi (licence/age-check ke baad true karna)
-export type Cat = { name: string; icon: string; enabled: boolean };
+// img = category ki photo (public/cats/). Baad mein apni photos se badalni hon toh bas wahi file replace karo
+export type Cat = { name: string; icon: string; img: string; enabled: boolean };
 export const CATS: Cat[] = [
-  { name: "Paan Corner", icon: "leaf", enabled: false },
-  { name: "Dairy, Bread & Eggs", icon: "milk", enabled: true },
-  { name: "Fruits & Vegetables", icon: "produce", enabled: true },
-  { name: "Cold Drinks & Juices", icon: "drink", enabled: true },
-  { name: "Snacks & Munchies", icon: "snack", enabled: true },
-  { name: "Breakfast & Instant Food", icon: "bowl", enabled: true },
-  { name: "Sweet Tooth", icon: "sweet", enabled: true },
-  { name: "Bakery & Biscuits", icon: "cookie", enabled: true },
-  { name: "Tea, Coffee & Milk Drinks", icon: "mug", enabled: true },
-  { name: "Atta, Rice & Dal", icon: "grain", enabled: true },
-  { name: "Masala, Oil & More", icon: "oil", enabled: true },
-  { name: "Sauces & Spreads", icon: "jar", enabled: true },
-  { name: "Chicken, Meat & Fish", icon: "bag", enabled: false },
-  { name: "Organic & Healthy Living", icon: "sprout", enabled: true },
-  { name: "Baby Care", icon: "baby", enabled: true },
-  { name: "Pharma & Wellness", icon: "pill", enabled: false },
-  { name: "Cleaning Essentials", icon: "spray", enabled: true },
-  { name: "Home & Office", icon: "home", enabled: true },
-  { name: "Personal Care", icon: "pump", enabled: true },
-  { name: "Pet Care", icon: "paw", enabled: true },
+  { name: "Paan Corner", icon: "leaf", img: "/cats/paan.webp", enabled: false },
+  { name: "Dairy, Bread & Eggs", icon: "milk", img: "/cats/dairy.webp", enabled: true },
+  { name: "Fruits & Vegetables", icon: "produce", img: "/cats/fruits.webp", enabled: true },
+  { name: "Cold Drinks & Juices", icon: "drink", img: "/cats/drinks.webp", enabled: true },
+  { name: "Snacks & Munchies", icon: "snack", img: "/cats/snacks.webp", enabled: true },
+  { name: "Breakfast & Instant Food", icon: "bowl", img: "/cats/breakfast.webp", enabled: true },
+  { name: "Sweet Tooth", icon: "sweet", img: "/cats/sweets.webp", enabled: true },
+  { name: "Bakery & Biscuits", icon: "cookie", img: "/cats/bakery.webp", enabled: true },
+  { name: "Tea, Coffee & Milk Drinks", icon: "mug", img: "/cats/tea.webp", enabled: true },
+  { name: "Atta, Rice & Dal", icon: "grain", img: "/cats/atta.webp", enabled: true },
+  { name: "Masala, Oil & More", icon: "oil", img: "/cats/masala.webp", enabled: true },
+  { name: "Sauces & Spreads", icon: "jar", img: "/cats/sauces.webp", enabled: true },
+  { name: "Chicken, Meat & Fish", icon: "bag", img: "/cats/meat.webp", enabled: false },
+  { name: "Organic & Healthy Living", icon: "sprout", img: "/cats/organic.webp", enabled: true },
+  { name: "Baby Care", icon: "baby", img: "/cats/baby.webp", enabled: true },
+  { name: "Pharma & Wellness", icon: "pill", img: "/cats/pharma.webp", enabled: false },
+  { name: "Cleaning Essentials", icon: "spray", img: "/cats/cleaning.webp", enabled: true },
+  { name: "Home & Office", icon: "home", img: "/cats/home.webp", enabled: true },
+  { name: "Personal Care", icon: "pump", img: "/cats/personal.webp", enabled: true },
+  { name: "Pet Care", icon: "paw", img: "/cats/pet.webp", enabled: true },
 ];
 
 // Shop owner category free-text likhta hai, isliye keyword se in categories mein map karte hain (upar se neeche, pehla match jeetta hai)

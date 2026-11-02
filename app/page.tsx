@@ -7,6 +7,11 @@ import { CATS, OTHER, SHOW_EMPTY_CATEGORIES, categorize, isEnabled } from "@/lib
 import ProductCard, { P } from "@/components/ProductCard";
 import { Icon } from "@/lib/icons";
 
+// Category ki photo; photo na ho (jaise "Other") toh icon
+function Thumb({ c, size }: { c: { icon: string; img: string }; size: number }) {
+  return c.img ? <img src={c.img} alt="" loading="lazy" width={240} height={141} /> : <Icon name={c.icon} size={size} />;
+}
+
 export default function Home() {
   const { loc, q } = useStore();
   const [products, setProducts] = useState<P[]>([]);
@@ -57,7 +62,7 @@ export default function Home() {
     return m;
   }, [visible]);
 
-  const sidebar = [...CATS.filter((c) => c.enabled && (SHOW_EMPTY_CATEGORIES || groups.has(c.name))), ...(groups.has(OTHER) ? [{ name: OTHER, icon: "bag", enabled: true }] : [])];
+  const sidebar = [...CATS.filter((c) => c.enabled && (SHOW_EMPTY_CATEGORIES || groups.has(c.name))), ...(groups.has(OTHER) ? [{ name: OTHER, icon: "bag", img: "", enabled: true }] : [])];
 
   const results = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -75,7 +80,7 @@ export default function Home() {
           <button className={"cat" + (!active ? " on" : "")} onClick={() => pick(null)}><span className="ic"><Icon name="bag" size={20} /></span><span>All</span></button>
           {sidebar.map((c) => (
             <button key={c.name} className={"cat" + (active === c.name ? " on" : "") + (groups.has(c.name) ? "" : " dim")} onClick={() => pick(c.name)}>
-              <span className="ic"><Icon name={c.icon} size={20} /></span><span>{c.name}</span>
+              <span className="ic"><Thumb c={c} size={20} /></span><span>{c.name}</span>
             </button>
           ))}
         </aside>
@@ -106,7 +111,7 @@ export default function Home() {
             <div className="catgrid">
               {(allCats ? sidebar : sidebar.slice(0, 8)).map((c) => (
                 <button key={c.name} className={"ctile" + (groups.has(c.name) ? "" : " dim")} onClick={() => pick(c.name)}>
-                  <span className="ci"><Icon name={c.icon} size={30} sw={1.5} /></span><span>{c.name}</span>
+                  <span className="ci"><Thumb c={c} size={30} /></span><span>{c.name}</span>
                 </button>))}
             </div>
           </section>

@@ -160,14 +160,14 @@ main{max-width:var(--wrap);margin:0 auto;padding:20px 24px 48px}
 .cats,.strip{display:none}
 .hdr{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px 10px;padding:10px 16px 8px;background:linear-gradient(#E6F5D8,#fff);border-bottom:0}
 .brand img{height:40px}
-.hloc{justify-self:stretch;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;width:100%;margin:0;padding:0 0 0 12px;border:0;border-radius:0;background:none;box-shadow:none;text-align:left}
+.hloc{justify-self:stretch;flex-direction:column;align-items:flex-end;gap:2px;min-width:0;width:100%;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;text-align:right}
 .hloc:hover{background:none}
 .hloc:active{opacity:.7}
-.hl1{color:var(--ink);font-size:17px;font-weight:800;line-height:1.2;letter-spacing:-.01em}
+.hl1{color:var(--ink);font-size:clamp(16px,4.3vw,20px);font-weight:800;line-height:1.2;letter-spacing:-.01em}
 .hl2{color:var(--muted);font-size:13px;font-weight:600;line-height:1.25}
 .hl2{width:auto}
 .hl2 .pin{display:inline-flex}
-.hl2{align-items:center}
+.hl2{align-items:center;justify-content:flex-end}
 .hl2 .t{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .eta-l{display:none}
 .eta-s{display:inline}

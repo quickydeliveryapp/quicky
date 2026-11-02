@@ -2,14 +2,18 @@ import { setState } from "./store";
 
 // Nominatim fair use: sirf button/Enter pe search, reverse result localStorage mein cache
 export async function reverse(lat: number, lng: number): Promise<string> {
-  const key = `qk_rev_${lat.toFixed(3)}_${lng.toFixed(3)}`;
+  const key = `qk_rev2_${lat.toFixed(3)}_${lng.toFixed(3)}`;
   try { const c = localStorage.getItem(key); if (c) return c; } catch {}
   try {
     const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&lat=${lat}&lon=${lng}`);
     const j = await r.json();
     const a = j.address || {};
-    const parts = [a.road, a.neighbourhood || a.suburb, a.city || a.town || a.village || a.county].filter(Boolean);
-    const label = parts.length ? parts.join(", ") : j.display_name || "Current location";
+    const pick = (...ks: string[]) => { for (const k of ks) if (a[k]) return String(a[k]); return ""; };
+    const parts = [pick("road"), pick("neighbourhood", "suburb", "quarter", "hamlet", "residential", "city_district"),
+      pick("village", "town", "city", "municipality", "county"), pick("state_district")].filter(Boolean);
+    const uniq = [...new Set(parts)];
+    if (uniq.length < 3 && a.state) uniq.push(String(a.state));
+    const label = uniq.slice(0, 4).join(", ") || j.display_name || "Current location";
     try { localStorage.setItem(key, label); } catch {}
     return label;
   } catch { return "Current location"; }

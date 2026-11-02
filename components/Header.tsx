@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { getState, initStore, setState, useStore } from "@/lib/store";
-import { detectAndSet } from "@/lib/geo";
+import { detectAndSet, reverse } from "@/lib/geo";
 import { Icon } from "@/lib/icons";
 
 export default function Header() {
@@ -18,7 +18,12 @@ export default function Header() {
 
   useEffect(() => {
     initStore();
-    if (!getState().loc) detectAndSet().catch(() => setState({ locOpen: true }));
+    const saved = getState().loc;
+    if (!saved) detectAndSet().catch(() => setState({ locOpen: true }));
+    else reverse(saved.lat, saved.lng).then((label) => {
+      const cur = getState().loc;
+      if (cur && cur.lat === saved.lat && cur.lng === saved.lng && label !== "Current location" && label !== cur.label) setState({ loc: { ...cur, label } });
+    });
     supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
         setLoggedIn(true);

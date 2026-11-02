@@ -20,9 +20,9 @@ export default function Header() {
     initStore();
     const saved = getState().loc;
     if (!saved) detectAndSet().catch(() => setState({ locOpen: true }));
-    else reverse(saved.lat, saved.lng).then((label) => {
+    else reverse(saved.lat, saved.lng).then((p) => {
       const cur = getState().loc;
-      if (cur && cur.lat === saved.lat && cur.lng === saved.lng && label !== "Current location" && label !== cur.label) setState({ loc: { ...cur, label } });
+      if (cur && cur.lat === saved.lat && cur.lng === saved.lng && p.label !== "Current location" && (cur.city !== p.city || cur.label !== p.label)) setState({ loc: { ...cur, label: p.label, city: p.city } });
     });
     supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
@@ -50,6 +50,8 @@ export default function Header() {
 
   const etaShort = !loc ? "Set location" : eta === undefined ? "Fast delivery" : eta === null ? "Not serviceable" : `${Math.min(eta, 60)}${eta > 60 ? "+" : ""} min`;
 
+  const etaMobile = typeof eta === "number" ? `Delivery in ${Math.min(eta, 60)}${eta > 60 ? "+" : ""} min` : etaShort;
+
   const shop = role === "shop_owner" || role === "admin";
   const rider = role === "rider" || role === "admin";
   const staff = role === "admin" || role === "area_manager";
@@ -66,8 +68,8 @@ export default function Header() {
       </Link>
 
       <button className="hloc" onClick={() => setState({ locOpen: true })} aria-label="Change delivery location">
-        <span className="hl1"><span className="eta-l">{etaText}</span><span className="eta-s">{typeof eta === "number" && <Icon name="bolt" size={13} />}{etaShort}</span></span>
-        <span className="hl2"><span className="pin"><Icon name="pin" size={15} /></span><span className="t">{loc ? loc.label : "Choose location"}</span>
+        <span className="hl1"><span className="eta-l">{etaText}</span><span className="eta-s">{etaMobile}</span></span>
+        <span className="hl2"><span className="pin"><Icon name="pin" size={15} /></span><span className="t">{loc ? (loc.city || loc.label) : "Choose location"}</span>
           <Icon name="chevronDown" size={16} sw={2} /></span>
       </button>
 

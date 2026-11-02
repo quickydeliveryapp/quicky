@@ -6,7 +6,7 @@ import { detectAndSet, searchPlaces } from "@/lib/geo";
 export default function LocationModal() {
   const { locOpen } = useStore();
   const [text, setText] = useState("");
-  const [results, setResults] = useState<{ lat: number; lng: number; label: string }[]>([]);
+  const [results, setResults] = useState<{ lat: number; lng: number; label: string; city?: string }[]>([]);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
 

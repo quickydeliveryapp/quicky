@@ -1,7 +1,7 @@
 "use client";
 import { useSyncExternalStore } from "react";
 
-export type Loc = { lat: number; lng: number; label: string } | null;
+export type Loc = { lat: number; lng: number; label: string; city?: string } | null;
 export type CartItem = { qty: number; name: string; unit: string; price: number };
 type State = { loc: Loc; q: string; cart: Record<string, CartItem>; cartOpen: boolean; locOpen: boolean };
 

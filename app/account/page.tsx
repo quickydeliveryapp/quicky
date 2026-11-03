@@ -3,20 +3,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-type O = { id: string; status: string; total: number; created_at: string };
-const label: Record<string, string> = { placed: "Order placed", accepted: "Accepted", packed: "Packed", picked_up: "On the way", delivered: "Delivered", cancelled: "Cancelled" };
-
 export default function Account() {
   const [phone, setPhone] = useState<string | null | undefined>(undefined);
-  const [orders, setOrders] = useState<O[]>([]);
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
+    supabase.auth.getUser().then(({ data }) => {
       if (!data.user) { setPhone(null); window.dispatchEvent(new Event("open-login")); return; }
       setPhone(data.user.phone ? "+" + data.user.phone : "");
-      const { data: o } = await supabase.from("orders").select("id,status,total,created_at")
-        .eq("customer_id", data.user.id).order("created_at", { ascending: false }).limit(20);
-      setOrders((o as O[]) || []);
     });
   }, []);
 
@@ -28,12 +21,6 @@ export default function Account() {
       <div><div className="muted">Mobile number</div><b>{phone}</b></div>
       <button className="alt" onClick={async () => { await supabase.auth.signOut(); window.location.href = "/"; }}>Logout</button>
     </div>
-    <h3>My Orders</h3>
-    {!orders.length && <p className="muted">No orders yet.</p>}
-    {orders.map((o) => (
-      <Link key={o.id} href={"/orders/" + o.id} className="oitem">
-        <div><b>₹{o.total}</b><div className="muted">{new Date(o.created_at).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}</div></div>
-        <span className={"ost" + (o.status === "delivered" ? " ok" : o.status === "cancelled" ? " bad" : "")}>{label[o.status] || o.status}</span>
-      </Link>))}
+    <Link href="/orders" className="oitem" style={{ marginTop: 12 }}><b>My Orders</b><span className="muted">View all &rarr;</span></Link>
   </div>);
 }

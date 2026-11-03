@@ -25,6 +25,8 @@ const ICONS: Record<string, ReactNode> = {
   leaf: <><path d="M5 19C5 10 10 5 19 5c0 9-5 14-14 14z" {...F} /><path d="M5 19L14 10" /></>,
   bag: <><path d="M5 8h14l-1 12.2a1 1 0 0 1-1 .8H7a1 1 0 0 1-1-.8z" {...F} /><path d="M9 8V6.5a3 3 0 0 1 6 0V8" /></>,
   hero: <><path d="M3.5 11h17l-1.8 8.2a1.5 1.5 0 0 1-1.5 1.2H6.8a1.5 1.5 0 0 1-1.5-1.2z" {...F} /><path d="M7 11l1-3h8l1 3" /><circle cx="9" cy="6.2" r="2.2" {...F} /><path d="M13 8c0-3 1.5-4.5 3.5-4.5.3 2.2-1 4.2-3.5 4.5z" {...F} /><path d="M8.5 15v2M12 15v2M15.5 15v2" /></>,
+  cart: <><circle cx="9" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" /><path d="M2 3h3l2.7 12.4a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 7H6" /></>,
+  truck: <><path d="M2.5 6.5h11v9.5h-11z" {...F} /><path d="M13.5 9.5h4l3 3.2V16h-7z" {...F} /><circle cx="7" cy="17.5" r="1.8" /><circle cx="17" cy="17.5" r="1.8" /></>,
   plus: <path d="M12 5v14M5 12h14" />,
   minus: <path d="M5 12h14" />,
   x: <path d="M18 6L6 18M6 6l12 12" />,

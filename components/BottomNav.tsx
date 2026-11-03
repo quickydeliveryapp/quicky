@@ -20,8 +20,9 @@ export default function BottomNav() {
     if (path === "/") window.dispatchEvent(new Event("show-categories"));
     else { try { sessionStorage.setItem("qk_cats", "1"); } catch {} router.push("/"); }
   }
-  function account() {
-    if (loggedIn) router.push("/account"); else window.dispatchEvent(new Event("open-login"));
+  // Login nahi hai toh login dialog, hai toh seedha page
+  function guarded(href: string) {
+    if (loggedIn) router.push(href); else window.dispatchEvent(new Event("open-login"));
   }
 
   return (
@@ -36,7 +37,10 @@ export default function BottomNav() {
         <svg {...I}><circle cx="9" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" /><path d="M2 3h3l2.7 12.4a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 7H6" /></svg>Cart
         {count > 0 && <span className="bd">{count}</span>}
       </button>
-      <button className={"tab" + (path === "/account" ? " on" : "")} onClick={account}>
+      <button className={"tab" + (path.startsWith("/orders") ? " on" : "")} onClick={() => guarded("/orders")}>
+        <svg {...I}><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h4" /></svg>Orders
+      </button>
+      <button className={"tab" + (path === "/account" ? " on" : "")} onClick={() => guarded("/account")}>
         <svg {...I}><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" /></svg>{loggedIn ? "Account" : "Login"}
       </button>
     </nav>

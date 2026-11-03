@@ -72,12 +72,15 @@ export default function Home() {
   const searching = q.trim().length > 0;
   const active = sel && sidebar.some((c) => c.name === sel) ? sel : null;
   const pick = (name: string | null) => { setSel(name); window.scrollTo({ top: 0 }); };
+  const toCategories = () => document.getElementById("categories")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  // Laptop pe left list sirf category kholne par dikhti hai (home pe tiles ki row hoti hai)
+  const showSide = !searching && !!active && visible.length > 0;
 
   return (
-    <div className={"shell" + (searching || !visible.length ? " nosb" : "")}>
-      {!searching && visible.length > 0 && (
+    <div className={"shell" + (showSide ? "" : " nosb")}>
+      {showSide && (
         <aside className="cats" aria-label="Categories">
-          <button className={"cat" + (!active ? " on" : "")} onClick={() => pick(null)}><span className="ic"><Icon name="bag" size={20} /></span><span>All</span></button>
+          <button className="cat" onClick={() => pick(null)}><span className="ic"><Icon name="bag" size={20} /></span><span>All</span></button>
           {sidebar.map((c) => (
             <button key={c.name} className={"cat" + (active === c.name ? " on" : "") + (groups.has(c.name) ? "" : " dim")} onClick={() => pick(c.name)}>
               <span className="ic"><Thumb c={c} size={20} /></span><span>{c.name}</span>
@@ -91,27 +94,32 @@ export default function Home() {
 
         {!searching && !active && <>
           <section className="hero">
-            <div>
-              <h2>Fresh groceries<br />at your <em>doorstep</em></h2>
-              <p>{fees ? `Free delivery on orders above ₹${Number(fees.free_delivery_above)}` : "Delivered fast, right to your door"}</p>
-              <button onClick={() => document.getElementById("categories")?.scrollIntoView({ behavior: "smooth", block: "start" })}>Shop Now <Icon name="arrowRight" size={16} sw={2} /></button>
+            <div className="hcopy">
+              <span className="hchip"><Icon name="leaf" size={16} /> Fresh &amp; Healthy</span>
+              <h2>Fresh Groceries<br />at Your Doorstep</h2>
+              <p>Quality products. Great prices. Delivered fast.</p>
+              <button onClick={toCategories}>Shop Now <Icon name="arrowRight" size={16} sw={2} /></button>
             </div>
-            <div className="art" aria-hidden="true"><Icon name="hero" size={104} sw={1} /></div>
+            <img className="himg" src="/hero.webp" alt="" width={640} height={271} />
           </section>
-          <div className="trust">
-            <div><Icon name="bolt" size={22} /><span>Quick<br />Delivery</span></div>
-            <div><Icon name="shield" size={22} /><span>Quality<br />Products</span></div>
-            <div><Icon name="smile" size={22} /><span>Hassle-Free<br />Shopping</span></div>
-          </div>
-          <section id="categories" className="mobsec">
+
+          {fees && (
+            <div className="freebar">
+              <span className="fi"><Icon name="truck" size={28} sw={1.5} /></span>
+              <div><b>Free Delivery</b><span>On orders above ₹{Number(fees.free_delivery_above)}</span></div>
+              <Icon name="arrowRight" size={18} sw={2} />
+            </div>
+          )}
+
+          <section id="categories" className="catsec">
             <div className="sechead">
               <h3>Shop by Category</h3>
-              <button className="seeall" onClick={() => setAllCats((a) => !a)}>{allCats ? "Show less" : <>See All <Icon name="arrowRight" size={15} sw={2} /></>}</button>
+              <button className="seeall" onClick={() => setAllCats((a) => !a)}>{allCats ? "Show less" : <>View All <Icon name="arrowRight" size={15} sw={2} /></>}</button>
             </div>
-            <div className="catgrid">
-              {(allCats ? sidebar : sidebar.slice(0, 8)).map((c) => (
-                <button key={c.name} className={"ctile" + (groups.has(c.name) ? "" : " dim")} onClick={() => pick(c.name)}>
-                  <span className="ci"><Thumb c={c} size={30} /></span><span>{c.name}</span>
+            <div className={"crow" + (allCats ? " all" : "")}>
+              {sidebar.map((c) => (
+                <button key={c.name} className={"cchip" + (groups.has(c.name) ? "" : " dim")} onClick={() => pick(c.name)}>
+                  <span className="cimg"><Thumb c={c} size={28} /></span><span>{c.name}</span>
                 </button>))}
             </div>
           </section>
@@ -121,8 +129,6 @@ export default function Home() {
         {!loc && <p>Choose your delivery location to see products near you.</p>}
         {loc && !loaded && <p className="muted">Loading products...</p>}
         {loc && loaded && !visible.length && !msg && <p>No shops or products are available in your area yet.</p>}
-
-        {fees && visible.length > 0 && !searching && <div className="strip">Free delivery on orders above ₹{Number(fees.free_delivery_above)}</div>}
 
         {searching ? (<>
           <h3>Results for &ldquo;{q}&rdquo;</h3>
@@ -138,7 +144,7 @@ export default function Home() {
             <section className="sec" key={c.name}>
               <div className="sechead">
                 <h3>{c.name}</h3>
-                {items.length > 4 && <button className="seeall" onClick={() => pick(c.name)}>See all</button>}
+                {items.length > 4 && <button className="seeall" onClick={() => pick(c.name)}>View All <Icon name="arrowRight" size={15} sw={2} /></button>}
               </div>
               <div className="row">{items.slice(0, 10).map((p) => <ProductCard key={p.id} p={p} />)}</div>
             </section>);

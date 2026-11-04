@@ -80,9 +80,9 @@ export default function Header() {
   if (isDash) return (<>
     <header className="dhdr">
       <Link href="/" className="brand hlogo" aria-label="Quicky home"><img src="/logo-nav-v3.webp" alt="Quicky" width={168} height={56} decoding="async" /></Link>
-      <div className="dtitle">{dashTitle ? `${dashTitle} dashboard` : "Dashboard"}</div>
+      <div className="dtitle">{role === "area_manager" ? "Area manager" : dashTitle ? `${dashTitle} dashboard` : "Dashboard"}</div>
       <div className="dright">
-        <Link href="/" className="dlink">Customer view</Link>
+        {role === "admin" && <Link href="/" className="dlink">Customer view</Link>}
         {authReady && loggedIn && <button className="hlogin" onClick={logout}>Logout</button>}
       </div>
     </header>

@@ -22,7 +22,7 @@ export default function ProductCard({ p }: { p: P }) {
         {qty
           ? <span className="stepper"><button aria-label="Decrease quantity" onClick={() => changeQty(p.id, -1)}><Icon name="minus" size={14} sw={2.2} /></button><span>{qty}</span><button aria-label="Increase quantity" onClick={() => changeQty(p.id, 1, info)}><Icon name="plus" size={14} sw={2.2} /></button></span>
           : <button className="add" onClick={() => changeQty(p.id, 1, info)}>
-              <span className="lg"><Icon name="cart" size={16} /> Add to Cart</span>
+              <span className="lg"><Icon name="cart" size={14} /> ADD</span>
               <span className="sm">Add <Icon name="plus" size={14} sw={2.2} /></span>
             </button>}
       </div>

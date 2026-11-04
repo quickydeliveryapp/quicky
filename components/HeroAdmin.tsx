@@ -69,7 +69,7 @@ export default function HeroAdmin() {
     setMsg(error ? error.message : `Slide ${slot} ka text save ho gaya.`);
   }
 
-  const field = (slot: number, key: keyof Draft, label: string, max: number) => (
+  const field = (slot: number, key: "chip" | "title" | "cta", label: string, max: number) => (
     <label style={{ display: "block", marginBottom: 8 }}>
       <span style={{ display: "block", fontSize: 12, color: "#6B7A71", marginBottom: 4 }}>{label} ({slides[slot - 1][key].length}/{max})</span>
       <input value={slides[slot - 1][key]} maxLength={max} onChange={(e) => set(slot, key, e.target.value)}

@@ -91,8 +91,8 @@ export default function HeroAdmin({ freeAbove }: { freeAbove?: number }) {
     const st = drag.current, img = imgRef.current;
     if (!st) return;
     const dx = (e.clientX - st.px) / sc, dy = (e.clientY - st.py) / sc;
-    if (st.kind === "txt") { // text block: frame ki width/height ke fraction mein
-      setT({ x: r3(clamp(st.t.x + dx / fr.w, -0.2, 0.9)), y: r3(clamp(st.t.y + dy / fr.h, -0.6, 0.6)) });
+    if (st.kind === "txt") { // sirf title: frame ki width/height ke fraction mein (button fixed rehta hai)
+      setT({ x: r3(clamp(st.t.x + dx / fr.w, -0.1, 0.8)), y: r3(clamp(st.t.y + dy / fr.h, -0.38, 0.4)) });
       return;
     }
     if (!img || !img.naturalWidth) return;
@@ -176,7 +176,7 @@ export default function HeroAdmin({ freeAbove }: { freeAbove?: number }) {
     <section style={{ margin: "24px 0", padding: 20, border: "1px solid #E7EEE4", borderRadius: 14, background: "#fff" }}>
       <h3 style={{ margin: "0 0 4px", fontSize: 18 }}>Hero banners</h3>
       <p style={{ margin: "0 0 14px", color: "#6B7A71", fontSize: 13 }}>
-        Text seedha image ke upar click karke likho (khaali chhodoge to default dikhega). Image ko <b>drag</b> karke position aur neeche ke <b>zoom</b> se size set karo. Text ko <b>✥ Text</b> handle se pakad ke khiskao.
+        Text seedha image ke upar click karke likho (khaali chhodoge to default dikhega). Image ko <b>drag</b> karke position aur neeche ke <b>zoom</b> se size set karo. Title ko <b>✥ Title</b> handle se pakad ke khiskao.
         Mobile aur Desktop ki setting alag save hoti hai.
       </p>
 
@@ -213,7 +213,7 @@ export default function HeroAdmin({ freeAbove }: { freeAbove?: number }) {
         </div>
       </div>
       <p style={{ margin: "6px 0 0", textAlign: "center", color: "#6B7A71", fontSize: 12 }}>
-        {FRAME[device].label} preview{sc < 1 ? ` (${Math.round(sc * 100)}% size mein dikh raha hai)` : ""} · image ya ✥ Text ko pakad ke khiskao
+        {FRAME[device].label} preview{sc < 1 ? ` (${Math.round(sc * 100)}% size mein dikh raha hai)` : ""} · image ya ✥ Title ko pakad ke khiskao
       </p>
 
       <div style={{ marginTop: 14, padding: 14, background: "#F4F8F2", borderRadius: 12 }}>
@@ -235,7 +235,7 @@ export default function HeroAdmin({ freeAbove }: { freeAbove?: number }) {
             <button className="alt" aria-label="Chhota" disabled={busy || tadj.s <= SIZE_MIN} onClick={() => setT({ s: r3(clamp(tadj.s - 0.05, SIZE_MIN, SIZE_MAX)) })} style={{ padding: "6px 14px" }}>−</button>
             <input type="range" min={SIZE_MIN} max={SIZE_MAX} step={0.01} value={tadj.s} onChange={(e) => setT({ s: Number(e.target.value) })} style={{ flex: 1 }} aria-label="Title size" />
             <button className="alt" aria-label="Bada" disabled={busy || tadj.s >= SIZE_MAX} onClick={() => setT({ s: r3(clamp(tadj.s + 0.05, SIZE_MIN, SIZE_MAX)) })} style={{ padding: "6px 14px" }}>+</button>
-            <button className="alt" disabled={busy} onClick={() => setT({ ...DEFAULT_T })} style={{ padding: "6px 14px" }}>Text reset</button>
+            <button className="alt" disabled={busy} onClick={() => setT({ ...DEFAULT_T })} style={{ padding: "6px 14px" }}>Title reset</button>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 14, marginTop: 12 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>

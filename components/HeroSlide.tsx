@@ -66,14 +66,16 @@ export default function HeroSlide({
         loading={eager ? "eager" : "lazy"} decoding="async" />
       {s.showText && (
         <div className="hs-copy">
-          {edit && <span className="hs-move" data-move title="Pakad ke text ko khiskao">✥ Text</span>}
           <div className="hs-low">
-            <h2>
-              {edit
-                ? <textarea className="hs-field" rows={2} maxLength={40} value={s.title} placeholder={edit.ph.title}
-                    onChange={(e) => edit.onTitle(e.target.value)} />
-                : s.title}
-            </h2>
+            <div className="hs-ttl">
+              {edit && <span className="hs-move" data-move title="Pakad ke title ko khiskao">✥ Title</span>}
+              <h2>
+                {edit
+                  ? <textarea className="hs-field" rows={2} maxLength={40} value={s.title} placeholder={edit.ph.title}
+                      onChange={(e) => edit.onTitle(e.target.value)} />
+                  : s.title}
+              </h2>
+            </div>
             {edit
               ? <span className="hs-btn">
                   <Auto value={s.cta} ph={edit.ph.cta} max={16} onChange={edit.onCta} />

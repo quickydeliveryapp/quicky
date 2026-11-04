@@ -50,7 +50,7 @@ alter table public.hero_slides add column if not exists d_zoom real not null def
 alter table public.hero_slides add column if not exists d_fx   real not null default 0.5;
 alter table public.hero_slides add column if not exists d_fy   real not null default 0.5;
 
--- 6) Text position + typography (chip hata diya, isliye chip column ab use nahi hota)
+-- 6) Title position + typography (chip hata diya, isliye chip column ab use nahi hota)
 --    tx/ty: slide ki width/height ka fraction (0 = default jagah) | ts: title size multiplier
 alter table public.hero_slides add column if not exists m_tx real not null default 0;
 alter table public.hero_slides add column if not exists m_ty real not null default 0;

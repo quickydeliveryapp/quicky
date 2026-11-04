@@ -486,7 +486,7 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
    Mobile = default, desktop = min-width:820px. Admin preview .pm / .pd se device force karta hai.
    ====================================================================== */
 .hs{--z:var(--mz);--x:var(--mx);--y:var(--my);--tx:var(--mtx);--ty:var(--mty);--ts:var(--mts);--h:200px;--px:16px;--py:14px;--tw:58%;--fs:20px;--chip-fs:12px;--chip-p:5px 11px;--btn-fs:12px;--btn-p:7px 14px;
-  position:relative;flex:0 0 100%;min-width:0;height:var(--h);overflow:hidden;border-radius:18px;scroll-snap-align:start;background:#EEF8F0}
+  container-type:inline-size;position:relative;flex:0 0 100%;min-width:0;height:var(--h);overflow:hidden;border-radius:18px;scroll-snap-align:start;background:#EEF8F0}
 @media(min-width:820px){
   .hs{--z:var(--dz);--x:var(--dx);--y:var(--dy);--tx:var(--dtx);--ty:var(--dty);--ts:var(--dts);--h:320px;--px:56px;--py:36px;--tw:50%;--fs:38px;--chip-fs:14px;--chip-p:8px 18px;--btn-fs:15px;--btn-p:11px 22px;border-radius:24px}
 }
@@ -497,7 +497,9 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
   object-position:calc(var(--x)*100%) calc(var(--y)*100%);
   transform:scale(var(--z));transform-origin:calc(var(--x)*100%) calc(var(--y)*100%);
   -webkit-user-drag:none;user-select:none}
-.hs-copy{position:relative;left:calc(var(--tx,0)*100%);top:calc(var(--ty,0)*100%);z-index:1;height:100%;max-width:var(--tw);padding:var(--py) 0 var(--py) var(--px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px}
+.hs-copy{position:relative;z-index:1;height:100%;max-width:var(--tw);padding:var(--py) 0 var(--py) var(--px);display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:10px}
+/* Sirf title movable: button apni jagah fixed. x = slide width ka fraction (cqw), y = slide height ka fraction */
+.hs-ttl{position:relative;width:100%;left:calc(var(--tx,0)*100cqw);top:calc(var(--ty,0)*var(--h))}
 .hs-chip{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:var(--chip-p);border-radius:999px;background:#fff;color:var(--g);font-size:var(--chip-fs);font-weight:600;line-height:1.3;box-shadow:0 2px 8px rgba(22,35,28,.1)}
 .hs-chip-txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .hs-low{display:flex;flex-direction:column;align-items:flex-start;gap:12px;width:100%}
@@ -523,5 +525,5 @@ textarea.hs-field{resize:none;overflow:hidden;line-height:inherit;letter-spacing
 .hs.edit{touch-action:none}
 
 .hs-move{display:none}
-.hs.edit .hs-move{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;background:#16231C;color:#fff;font-size:11px;font-weight:600;line-height:1.2;cursor:move;touch-action:none;user-select:none;opacity:.85}
+.hs.edit .hs-move{position:absolute;left:0;top:-26px;z-index:3;display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;background:#16231C;color:#fff;font-size:11px;font-weight:600;line-height:1.2;cursor:move;touch-action:none;user-select:none;opacity:.85}
 .hs.edit .hs-move:hover{opacity:1}

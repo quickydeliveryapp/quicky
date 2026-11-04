@@ -268,16 +268,17 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .brand img{aspect-ratio:auto}
 
 
-/* ---- Hero carousel: text left, image right (desktop aur mobile dono) ---- */
+
+/* ---- Hero: image hi poora background, text uske left khali hisse par ---- */
 .hcar{margin:0 0 22px}
 .htrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;border-radius:18px}
 .htrack::-webkit-scrollbar{display:none}
-.hslide{flex:0 0 100%;min-width:0;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);min-height:190px;overflow:hidden;border-radius:18px;scroll-snap-align:start}
-.hslide-copy{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;min-width:0;padding:14px 10px 14px 14px}
-.hslide-img{order:2;display:block;width:100%;height:100%;min-height:190px;object-fit:cover;object-position:right center;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 20%);mask-image:linear-gradient(90deg,transparent 0%,#000 20%)}
+.hslide{position:relative;flex:0 0 100%;min-width:0;min-height:230px;overflow:hidden;border-radius:18px;scroll-snap-align:start;display:flex;align-items:center}
+.hslide-img{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:80% center}
+.hslide-copy{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;max-width:58%;padding:18px 0 18px 16px}
 .hslide .hchip{margin:0 0 10px;padding:4px 10px;font-size:11px;max-width:100%}
-.hslide h2{margin:0 0 6px;font-size:17px;font-weight:800;line-height:1.2;letter-spacing:-.01em}
-.hslide p{margin:0 0 10px;font-size:11.5px;line-height:1.35}
+.hslide h2{margin:0 0 6px;font-size:18px;font-weight:800;line-height:1.2;letter-spacing:-.01em}
+.hslide p{margin:0 0 10px;font-size:12px;line-height:1.35}
 .hslide button{display:inline-flex;align-items:center;gap:4px;padding:7px 12px;border:0;border-radius:999px;background:#0C7D1D;color:#fff;font-size:12px;font-weight:600}
 .hslide button:hover{background:#0A6A18}
 .hdots{display:flex;justify-content:center;gap:6px;margin-top:10px}
@@ -286,23 +287,13 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hdot.on{width:22px;background:#0C7D1D}
 @media(min-width:820px){
 .htrack{border-radius:24px}
-.hslide{min-height:340px;border-radius:24px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-.hslide-copy{padding:44px 24px 44px 48px}
-.hslide-img{min-height:340px;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 14%);mask-image:linear-gradient(90deg,transparent 0%,#000 14%)}
+.hslide{min-height:340px;border-radius:24px}
+.hslide-img{object-position:right center}
+.hslide-copy{max-width:50%;padding:44px 0 44px 48px}
 .hslide .hchip{margin-bottom:18px;padding:7px 16px;font-size:14px}
 .hslide h2{margin-bottom:12px;font-size:44px;line-height:1.1}
 .hslide p{margin-bottom:22px;font-size:17px}
 .hslide button{padding:13px 26px;font-size:15px}
 .hdot{width:9px;height:9px}
 .hdot.on{width:26px}
-}
-
-/* ---- Hero: text aur image alag, image ek rounded frame mein ---- */
-.hslide{gap:10px}
-.hslide-copy{padding:12px 0 12px 12px}
-.hslide-img{min-height:170px;margin:10px 10px 10px 0;border-radius:14px;-webkit-mask-image:none;mask-image:none}
-@media(min-width:820px){
-.hslide{gap:24px}
-.hslide-copy{padding:44px 0 44px 48px}
-.hslide-img{min-height:340px;margin:20px 20px 20px 0;border-radius:24px;-webkit-mask-image:none;mask-image:none}
 }

@@ -64,7 +64,7 @@ export default function Header() {
   return (<>
     <header className="hdr">
       <Link href="/" className="brand hlogo" aria-label="Quicky home">
-        <img src="/logo-nav-v2.webp" alt="Quicky" width={168} height={56} decoding="async" />
+        <img src="/logo-nav-v3.webp" alt="Quicky" width={168} height={56} decoding="async" />
       </Link>
 
       <button className="hloc" onClick={() => setState({ locOpen: true })} aria-label="Change delivery location">

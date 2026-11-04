@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
+import HeroAdmin from "@/components/HeroAdmin";
 
-type Tab = "orders" | "riders" | "shops" | "commission" | "settlement" | "cash" | "fees";
+type Tab = "orders" | "riders" | "shops" | "commission" | "settlement" | "cash" | "fees" | "hero";
 
 export default function Admin() {
   const [role, setRole] = useState<string | null>(null);
@@ -53,7 +54,7 @@ export default function Admin() {
 
   if (role === null) return <p>Loading...</p>;
   if (role !== "admin" && role !== "area_manager") return <p>You don't have access to this page.</p>;
-  const tabs: Tab[] = role === "admin" ? ["orders", "riders", "shops", "commission", "settlement", "cash", "fees"] : ["orders", "riders", "cash"];
+  const tabs: Tab[] = role === "admin" ? ["orders", "riders", "shops", "commission", "settlement", "cash", "fees", "hero"] : ["orders", "riders", "cash"];
 
   return (<div>
     <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
@@ -124,5 +125,6 @@ export default function Admin() {
         </div>);
       })() : <p>No delivered orders yet (with the new fees).</p>}
     </div>}
+    {tab === "hero" && <HeroAdmin />}
   </div>);
 }

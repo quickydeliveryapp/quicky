@@ -419,3 +419,22 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hslide .hline{gap:14px 20px;flex-wrap:nowrap}
 .hslide .hline button{padding:13px 26px;font-size:16px;white-space:nowrap}
 }
+
+/* ---- Shop Now fixed position: text stack, button har slide par ek hi jagah ---- */
+.hslide .hline{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.hslide h2{min-height:2.3em;display:flex;align-items:center}
+@media(min-width:820px){
+.hslide .hline{flex-direction:column;align-items:flex-start;flex-wrap:nowrap;gap:18px}
+.hslide h2{min-height:2.3em;font-size:38px;line-height:1.15}
+}
+@media(max-width:819px){
+.hslide h2{min-height:2.6em;font-size:17px;line-height:1.2}
+}
+
+/* ---- Shop Now: neeche fixed, bottom par margin ke saath (desktop + mobile) ---- */
+.hslide-copy{justify-content:space-between;padding-top:16px;padding-bottom:16px}
+.hslide .hline{margin-bottom:14px}
+@media(min-width:820px){
+.hslide-copy{justify-content:space-between;padding-top:36px;padding-bottom:36px}
+.hslide .hline{margin-bottom:36px}
+}

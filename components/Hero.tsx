@@ -6,13 +6,13 @@ type Slide = { img: string; alt: string; chip: string; chipIcon: string; title: 
 
 export default function Hero({ freeAbove, onShop }: { freeAbove?: number; onShop?: () => void }) {
   const SLIDES: Slide[] = [
-    { img: "/hero-1-v3.webp", alt: "Fresh vegetables in a paper grocery bag", chip: "Fresh & Healthy", chipIcon: "leaf",
+    { img: "/hero-1-v4.webp", alt: "Smiling shopper carrying fresh vegetables at a market", chip: "Fresh & Healthy", chipIcon: "leaf",
       title: "Fresh Daily.", sub: "Farm-fresh, at your door.", cta: "Shop Now", ink: "#0E3B26", subInk: "#3F5B4A" },
-    { img: "/hero-2-v3.webp", alt: "Family unpacking fresh groceries together", chip: "Delivery in 15 min", chipIcon: "truck",
+    { img: "/hero-2-v4.webp", alt: "Smiling delivery rider with a bag of fresh vegetables", chip: "Delivery in 15 min", chipIcon: "truck",
       title: "Super Fast.", sub: "Groceries in 15 minutes.", cta: "Order Now", ink: "#0E3B26", subInk: "#3F5B4A" },
-    { img: "/hero-3-v3.webp", alt: "Bread, milk, butter and eggs on a wooden table", chip: "Dairy & Bakery", chipIcon: "bag",
+    { img: "/hero-3-v4.webp", alt: "Smiling child holding a glass of milk at breakfast", chip: "Dairy & Bakery", chipIcon: "bag",
       title: "Daily Essentials", sub: "Milk, bread & eggs, always fresh.", cta: "Shop Dairy", ink: "#3A2A0E", subInk: "#5C4B2E" },
-    { img: "/hero-4-v3.webp", alt: "Smiling delivery rider with a bag of fresh groceries", chip: "Free Delivery", chipIcon: "truck",
+    { img: "/hero-4-v4.webp", alt: "Happy family unpacking fresh groceries in the kitchen", chip: "Free Delivery", chipIcon: "truck",
       title: "Free Delivery", sub: freeAbove !== undefined ? `On orders above ₹${freeAbove}.` : "On big orders.", cta: "Start Shopping", ink: "#0E3B26", subInk: "#3F5B4A" },
   ];
 

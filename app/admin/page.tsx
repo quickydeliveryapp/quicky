@@ -125,6 +125,6 @@ export default function Admin() {
         </div>);
       })() : <p>No delivered orders yet (with the new fees).</p>}
     </div>}
-    {tab === "hero" && <HeroAdmin />}
+    {tab === "hero" && <HeroAdmin freeAbove={fees ? Number(fees.free_delivery_above) : undefined} />}
   </div>);
 }

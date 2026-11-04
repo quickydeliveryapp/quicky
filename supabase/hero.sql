@@ -40,3 +40,12 @@ alter table public.hero_slides add column if not exists cta text;
 
 -- 4) Text on/off toggle (default: on)
 alter table public.hero_slides add column if not exists show_text boolean not null default true;
+
+-- 5) Image zoom + position (mobile aur desktop ke liye alag)
+--    zoom: 1 se 3 | fx, fy: image ka focus point (0 = left/top, 1 = right/bottom)
+alter table public.hero_slides add column if not exists m_zoom real not null default 1;
+alter table public.hero_slides add column if not exists m_fx   real not null default 0.5;
+alter table public.hero_slides add column if not exists m_fy   real not null default 0.5;
+alter table public.hero_slides add column if not exists d_zoom real not null default 1;
+alter table public.hero_slides add column if not exists d_fx   real not null default 0.5;
+alter table public.hero_slides add column if not exists d_fy   real not null default 0.5;

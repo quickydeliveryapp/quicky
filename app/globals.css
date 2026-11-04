@@ -298,15 +298,23 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hdot.on{width:26px}
 }
 
-/* ---- Hero: phone par compact + text ke peeche halka gradient (desktop par nahi) ---- */
-.hcar{max-width:100%}
-.hslide{min-height:200px;border-radius:16px}
-.hslide::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,.92) 0%,rgba(255,255,255,.7) 45%,rgba(255,255,255,0) 80%)}
-.hslide-copy{z-index:2;max-width:60%;padding:14px 0 14px 14px}
-.hslide .hchip{background:rgba(255,255,255,.95)}
-.hslide h2{font-size:19px}
-.hslide p{font-size:12px}
-@media(min-width:820px){
-.hslide::before{display:none}
-.hslide-copy{z-index:1;max-width:50%}
+
+/* ---- Hero: sirf phone (819px tak). Desktop ke rules upar waale hi rahenge ---- */
+.hslide::before{content:none}
+@media(max-width:819px){
+.hslide{min-height:210px;border-radius:18px}
+.hslide-img{object-position:right center}
+.hslide::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,.95) 0%,rgba(255,255,255,.8) 40%,rgba(255,255,255,0) 75%)}
+.hslide-copy{z-index:2;max-width:62%;padding:16px 0 16px 16px}
+.hslide .hchip{margin-bottom:12px;padding:5px 11px;font-size:12px}
+.hslide h2{margin-bottom:8px;font-size:23px;line-height:1.15}
+.hslide p{margin-bottom:14px;font-size:13px}
+.hslide button{padding:9px 18px;font-size:13px}
+}
+
+/* ---- Categories phone par square tiles (desktop jaisa) ---- */
+@media(max-width:819px){
+.crow{gap:10px}
+.cchip{width:92px;padding:6px;border-radius:14px;background:#F6F8F5}
+.cimg{width:100%;height:auto;aspect-ratio:1/1;border-radius:10px;background:#EEF9DD}
 }

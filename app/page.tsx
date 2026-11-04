@@ -84,10 +84,15 @@ export default function Home() {
 
   const searching = q.trim().length > 0;
   const active = sel && sidebar.some((c) => c.name === sel) ? sel : null;
-  const pick = (name: string | null) => { setSel(name); window.scrollTo({ top: 0 }); };
+  const pick = (name: string | null) => { setSel(name); if (!name) window.scrollTo({ top: 0 }); };
   const toCategories = () => document.getElementById("categories")?.scrollIntoView({ behavior: "smooth", block: "start" });
   // Laptop pe left list sirf category kholne par dikhti hai (home pe tiles ki row hoti hai)
   const showSide = !searching && !!active && visible.length > 0;
+
+  // Category chuni to uske heading par scroll karo (header ke neeche)
+  useEffect(() => {
+    if (active && !searching) document.getElementById("cat-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [active]);
 
   return (
     <div className={"shell" + (showSide ? "" : " nosb")}>
@@ -140,7 +145,7 @@ export default function Home() {
           {!results.length && visible.length > 0 && <p>No products match your search.</p>}
           <ProductGrid key={"s:" + q} items={results} />
         </>) : active ? (<>
-          <h3>{active}</h3>
+          <h3 id="cat-title">{active}</h3>
           {!groups.get(active)?.length && <p className="muted">No products in this category near you yet.</p>}
           <ProductGrid key={"c:" + active} items={groups.get(active) || []} />
         </>) : visible.length > 0 && (<>

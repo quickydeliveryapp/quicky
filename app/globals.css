@@ -444,3 +444,9 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hslide-copy{padding-bottom:16px}
 .hslide .hline{margin-bottom:16px}
 }
+
+/* ---- Category click: heading sticky header ke neeche dikhe ---- */
+#cat-title{scroll-margin-top:100px}
+@media(max-width:819px){
+#cat-title{scroll-margin-top:150px}
+}

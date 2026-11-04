@@ -96,12 +96,23 @@ export default function Home() {
 
   const searching = q.trim().length > 0;
   const active = sel && sidebar.some((c) => c.name === sel) ? sel : null;
-  const pick = (name: string | null) => { setSel(name); if (!name) window.scrollTo({ top: 0 }); };
+  const pick = (name: string | null) => {
+    setSel(name);
+    setAllCats(false); // category se aane/jaane par categories default (collapsed) view mein
+    if (!name) window.scrollTo({ top: 0 });
+  };
   const toCategories = scrollToCats;
   // Laptop pe left list sirf category kholne par dikhti hai (home pe tiles ki row hoti hai)
   const showSide = !searching && !!active && visible.length > 0;
 
   // Category chuni to uske heading par scroll karo (header ke neeche)
+  // Bottom "Home" tab: already home par ho to categories default view aur category selection reset
+  useEffect(() => {
+    const reset = () => { setSel(null); setAllCats(false); window.scrollTo({ top: 0 }); };
+    window.addEventListener("go-home", reset);
+    return () => window.removeEventListener("go-home", reset);
+  }, []);
+
   useEffect(() => {
     if (!active || searching) return;
     // Page chhota hone ke baad browser scroll clamp karta hai, isliye render ke baad do baar, instant scroll

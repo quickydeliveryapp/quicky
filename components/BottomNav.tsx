@@ -27,7 +27,7 @@ export default function BottomNav() {
 
   return (
     <nav className="tabs" aria-label="Main">
-      <Link href="/" className={"tab" + (path === "/" ? " on" : "")} onClick={() => setState({ q: "" })}>
+      <Link href="/" className={"tab" + (path === "/" ? " on" : "")} onClick={() => { setState({ q: "" }); if (path === "/") window.dispatchEvent(new Event("go-home")); }}>
         <svg {...I}><path d="M3 11l9-8 9 8" /><path d="M5 10v10h14V10" /></svg>Home
       </Link>
       <button className="tab" onClick={categories}>

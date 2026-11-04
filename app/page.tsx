@@ -91,7 +91,18 @@ export default function Home() {
 
   // Category chuni to uske heading par scroll karo (header ke neeche)
   useEffect(() => {
-    if (active && !searching) document.getElementById("cat-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!active || searching) return;
+    // Page chhota hone ke baad browser scroll clamp karta hai, isliye render ke baad do baar, instant scroll
+    const go = () => {
+      const el = document.getElementById("cat-title");
+      if (!el) return;
+      const headerH = document.querySelector(".hdr")?.getBoundingClientRect().height ?? 0;
+      const top = el.getBoundingClientRect().top + window.scrollY - headerH - 12;
+      window.scrollTo({ top, behavior: "auto" });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(go));
+    const t = setTimeout(go, 150);
+    return () => clearTimeout(t);
   }, [active]);
 
   return (

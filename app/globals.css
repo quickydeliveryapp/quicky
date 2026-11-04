@@ -318,3 +318,9 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .cchip{width:92px;padding:6px;border-radius:14px;background:#F6F8F5}
 .cimg{width:100%;height:auto;aspect-ratio:1/1;border-radius:10px;background:#EEF9DD}
 }
+
+/* ---- Desktop hero: 3:1 ratio, taaki image crop na ho ---- */
+@media(min-width:820px){
+.hslide{aspect-ratio:3/1;min-height:0}
+.hslide-img{min-height:0}
+}

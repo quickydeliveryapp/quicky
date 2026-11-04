@@ -12,6 +12,15 @@ function Thumb({ c, size }: { c: { icon: string; img: string }; size: number }) 
   return c.img ? <img src={c.img} alt="" loading="lazy" width={240} height={141} /> : <Icon name={c.icon} size={size} />;
 }
 
+// Products ka ek grid: jitne side-by-side aa sakein, phir neeche. Pehle 24, baaki "Show more" se (page tez rahe)
+function ProductGrid({ items }: { items: P[] }) {
+  const [n, setN] = useState(24);
+  return (<>
+    <div className="grid">{items.slice(0, n).map((p) => <ProductCard key={p.id} p={p} />)}</div>
+    {n < items.length && <button className="alt more" onClick={() => setN(n + 24)}>Show more products</button>}
+  </>);
+}
+
 export default function Home() {
   const { loc, q } = useStore();
   const [products, setProducts] = useState<P[]>([]);
@@ -56,18 +65,21 @@ export default function Home() {
   // Band (disabled) categories ke products customer ko nahi dikhte
   const visible = useMemo(() => products.filter((p) => isEnabled(categorize(p.category))), [products]);
 
+  // Naam ke hisaab se A-Z (popular ka data aane par badal denge)
+  const allSorted = useMemo(() => [...visible].sort((a, b) => a.name.localeCompare(b.name)), [visible]);
+
   const groups = useMemo(() => {
     const m = new Map<string, P[]>();
-    for (const p of visible) { const k = categorize(p.category); m.set(k, [...(m.get(k) || []), p]); }
+    for (const p of allSorted) { const k = categorize(p.category); m.set(k, [...(m.get(k) || []), p]); }
     return m;
-  }, [visible]);
+  }, [allSorted]);
 
   const sidebar = [...CATS.filter((c) => c.enabled && (SHOW_EMPTY_CATEGORIES || groups.has(c.name))), ...(groups.has(OTHER) ? [{ name: OTHER, icon: "bag", img: "", enabled: true }] : [])];
 
   const results = useMemo(() => {
     const t = q.trim().toLowerCase();
-    return t ? visible.filter((p) => p.name.toLowerCase().includes(t) || (p.category || "").toLowerCase().includes(t)) : [];
-  }, [visible, q]);
+    return t ? allSorted.filter((p) => p.name.toLowerCase().includes(t) || (p.category || "").toLowerCase().includes(t)) : [];
+  }, [allSorted, q]);
 
   const searching = q.trim().length > 0;
   const active = sel && sidebar.some((c) => c.name === sel) ? sel : null;
@@ -118,7 +130,7 @@ export default function Home() {
             </div>
             <div className={"crow" + (allCats ? " all" : "")}>
               {sidebar.map((c) => (
-                <button key={c.name} className={"cchip" + (groups.has(c.name) ? "" : " dim")} onClick={() => pick(c.name)}>
+                <button key={c.name} className="cchip" onClick={() => pick(c.name)}>
                   <span className="cimg"><Thumb c={c} size={28} /></span><span>{c.name}</span>
                 </button>))}
             </div>
@@ -133,22 +145,15 @@ export default function Home() {
         {searching ? (<>
           <h3>Results for &ldquo;{q}&rdquo;</h3>
           {!results.length && visible.length > 0 && <p>No products match your search.</p>}
-          <div className="grid">{results.map((p) => <ProductCard key={p.id} p={p} />)}</div>
+          <ProductGrid key={"s:" + q} items={results} />
         </>) : active ? (<>
           <h3>{active}</h3>
           {!groups.get(active)?.length && <p className="muted">No products in this category near you yet.</p>}
-          <div className="grid">{(groups.get(active) || []).map((p) => <ProductCard key={p.id} p={p} />)}</div>
-        </>) : sidebar.filter((c) => groups.has(c.name)).map((c) => {
-          const items = groups.get(c.name)!;
-          return (
-            <section className="sec" key={c.name}>
-              <div className="sechead">
-                <h3>{c.name}</h3>
-                {items.length > 4 && <button className="seeall" onClick={() => pick(c.name)}>View All <Icon name="arrowRight" size={15} sw={2} /></button>}
-              </div>
-              <div className="row">{items.slice(0, 10).map((p) => <ProductCard key={p.id} p={p} />)}</div>
-            </section>);
-        })}
+          <ProductGrid key={"c:" + active} items={groups.get(active) || []} />
+        </>) : visible.length > 0 && (<>
+          <div className="sechead"><h3>All Products</h3></div>
+          <ProductGrid key="all" items={allSorted} />
+        </>)}
       </div>
     </div>
   );

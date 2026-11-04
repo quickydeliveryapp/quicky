@@ -371,3 +371,14 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hslide .hline button{padding:12px 24px;font-size:15px}
 .hslide-copy .hchip{padding:7px 16px;font-size:14px}
 }
+
+/* ---- Desktop hero: height fixed (phone jaisa compact), image cover + subject center-right ---- */
+@media(min-width:820px){
+.hslide{aspect-ratio:auto;height:300px;border-radius:24px}
+.hslide-img{object-fit:cover;object-position:right 30%}
+.hslide-copy{max-width:46%;padding:0 0 0 48px;gap:14px}
+.hslide h2{font-size:26px;line-height:1.15}
+.hslide .hline{gap:12px 16px}
+.hslide .hline button{padding:10px 20px;font-size:14px}
+.hslide-copy .hchip{padding:6px 14px;font-size:13px}
+}

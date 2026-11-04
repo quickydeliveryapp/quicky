@@ -329,3 +329,8 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 @media(min-width:820px){
 .hslide-img{object-position:right top}
 }
+
+/* ---- Hero: desktop par image ka subject center mein ---- */
+@media(min-width:820px){
+.hslide-img{object-position:right center}
+}

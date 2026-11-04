@@ -31,6 +31,18 @@ export default function Home() {
   const [sel, setSel] = useState<string | null>(null);
   const [allCats, setAllCats] = useState(false);
 
+  // "Shop by Category" heading ko sticky header ke theek neeche laao (render ke baad, instant)
+  const scrollToCats = () => {
+    const go = () => {
+      const el = document.getElementById("categories");
+      if (!el) return;
+      const headerH = document.querySelector(".hdr")?.getBoundingClientRect().height ?? 0;
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - headerH - 12, behavior: "auto" });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(go));
+    setTimeout(go, 150);
+  };
+
   useEffect(() => {
     supabase.from("fee_settings").select("free_delivery_above").eq("id", 1).single().then(({ data }) => setFees(data));
   }, []);
@@ -46,7 +58,7 @@ export default function Home() {
 
   // Bottom tab ka "Categories": saari categories kholo aur wahan scroll karo
   useEffect(() => {
-    const go = () => { setSel(null); setAllCats(true); setTimeout(() => document.getElementById("categories")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80); };
+    const go = () => { setSel(null); setAllCats(true); scrollToCats(); };
     try { if (sessionStorage.getItem("qk_cats")) { sessionStorage.removeItem("qk_cats"); go(); } } catch {}
     window.addEventListener("show-categories", go);
     return () => window.removeEventListener("show-categories", go);
@@ -85,7 +97,7 @@ export default function Home() {
   const searching = q.trim().length > 0;
   const active = sel && sidebar.some((c) => c.name === sel) ? sel : null;
   const pick = (name: string | null) => { setSel(name); if (!name) window.scrollTo({ top: 0 }); };
-  const toCategories = () => document.getElementById("categories")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const toCategories = scrollToCats;
   // Laptop pe left list sirf category kholne par dikhti hai (home pe tiles ki row hoti hai)
   const showSide = !searching && !!active && visible.length > 0;
 

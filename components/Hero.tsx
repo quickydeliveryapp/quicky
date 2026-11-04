@@ -2,14 +2,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/lib/icons";
 
-type Slide = { img: string; alt: string; chip: string; chipIcon: string };
+type Slide = { img: string; alt: string; chip: string; chipIcon: string; title: string };
 
 export default function Hero({ freeAbove, onShop }: { freeAbove?: number; onShop?: () => void }) {
   const SLIDES: Slide[] = [
-    { img: "/hero-1-v5.webp", alt: "Smiling shopper carrying fresh vegetables at a market", chip: "Fresh & Healthy", chipIcon: "leaf" },
-    { img: "/hero-2-v5.webp", alt: "Smiling delivery rider with a bag of fresh vegetables", chip: "Delivery in 15 min", chipIcon: "truck" },
-    { img: "/hero-3-v5.webp", alt: "Smiling child holding a glass of milk at breakfast", chip: "Dairy & Bakery", chipIcon: "bag" },
-    { img: "/hero-4-v5.webp", alt: "Happy family unpacking fresh groceries in the kitchen", chip: freeAbove !== undefined ? `Free above ₹${freeAbove}` : "Free Delivery", chipIcon: "truck" },
+    { img: "/hero-1-v5.webp", alt: "Smiling shopper carrying fresh vegetables at a market", chip: "Fresh & Healthy", chipIcon: "leaf", title: "Fresh picks, every day" },
+    { img: "/hero-2-v5.webp", alt: "Smiling delivery rider with a bag of fresh vegetables", chip: "Delivery in 15 min", chipIcon: "truck", title: "Groceries in 15 minutes" },
+    { img: "/hero-3-v5.webp", alt: "Smiling child holding a glass of milk at breakfast", chip: "Dairy & Bakery", chipIcon: "bag", title: "Morning essentials, always" },
+    { img: "/hero-4-v5.webp", alt: "Happy family unpacking fresh groceries in the kitchen", chip: freeAbove !== undefined ? `Free above ₹${freeAbove}` : "Free Delivery", chipIcon: "truck", title: "Stock up, save more" },
   ];
 
   const trackRef = useRef<HTMLDivElement>(null);
@@ -48,7 +48,10 @@ export default function Hero({ freeAbove, onShop }: { freeAbove?: number; onShop
             <img className="hslide-img" src={s.img} alt={s.alt} loading={k === 0 ? "eager" : "lazy"} decoding="async" />
             <div className="hslide-copy">
               <span className="hchip"><Icon name={s.chipIcon} size={16} /> {s.chip}</span>
-              <button onClick={onShop}>Shop Now <Icon name="arrowRight" size={16} sw={2} /></button>
+              <div className="hline">
+                <h2>{s.title}</h2>
+                <button onClick={onShop}>Shop Now <Icon name="arrowRight" size={14} sw={2} /></button>
+              </div>
             </div>
           </div>
         ))}

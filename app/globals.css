@@ -353,3 +353,21 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hslide button{padding:14px 30px;font-size:16px}
 .hslide-img{object-position:right center}
 }
+
+/* ---- Hero v6: creative headline + Shop Now same line; desktop full width 16:9 ---- */
+.hline{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.hslide h2{margin:0;color:#0E3B26;font-size:17px;font-weight:800;line-height:1.2;letter-spacing:-.01em}
+.hslide .hline button{margin:0;padding:7px 12px;font-size:11px;font-weight:600;box-shadow:0 3px 8px rgba(12,125,29,.22)}
+.hslide-copy{gap:10px;max-width:60%}
+@media(max-width:819px){
+.hslide-copy{max-width:60%;padding:0 0 0 14px}
+}
+@media(min-width:820px){
+.hslide{aspect-ratio:16/9;height:auto;border-radius:24px}
+.hslide-img{object-fit:cover;object-position:right center}
+.hslide-copy{max-width:46%;padding:0 0 0 48px;gap:16px}
+.hslide h2{font-size:30px;line-height:1.15}
+.hslide .hline{gap:12px 18px}
+.hslide .hline button{padding:12px 24px;font-size:15px}
+.hslide-copy .hchip{padding:7px 16px;font-size:14px}
+}

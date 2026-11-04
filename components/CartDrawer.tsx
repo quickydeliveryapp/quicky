@@ -26,9 +26,11 @@ export default function CartDrawer() {
   }, [cartOpen]);
 
   const entries = Object.entries(cart);
+  const itemCount = entries.reduce((s, [, i]) => s + i.qty, 0);
   const total = entries.reduce((s, [, i]) => s + i.qty * i.price, 0);
   const del = fees ? (total >= Number(fees.free_delivery_above) ? 0 : Number(fees.delivery_fee)) : 0;
   const small = fees && total < Number(fees.small_cart_threshold) ? Number(fees.small_cart_fee) : 0;
+  const grand = total + del + small;
 
   async function placeOrder() {
     setMsg("");
@@ -50,29 +52,55 @@ export default function CartDrawer() {
   return (
     <div className="drawer-bg" onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
       <aside className="drawer" role="dialog" aria-modal="true" aria-label="My Cart">
-        <div className="dhead">My Cart<button className="dx" aria-label="Close cart" onClick={close}><Icon name="x" size={18} sw={2} /></button></div>
+        <div className="dhead">
+          <button className="dx" aria-label="Close cart" onClick={close}><Icon name="arrowLeft" size={20} sw={2} /></button>
+          <span>My Cart</span>
+          <span className="dspacer" />
+        </div>
         <div className="dbody">
           {!entries.length ? <div className="empty">Your cart is empty</div> : <>
-            {entries.map(([id, i]) => (
-              <div className="ditem" key={id}>
-                <div className="n"><div className="pname">{i.name}</div><div className="muted">{i.unit}</div></div>
-                <span className="stepper"><button aria-label="Decrease quantity" onClick={() => changeQty(id, -1)}><Icon name="minus" size={14} sw={2.2} /></button><span>{i.qty}</span><button aria-label="Increase quantity" onClick={() => changeQty(id, 1)}><Icon name="plus" size={14} sw={2.2} /></button></span>
-                <b>₹{(i.qty * i.price).toFixed(0)}</b>
-              </div>))}
-            <div className="bill">
-              <div><span>Items total</span><span>₹{total.toFixed(2)}</span></div>
+            <div className="dcard dtime">
+              <span className="dtic"><Icon name="clock" size={26} sw={1.6} /></span>
+              <div><b>Delivery in 15 minutes</b><span className="muted">Shipment of {itemCount} {itemCount === 1 ? "item" : "items"}</span></div>
+            </div>
+
+            <div className="dcard">
+              {entries.map(([id, i]) => (
+                <div className="ditem" key={id}>
+                  <span className="dthumb"><Icon name="bag" size={26} sw={1.4} /></span>
+                  <div className="n"><div className="dname">{i.name}</div><div className="muted">{i.unit}</div><b className="dprice">₹{(i.qty * i.price).toFixed(0)}</b></div>
+                  <span className="stepper"><button aria-label="Decrease quantity" onClick={() => changeQty(id, -1)}><Icon name="minus" size={14} sw={2.2} /></button><span>{i.qty}</span><button aria-label="Increase quantity" onClick={() => changeQty(id, 1)}><Icon name="plus" size={14} sw={2.2} /></button></span>
+                </div>))}
+            </div>
+
+            <div className="dcard bill">
+              <div className="btitle">Bill details</div>
+              <div><span>Items total</span><span>₹{total.toFixed(0)}</span></div>
               <div><span>Delivery charge</span><span>{del === 0 ? <b className="free">FREE</b> : "₹" + del}</span></div>
               {small > 0 && <div><span>Small cart charge</span><span>₹{small}</span></div>}
-              <div className="tot"><span>Grand total</span><span>₹{(total + del + small).toFixed(2)}</span></div>
+              <div className="tot"><span>Grand total</span><span>₹{grand.toFixed(0)}</span></div>
             </div>
             {fees && del > 0 && <p className="muted">Add ₹{(Number(fees.free_delivery_above) - total).toFixed(0)} more for free delivery</p>}
-            <p style={{ margin: "16px 0 4px", fontWeight: 600 }}>Delivery address</p>
-            <input placeholder="House no., building, street" value={addr} onChange={(e) => setAddr(e.target.value)} />
-            <p className="muted">Payment: Cash on Delivery</p>
+
+            <div className="dcard">
+              <p style={{ margin: "0 0 4px", fontWeight: 600 }}>Delivery address</p>
+              <input placeholder="House no., building, street" value={addr} onChange={(e) => setAddr(e.target.value)} />
+              <p className="muted">Payment: Cash on Delivery</p>
+            </div>
+
+            <div className="dcard">
+              <div className="btitle">Cancellation Policy</div>
+              <p className="muted dpolicy">Orders cannot be cancelled once packed for delivery. In case of unexpected delays, a refund will be provided, if applicable.</p>
+            </div>
             {msg && <p className="merr">{msg}</p>}
           </>}
         </div>
-        {!!entries.length && <div className="dfoot"><button disabled={busy} onClick={placeOrder}>{busy ? "Placing order..." : `Place order · ₹${(total + del + small).toFixed(0)}`}</button></div>}
+        {!!entries.length && <div className="dfoot">
+          <button className="cbar" disabled={busy} onClick={placeOrder}>
+            <span className="cbar-l"><b>₹{grand.toFixed(0)}</b><small>TOTAL</small></span>
+            <span className="cbar-r">{busy ? "Placing order..." : <>Place order <Icon name="arrowRight" size={16} sw={2} /></>}</span>
+          </button>
+        </div>}
       </aside>
     </div>
   );

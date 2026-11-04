@@ -382,3 +382,8 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hslide .hline button{padding:10px 20px;font-size:14px}
 .hslide-copy .hchip{padding:6px 14px;font-size:13px}
 }
+
+/* ---- Desktop: poora image dikhe (crop nahi), bache hue left hisse par text ---- */
+@media(min-width:820px){
+.hslide-img{object-fit:contain;object-position:right center}
+}

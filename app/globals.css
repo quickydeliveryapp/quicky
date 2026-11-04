@@ -438,3 +438,9 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hslide-copy{justify-content:space-between;padding-top:36px;padding-bottom:36px}
 .hslide .hline{margin-bottom:36px}
 }
+
+/* ---- Desktop: Shop Now thoda neeche ---- */
+@media(min-width:820px){
+.hslide-copy{padding-bottom:16px}
+.hslide .hline{margin-bottom:16px}
+}

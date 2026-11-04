@@ -23,7 +23,7 @@ function ProductGrid({ items }: { items: P[] }) {
 }
 
 export default function Home() {
-  const { loc, q } = useStore();
+  const { loc, q, cart } = useStore();
   const [products, setProducts] = useState<P[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [msg, setMsg] = useState("");
@@ -136,13 +136,23 @@ export default function Home() {
         {!searching && !active && <>
           <Hero freeAbove={fees ? Number(fees.free_delivery_above) : undefined} onShop={toCategories} />
 
-          {fees && (
-            <div className="freebar">
-              <span className="fi"><Icon name="truck" size={28} sw={1.5} /></span>
-              <div><b>Free Delivery</b><span>On orders above ₹{Number(fees.free_delivery_above)}</span></div>
-              <Icon name="arrowRight" size={18} sw={2} />
-            </div>
-          )}
+          {fees && (() => {
+            const threshold = Number(fees.free_delivery_above);
+            const cartTotal = Object.values(cart).reduce((sum, i) => sum + i.qty * Number(i.price), 0);
+            const left = Math.max(0, threshold - cartTotal);
+            const pct = threshold > 0 ? Math.min(100, (cartTotal / threshold) * 100) : 100;
+            return (
+              <button className="freebar" onClick={() => setState({ cartOpen: true })}>
+                <span className="fi"><Icon name="truck" size={28} sw={1.5} /></span>
+                <div>
+                  <b>{left > 0 ? `Add ₹${Math.ceil(left)} more for Free Delivery` : "Free Delivery unlocked!"}</b>
+                  <span>{left > 0 ? `On orders above ₹${threshold}` : "Your order qualifies"}</span>
+                  <div className="fbar"><i style={{ width: `${pct}%` }} /></div>
+                </div>
+                <Icon name="arrowRight" size={18} sw={2} />
+              </button>
+            );
+          })()}
 
           <section id="categories" className="catsec">
             <div className="sechead">

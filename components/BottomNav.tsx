@@ -25,6 +25,7 @@ export default function BottomNav() {
     if (loggedIn) router.push(href); else window.dispatchEvent(new Event("open-login"));
   }
 
+  if (/^\/(admin|shop|rider)(\/|$)/.test(path ?? "")) return null;
   return (
     <nav className="tabs" aria-label="Main">
       <Link href="/" className={"tab" + (path === "/" ? " on" : "")} onClick={() => { setState({ q: "" }); if (path === "/") window.dispatchEvent(new Event("go-home")); }}>

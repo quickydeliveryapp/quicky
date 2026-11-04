@@ -70,6 +70,21 @@ export default function Header() {
     ...(staff ? [["/admin", "Admin"]] : []),
   ];
 
+  const isDash = /^\/(admin|shop|rider)(\/|$)/.test(path ?? "");
+  const dashTitle = role === "admin" || role === "area_manager" ? "Admin" : role === "shop_owner" ? "Shop" : role === "rider" ? "Rider" : "";
+  const logout = async () => { await supabase.auth.signOut(); try { sessionStorage.removeItem("qk_role_redirect"); } catch {} window.location.href = "/"; };
+  if (isDash) return (<>
+    <header className="dhdr">
+      <Link href="/" className="brand hlogo" aria-label="Quicky home"><img src="/logo-nav-v3.webp" alt="Quicky" width={168} height={56} decoding="async" /></Link>
+      <div className="dtitle">{dashTitle ? `${dashTitle} dashboard` : "Dashboard"}</div>
+      <div className="dright">
+        <Link href="/" className="dlink">Customer view</Link>
+        {authReady && loggedIn && <button className="hlogin" onClick={logout}>Logout</button>}
+      </div>
+    </header>
+    {links.length > 0 && <nav className="subnav">{links.map(([href, label]) => <Link key={href} className={"navlink" + ((path ?? "").startsWith(href) ? " on" : "")} href={href}>{label}</Link>)}</nav>}
+  </>);
+
   return (<>
     <header className="hdr">
       <Link href="/" className="brand hlogo" aria-label="Quicky home">

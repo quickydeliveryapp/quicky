@@ -57,7 +57,7 @@ export default function Admin() {
   const tabs: Tab[] = role === "admin" ? ["orders", "riders", "shops", "commission", "settlement", "cash", "fees", "hero"] : ["orders", "riders", "cash"];
 
   return (<div>
-    <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+    <div className="dash-tabs">
       {tabs.map((t) => <button key={t} className={t === tab ? "" : "alt"} onClick={() => setTab(t)}>{t}</button>)}
     </div>
     {msg && <p>{msg}</p>}

@@ -297,3 +297,16 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hdot{width:9px;height:9px}
 .hdot.on{width:26px}
 }
+
+/* ---- Hero: phone par compact + text ke peeche halka gradient (desktop par nahi) ---- */
+.hcar{max-width:100%}
+.hslide{min-height:200px;border-radius:16px}
+.hslide::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,.92) 0%,rgba(255,255,255,.7) 45%,rgba(255,255,255,0) 80%)}
+.hslide-copy{z-index:2;max-width:60%;padding:14px 0 14px 14px}
+.hslide .hchip{background:rgba(255,255,255,.95)}
+.hslide h2{font-size:19px}
+.hslide p{font-size:12px}
+@media(min-width:820px){
+.hslide::before{display:none}
+.hslide-copy{z-index:1;max-width:50%}
+}

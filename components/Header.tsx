@@ -28,7 +28,16 @@ export default function Header() {
       if (data.user) {
         setLoggedIn(true);
         const { data: p } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
-        if (p) setRole(p.role);
+        if (p) {
+          setRole(p.role);
+          // Role ke hisaab se dashboard: session mein sirf ek baar, taaki admin logo se customer view bhi dekh sake
+          const dash: Record<string, string> = { admin: "/admin", area_manager: "/admin", rider: "/rider", shop_owner: "/shop" };
+          const target = dash[p.role];
+          if (target && window.location.pathname === "/" && !sessionStorage.getItem("qk_role_redirect")) {
+            sessionStorage.setItem("qk_role_redirect", "1");
+            router.replace(target);
+          }
+        }
       }
       setAuthReady(true);
     });
@@ -80,7 +89,7 @@ export default function Header() {
       </label>
 
       {authReady && (loggedIn
-        ? <button className="hlogin" onClick={async () => { await supabase.auth.signOut(); window.location.href = "/"; }}>Logout</button>
+        ? <button className="hlogin" onClick={async () => { await supabase.auth.signOut(); try { sessionStorage.removeItem("qk_role_redirect"); } catch {} window.location.href = "/"; }}>Logout</button>
         : <button className="hlogin" onClick={() => window.dispatchEvent(new Event("open-login"))}>Login</button>)}
 
       <button className={"hcart" + (count ? " on" : "")} onClick={() => setState({ cartOpen: true })}>

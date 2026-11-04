@@ -1,4 +1,5 @@
-/* Quicky UI: clean, minimal, fast. Ek font, 3 sizes, halka weight */
+/* Quicky UI: clean, minimal, fast. One font, 3 sizes, light weight */
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Montserrat:wght@500;600;700;800;900&family=Nunito:wght@500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800;900&family=Poppins:wght@500;600;700;800;900&display=swap');
 :root{--g:#0C7D1D;--cta:#0C7D1D;--g2:#034A21;--lime:#5CBF0A;--ink:#16231C;--muted:#6B7A71;--line:#E7EEE4;--tint:#F4F8F2;--red:#C62828;--wrap:1240px}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -269,7 +270,7 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 
 
 
-/* ---- Hero: image hi poora background, text uske left khali hisse par ---- */
+/* ---- Hero: the image is the full background, text sits on its empty left part ---- */
 .hcar{margin:0 0 22px}
 .htrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;border-radius:18px}
 .htrack::-webkit-scrollbar{display:none}
@@ -325,12 +326,12 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hslide-img{min-height:0}
 }
 
-/* ---- Hero image: desktop par upar se crop (sir/sabzi nahi kategi) ---- */
+/* ---- Hero image: desktop crops from the top (keeps heads/produce intact) ---- */
 @media(min-width:820px){
 .hslide-img{object-position:right top}
 }
 
-/* ---- Hero: desktop par image ka subject center mein ---- */
+/* ---- Hero: desktop keeps the image subject centered ---- */
 @media(min-width:820px){
 .hslide-img{object-position:right center}
 }
@@ -383,26 +384,26 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hslide-copy .hchip{padding:6px 14px;font-size:13px}
 }
 
-/* ---- Desktop: poora image dikhe (crop nahi), bache hue left hisse par text ---- */
+/* ---- Desktop: show the full image (no crop), text on the remaining left part ---- */
 @media(min-width:820px){
 .hslide-img{object-fit:contain;object-position:right center}
 }
 
-/* ---- Desktop hero: photo right par ek block mein, left edge bg mein fade (do-hisse wala split khatam) ---- */
+/* ---- Desktop hero: photo as one block on the right, left edge fades into the background (no two-part split) ---- */
 @media(min-width:820px){
 .hslide{height:300px;aspect-ratio:auto}
 .hslide-img{left:auto;right:0;top:0;bottom:0;width:58%;height:100%;object-fit:cover;object-position:center 30%;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 28%);mask-image:linear-gradient(90deg,transparent 0%,#000 28%)}
 .hslide-copy{position:relative;z-index:1;max-width:46%}
 }
 
-/* ---- Desktop hero: text seedha actual image ke upar (koi panel/fade nahi) ---- */
+/* ---- Desktop hero: text directly on the image (no panel/fade) ---- */
 @media(min-width:820px){
 .hslide{height:300px;aspect-ratio:auto;border-radius:24px;background:none}
 .hslide-img{left:0;right:auto;top:0;bottom:0;width:100%;height:100%;object-fit:cover;object-position:right 15%;-webkit-mask-image:none;mask-image:none}
 .hslide-copy{position:relative;z-index:1;max-width:46%;padding:0 0 0 48px}
 }
 
-/* ---- Desktop hero: image poori dikhe (crop nahi), height 300px, left edge bg mein blend (koi divider nahi) ---- */
+/* ---- Desktop hero: full image (no crop), 300px height, left edge blends into the background (no divider) ---- */
 @media(min-width:820px){
 .hslide{height:300px;aspect-ratio:auto;border-radius:24px}
 .hslide-img{position:absolute;top:0;right:0;left:auto;bottom:auto;width:auto;max-width:none;height:100%;object-fit:fill;object-position:right center;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 30%);mask-image:linear-gradient(90deg,transparent 0%,#000 30%)}
@@ -420,7 +421,7 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hslide .hline button{padding:13px 26px;font-size:16px;white-space:nowrap}
 }
 
-/* ---- Shop Now fixed position: text stack, button har slide par ek hi jagah ---- */
+/* ---- Shop Now fixed position: text stack, button stays in the same place on every slide ---- */
 .hslide .hline{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
 .hslide h2{min-height:2.3em;display:flex;align-items:center}
 @media(min-width:820px){
@@ -445,7 +446,7 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hslide .hline{margin-bottom:16px}
 }
 
-/* ---- Category click: heading sticky header ke neeche dikhe ---- */
+/* ---- Category click: heading appears below the sticky header ---- */
 #cat-title{scroll-margin-top:100px}
 @media(max-width:819px){
 #cat-title{scroll-margin-top:150px}
@@ -466,7 +467,7 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .fbar{height:6px;margin-top:6px;border-radius:3px;background:#DDEFD6;overflow:hidden}
 .fbar i{display:block;height:100%;border-radius:3px;background:var(--g);transition:width .3s ease}
 
-/* ---- Dashboard (admin / shop / rider): storefront header ki jagah saaf dashboard header ---- */
+/* ---- Dashboard (admin / shop / rider): clean dashboard header instead of the storefront header ---- */
 .dhdr{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;background:#fff;border-bottom:1px solid var(--line)}
 .dtitle{font-size:18px;font-weight:700;color:var(--ink)}
 .dright{display:flex;align-items:center;gap:18px}
@@ -481,9 +482,9 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 }
 
 /* ======================================================================
-   Hero v6: image full-bleed, text seedha image ke upar.
-   Naye class names (hs-*) -> purane .hslide rules se koi takkar nahi.
-   Mobile = default, desktop = min-width:820px. Admin preview .pm / .pd se device force karta hai.
+   Hero v6: full-bleed image, text directly on the image.
+   New class names (hs-*) -> no clash with the old .hslide rules.
+   Mobile = default, desktop = min-width:820px. The admin preview forces a device with .pm / .pd.
    ====================================================================== */
 .hs{--z:var(--mz);--x:var(--mx);--y:var(--my);--tx:var(--mtx);--ty:var(--mty);--ts:var(--mts);--h:200px;--px:16px;--py:14px;--tw:58%;--fs:20px;--chip-fs:12px;--chip-p:5px 11px;--btn-fs:12px;--btn-p:7px 14px;
   container-type:inline-size;position:relative;flex:0 0 100%;min-width:0;height:var(--h);overflow:hidden;border-radius:18px;scroll-snap-align:start;background:#EEF8F0}
@@ -498,18 +499,18 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
   transform:scale(var(--z));transform-origin:calc(var(--x)*100%) calc(var(--y)*100%);
   -webkit-user-drag:none;user-select:none}
 .hs-copy{position:relative;z-index:1;height:100%;max-width:var(--tw);padding:var(--py) 0 var(--py) var(--px);display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:10px}
-/* Sirf title movable: button apni jagah fixed. x = slide width ka fraction (cqw), y = slide height ka fraction */
+/* Only the title is movable: the button stays fixed. x = fraction of slide width (cqw), y = fraction of slide height */
 .hs-ttl{position:relative;width:100%;left:calc(var(--tx,0)*100cqw);top:calc(var(--ty,0)*var(--h))}
 .hs-chip{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:var(--chip-p);border-radius:999px;background:#fff;color:var(--g);font-size:var(--chip-fs);font-weight:600;line-height:1.3;box-shadow:0 2px 8px rgba(22,35,28,.1)}
 .hs-chip-txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .hs-low{display:flex;flex-direction:column;align-items:flex-start;gap:12px;width:100%}
-.hs h2{margin:0;width:100%;min-height:2.3em;color:var(--tc,#0E3B26);font-size:calc(var(--fs)*var(--ts,1));font-weight:var(--tfw,800);line-height:1.15;letter-spacing:-.01em;display:flex;align-items:flex-start;white-space:pre-line}
+.hs h2{margin:0;width:100%;min-height:2.3em;color:var(--tc,#0E3B26);font-size:calc(var(--fs)*var(--ts,1));font-family:var(--tff,inherit);font-weight:var(--tfw,800);line-height:1.15;letter-spacing:-.01em;display:flex;align-items:flex-start;white-space:pre-line}
 .hs-btn{display:inline-flex;align-items:center;gap:6px;padding:var(--btn-p);border:0;border-radius:999px;background:#0C7D1D;color:#fff;font-size:var(--btn-fs);font-weight:600;box-shadow:0 4px 12px rgba(12,125,29,.22);cursor:pointer}
 .hs-btn{white-space:nowrap;line-height:1.2}
 .hs-btn .hs-field{line-height:1.2;height:auto;font-weight:inherit}
 .hs-btn .hs-ghost{line-height:1.2}
 
-/* Admin: inline editing (input/textarea bilkul live text jaise dikhte hain) */
+/* Admin: inline editing (inputs/textareas look exactly like the live text) */
 .hs-auto{display:inline-grid;align-items:center;min-width:1ch;max-width:100%}
 .hs-auto>*{grid-area:1/1;min-width:0}
 .hs-auto>.hs-field{width:0;min-width:100%}

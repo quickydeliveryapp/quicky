@@ -5,7 +5,7 @@ import HeroSlide, { type SlideView, DEFAULT_ADJ, DEFAULT_T, DEFAULT_WEIGHT } fro
 
 export const FALLBACK = ["/hero-1-v5.webp", "/hero-2-v5.webp", "/hero-3-v5.webp", "/hero-4-v5.webp"];
 
-// Defaults: admin dashboard mein text khaali chhodne par yahi dikhega. 
+// Defaults: shown when the text is left empty in the admin dashboard.
 export const META = [
   { alt: "Smiling shopper carrying fresh vegetables at a market", title: "Fresh picks, every day", cta: "Shop Now", bg: "#E4F3D1" },
   { alt: "Smiling delivery rider with a bag of fresh vegetables", title: "Groceries in 15 minutes", cta: "Shop Now", bg: "#E9F6DD" },
@@ -17,9 +17,9 @@ type Row = {
   id: number; image_url: string | null; title: string | null; cta: string | null; show_text: boolean | null;
   m_zoom: number | null; m_fx: number | null; m_fy: number | null; d_zoom: number | null; d_fx: number | null; d_fy: number | null;
   m_tx: number | null; m_ty: number | null; m_ts: number | null; d_tx: number | null; d_ty: number | null; d_ts: number | null;
-  t_weight: number | null; t_color: string | null;
+  t_weight: number | null; t_color: string | null; t_font: string | null;
 };
-export const HERO_COLS = "id,image_url,title,cta,show_text,m_zoom,m_fx,m_fy,d_zoom,d_fx,d_fy,m_tx,m_ty,m_ts,d_tx,d_ty,d_ts,t_weight,t_color";
+export const HERO_COLS = "id,image_url,title,cta,show_text,m_zoom,m_fx,m_fy,d_zoom,d_fx,d_fy,m_tx,m_ty,m_ts,d_tx,d_ty,d_ts,t_weight,t_color,t_font";
 
 export default function Hero({ freeAbove, onShop }: { freeAbove?: number; onShop?: () => void }) {
   const [rows, setRows] = useState<Row[]>([]);
@@ -44,6 +44,7 @@ export default function Hero({ freeAbove, onShop }: { freeAbove?: number; onShop
       td: { x: r?.d_tx ?? DEFAULT_T.x, y: r?.d_ty ?? DEFAULT_T.y, s: r?.d_ts ?? DEFAULT_T.s },
       weight: r?.t_weight ?? DEFAULT_WEIGHT,
       color: r?.t_color || "",
+      font: r?.t_font || "",
     };
   });
 

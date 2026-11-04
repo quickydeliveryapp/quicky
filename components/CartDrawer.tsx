@@ -16,7 +16,7 @@ export default function CartDrawer() {
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // Dashboard par aur area manager ke liye cart nahi dikhana
+  // Hide the cart on dashboards and for area managers
   const onDash = /^\/(admin|shop|rider|areamanager)(\/|$)/.test(path ?? "");
   const hidden = onDash || role === "area_manager";
 

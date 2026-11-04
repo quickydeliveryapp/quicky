@@ -2,7 +2,7 @@
 
 alter table public.profiles add column if not exists is_online boolean not null default false;
 
--- Guard: area change sirf in functions se allowed (flag inside them). Admin ka rule same.
+-- Guard: area changes are allowed only through the functions below (they set a flag). Admin rule unchanged.
 create or replace function public.guard_profile_role() returns trigger
   language plpgsql security definer set search_path = public as $$
 begin
@@ -14,7 +14,7 @@ begin
   return new;
 end $$;
 
--- Online / offline (sirf apne area ke shop/rider)
+-- Online / offline (only shops and riders in own area)
 create or replace function public.am_set_online(p_id uuid, p_online boolean) returns void
   language plpgsql security definer set search_path = public as $$
 begin
@@ -24,7 +24,7 @@ begin
   if not found then raise exception 'Not in your area'; end if;
 end $$;
 
--- Add: phone se, sirf shop/rider role wala user jiska koi area na ho ya same area ho
+-- Add by phone: only a user with shop or rider role and no area, or already in this area
 create or replace function public.am_add_member(p_phone text) returns void
   language plpgsql security definer set search_path = public as $$
 declare v_id uuid;
@@ -36,13 +36,13 @@ begin
       and (p.area is null or p.area = public.my_area())
     limit 1;
   if v_id is null then
-    raise exception 'No shop or rider found with this phone (role shop/rider hona chahiye, aur kisi aur area mein nahi)';
+    raise exception 'No shop or rider found with this phone (role must be shop or rider, and not in another area)';
   end if;
   perform set_config('app.am_action', 'on', true);
   update public.profiles set area = public.my_area() where id = v_id;
 end $$;
 
--- Remove: area se hatana (role nahi badlega)
+-- Remove from area (role is not changed)
 create or replace function public.am_remove_member(p_id uuid) returns void
   language plpgsql security definer set search_path = public as $$
 begin

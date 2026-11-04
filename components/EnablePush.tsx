@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { enablePush } from "@/lib/push";
 import { Icon } from "@/lib/icons";
 
-// Sirf jinhe orders aate hain unhe alert chahiye. Area manager aur customer ko nahi.
+// Only roles that receive orders get order alerts. Not area managers or customers.
 const ORDER_ALERT_ROLES = ["admin", "shop_owner", "shop", "rider"];
 
 export default function EnablePush() {

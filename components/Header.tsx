@@ -30,7 +30,7 @@ export default function Header() {
         const { data: p } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
         if (p) {
           setRole(p.role);
-          // Role ke hisaab se dashboard: session mein sirf ek baar
+          // Redirect to the role's dashboard once per session
           const dash: Record<string, string> = { admin: "/admin", area_manager: "/areamanager", rider: "/rider", shop_owner: "/shop", shop: "/shop" };
           const target = dash[p.role];
           if (target && window.location.pathname === "/" && !sessionStorage.getItem("qk_role_redirect")) {
@@ -72,7 +72,7 @@ export default function Header() {
     ...(isArea ? [["/areamanager", "Area manager"]] : []),
   ];
 
-  // Dashboard routes: storefront header (search, cart) nahi dikhana
+  // Dashboard routes: hide the storefront header (search, cart)
   const isDash = /^\/(admin|shop|rider|areamanager)(\/|$)/.test(path ?? "");
   const dashTitle = role === "admin" ? "Admin" : role === "area_manager" ? "Area manager" : (role === "shop_owner" || role === "shop") ? "Shop" : role === "rider" ? "Rider" : "";
   const logout = async () => { await supabase.auth.signOut(); try { sessionStorage.removeItem("qk_role_redirect"); } catch {} window.location.href = "/"; };

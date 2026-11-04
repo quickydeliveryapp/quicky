@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import RoleGate from "@/components/RoleGate";
 import { supabase } from "@/lib/supabase";
 import { useProfile } from "@/lib/useProfile";
+import OrdersPanel from "./OrdersPanel";
 
 type Row = { id: string; role: string; full_name: string | null; is_online: boolean };
 
@@ -56,7 +57,7 @@ function AreaView() {
           {r.is_online ? "Set offline" : "Set online"}
         </button>
         <button disabled={busy} style={{ ...btn, color: "#C62828" }}
-          onClick={() => { if (window.confirm("Ise area se remove karna hai?")) call("am_remove_member", { p_id: r.id }); }}>
+          onClick={() => { if (window.confirm("Remove this member from your area?")) call("am_remove_member", { p_id: r.id }); }}>
           Remove
         </button>
       </li>
@@ -97,7 +98,7 @@ function AreaView() {
         </button>
       </div>
       <p style={{ margin: "0 0 12px", color: "#6B7A71", fontSize: 12 }}>
-        Sirf wahi shop ya rider add ho sakta hai jiska role pehle se shop ya rider ho aur koi area na ho.
+        Only a shop or rider whose role is already set and who has no area can be added.
       </p>
 
       {err && <p style={{ color: "#C62828", fontSize: 13 }}>{err}</p>}
@@ -105,6 +106,8 @@ function AreaView() {
         {list("Shops", "shop")}
         {list("Riders", "rider")}
       </div>
+
+      <OrdersPanel people={rows} />
     </>
   );
 }

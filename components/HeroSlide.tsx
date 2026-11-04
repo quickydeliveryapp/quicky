@@ -4,23 +4,29 @@ import { Icon } from "@/lib/icons";
 export type Adj = { z: number; x: number; y: number };
 export const DEFAULT_ADJ: Adj = { z: 1, x: 0.5, y: 0.5 };
 
+// Text block: x/y = slide ki width/height ka fraction (0 = default jagah), s = title size multiplier
+export type TAdj = { x: number; y: number; s: number };
+export const DEFAULT_T: TAdj = { x: 0, y: 0, s: 1 };
+export const DEFAULT_WEIGHT = 800;
+
 export type SlideView = {
   img: string;
   alt: string;
   bg: string;
-  chip: string;
-  chipIcon: string;
   title: string;
   cta: string;
   showText: boolean;
   m: Adj; // mobile zoom/position
   d: Adj; // desktop zoom/position
+  tm: TAdj; // mobile text position/size
+  td: TAdj; // desktop text position/size
+  weight: number; // title font weight
+  color: string; // title color ("" = default)
 };
 
 // Admin mein text seedha image ke upar edit hota hai: inhi callbacks se.
 export type EditProps = {
-  ph: { chip: string; title: string; cta: string }; // khaali hone par live mein jo default dikhega
-  onChip: (v: string) => void;
+  ph: { title: string; cta: string }; // khaali hone par live mein jo default dikhega
   onTitle: (v: string) => void;
   onCta: (v: string) => void;
 };
@@ -47,6 +53,9 @@ export default function HeroSlide({
   const vars = {
     "--mz": s.m.z, "--mx": s.m.x, "--my": s.m.y,
     "--dz": s.d.z, "--dx": s.d.x, "--dy": s.d.y,
+    "--mtx": s.tm.x, "--mty": s.tm.y, "--mts": s.tm.s,
+    "--dtx": s.td.x, "--dty": s.td.y, "--dts": s.td.s,
+    "--tfw": s.weight, ...(s.color ? { "--tc": s.color } : {}),
     background: s.bg,
   } as React.CSSProperties;
   const cls = "hs" + (device === "m" ? " pm" : device === "d" ? " pd" : "") + (edit ? " edit" : "");
@@ -57,14 +66,7 @@ export default function HeroSlide({
         loading={eager ? "eager" : "lazy"} decoding="async" />
       {s.showText && (
         <div className="hs-copy">
-          {(edit || s.chip) ? (
-            <span className="hs-chip">
-              <Icon name={s.chipIcon} size={14} />
-              {edit
-                ? <Auto value={s.chip} ph={edit.ph.chip} max={30} onChange={edit.onChip} />
-                : <span className="hs-chip-txt">{s.chip}</span>}
-            </span>
-          ) : <span />}
+          {edit && <span className="hs-move" data-move title="Pakad ke text ko khiskao">✥ Text</span>}
           <div className="hs-low">
             <h2>
               {edit

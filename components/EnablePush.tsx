@@ -4,6 +4,9 @@ import { supabase } from "@/lib/supabase";
 import { enablePush } from "@/lib/push";
 import { Icon } from "@/lib/icons";
 
+// Sirf jinhe orders aate hain unhe alert chahiye. Area manager aur customer ko nahi.
+const ORDER_ALERT_ROLES = ["admin", "shop_owner", "shop", "rider"];
+
 export default function EnablePush() {
   const [show, setShow] = useState(false);
   const [msg, setMsg] = useState("");
@@ -12,6 +15,8 @@ export default function EnablePush() {
       if (typeof Notification === "undefined") return;
       const { data } = await supabase.auth.getUser();
       if (!data.user) return;
+      const { data: p } = await supabase.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
+      if (!p || !ORDER_ALERT_ROLES.includes(p.role)) return;
       if (Notification.permission === "granted") enablePush().catch(() => {});
       else if (Notification.permission === "default") setShow(true);
     })();

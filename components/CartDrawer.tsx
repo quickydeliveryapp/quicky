@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 import { changeQty, setState, useStore } from "@/lib/store";
@@ -9,21 +9,35 @@ import { Icon } from "@/lib/icons";
 export default function CartDrawer() {
   const { cart, cartOpen, loc } = useStore();
   const router = useRouter();
+  const path = usePathname();
+  const [role, setRole] = useState<string | null>(null);
   const [fees, setFees] = useState<any>(null);
   const [addr, setAddr] = useState("");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // Dashboard par aur area manager ke liye cart nahi dikhana
+  const onDash = /^\/(admin|shop|rider|areamanager)(\/|$)/.test(path ?? "");
+  const hidden = onDash || role === "area_manager";
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: p } = await supabase.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
+      setRole(p?.role ?? null);
+    });
+  }, []);
+
   const close = () => setState({ cartOpen: false });
   useEffect(() => {
-    if (!cartOpen) return;
+    if (!cartOpen || hidden) return;
     document.body.style.overflow = "hidden";
     setAddr((a) => a || loc?.label || "");
     supabase.from("fee_settings").select("*").eq("id", 1).single().then(({ data }) => setFees(data));
     const k = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
     window.addEventListener("keydown", k);
     return () => { document.body.style.overflow = ""; window.removeEventListener("keydown", k); };
-  }, [cartOpen]);
+  }, [cartOpen, hidden]);
 
   const entries = Object.entries(cart);
   const itemCount = entries.reduce((s, [, i]) => s + i.qty, 0);
@@ -48,7 +62,7 @@ export default function CartDrawer() {
     router.push("/orders/" + data);
   }
 
-  if (!cartOpen) return null;
+  if (!cartOpen || hidden) return null;
   return (
     <div className="drawer-bg" onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
       <aside className="drawer" role="dialog" aria-modal="true" aria-label="My Cart">

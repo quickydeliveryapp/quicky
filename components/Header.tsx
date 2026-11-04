@@ -30,8 +30,8 @@ export default function Header() {
         const { data: p } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
         if (p) {
           setRole(p.role);
-          // Role ke hisaab se dashboard: session mein sirf ek baar, taaki admin logo se customer view bhi dekh sake
-          const dash: Record<string, string> = { admin: "/admin", area_manager: "/admin", rider: "/rider", shop_owner: "/shop" };
+          // Role ke hisaab se dashboard: session mein sirf ek baar
+          const dash: Record<string, string> = { admin: "/admin", area_manager: "/areamanager", rider: "/rider", shop_owner: "/shop", shop: "/shop" };
           const target = dash[p.role];
           if (target && window.location.pathname === "/" && !sessionStorage.getItem("qk_role_redirect")) {
             sessionStorage.setItem("qk_role_redirect", "1");
@@ -61,18 +61,22 @@ export default function Header() {
 
   const etaMobile = typeof eta === "number" ? `Delivery in ${Math.min(eta, 60)}${eta > 60 ? "+" : ""} min` : etaShort;
 
-  const shop = role === "shop_owner" || role === "admin";
-  const rider = role === "rider" || role === "admin";
-  const staff = role === "admin" || role === "area_manager";
+  const isShop = role === "shop_owner" || role === "shop" || role === "admin";
+  const isRider = role === "rider" || role === "admin";
+  const isAdmin = role === "admin";
+  const isArea = role === "area_manager";
   const links: string[][] = [
-    ...(shop ? [["/shop", "Orders"], ["/shop/inventory", "Inventory"], ["/shop/earnings", "Earnings"]] : []),
-    ...(rider ? [["/rider", "Rider"]] : []),
-    ...(staff ? [["/admin", "Admin"]] : []),
+    ...(isShop ? [["/shop", "Orders"], ["/shop/inventory", "Inventory"], ["/shop/earnings", "Earnings"]] : []),
+    ...(isRider ? [["/rider", "Rider"]] : []),
+    ...(isAdmin ? [["/admin", "Admin"]] : []),
+    ...(isArea ? [["/areamanager", "Area manager"]] : []),
   ];
 
-  const isDash = /^\/(admin|shop|rider)(\/|$)/.test(path ?? "");
-  const dashTitle = role === "admin" || role === "area_manager" ? "Admin" : role === "shop_owner" ? "Shop" : role === "rider" ? "Rider" : "";
+  // Dashboard routes: storefront header (search, cart) nahi dikhana
+  const isDash = /^\/(admin|shop|rider|areamanager)(\/|$)/.test(path ?? "");
+  const dashTitle = role === "admin" ? "Admin" : role === "area_manager" ? "Area manager" : (role === "shop_owner" || role === "shop") ? "Shop" : role === "rider" ? "Rider" : "";
   const logout = async () => { await supabase.auth.signOut(); try { sessionStorage.removeItem("qk_role_redirect"); } catch {} window.location.href = "/"; };
+
   if (isDash) return (<>
     <header className="dhdr">
       <Link href="/" className="brand hlogo" aria-label="Quicky home"><img src="/logo-nav-v3.webp" alt="Quicky" width={168} height={56} decoding="async" /></Link>
@@ -104,7 +108,7 @@ export default function Header() {
       </label>
 
       {authReady && (loggedIn
-        ? <button className="hlogin" onClick={async () => { await supabase.auth.signOut(); try { sessionStorage.removeItem("qk_role_redirect"); } catch {} window.location.href = "/"; }}>Logout</button>
+        ? <button className="hlogin" onClick={logout}>Logout</button>
         : <button className="hlogin" onClick={() => window.dispatchEvent(new Event("open-login"))}>Login</button>)}
 
       <button className={"hcart" + (count ? " on" : "")} onClick={() => setState({ cartOpen: true })}>

@@ -485,13 +485,13 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
    Naye class names (hs-*) -> purane .hslide rules se koi takkar nahi.
    Mobile = default, desktop = min-width:820px. Admin preview .pm / .pd se device force karta hai.
    ====================================================================== */
-.hs{--z:var(--mz);--x:var(--mx);--y:var(--my);--h:200px;--px:16px;--py:14px;--tw:58%;--fs:20px;--chip-fs:12px;--chip-p:5px 11px;--btn-fs:13px;--btn-p:9px 18px;
+.hs{--z:var(--mz);--x:var(--mx);--y:var(--my);--h:200px;--px:16px;--py:14px;--tw:58%;--fs:20px;--chip-fs:12px;--chip-p:5px 11px;--btn-fs:12px;--btn-p:7px 14px;
   position:relative;flex:0 0 100%;min-width:0;height:var(--h);overflow:hidden;border-radius:18px;scroll-snap-align:start;background:#EEF8F0}
 @media(min-width:820px){
-  .hs{--z:var(--dz);--x:var(--dx);--y:var(--dy);--h:320px;--px:56px;--py:36px;--tw:50%;--fs:38px;--chip-fs:14px;--chip-p:8px 18px;--btn-fs:16px;--btn-p:13px 26px;border-radius:24px}
+  .hs{--z:var(--dz);--x:var(--dx);--y:var(--dy);--h:320px;--px:56px;--py:36px;--tw:50%;--fs:38px;--chip-fs:14px;--chip-p:8px 18px;--btn-fs:15px;--btn-p:11px 22px;border-radius:24px}
 }
-.hs.pm{--z:var(--mz);--x:var(--mx);--y:var(--my);--h:200px;--px:16px;--py:14px;--tw:58%;--fs:20px;--chip-fs:12px;--chip-p:5px 11px;--btn-fs:13px;--btn-p:9px 18px;border-radius:18px}
-.hs.pd{--z:var(--dz);--x:var(--dx);--y:var(--dy);--h:320px;--px:56px;--py:36px;--tw:50%;--fs:38px;--chip-fs:14px;--chip-p:8px 18px;--btn-fs:16px;--btn-p:13px 26px;border-radius:24px}
+.hs.pm{--z:var(--mz);--x:var(--mx);--y:var(--my);--h:200px;--px:16px;--py:14px;--tw:58%;--fs:20px;--chip-fs:12px;--chip-p:5px 11px;--btn-fs:12px;--btn-p:7px 14px;border-radius:18px}
+.hs.pd{--z:var(--dz);--x:var(--dx);--y:var(--dy);--h:320px;--px:56px;--py:36px;--tw:50%;--fs:38px;--chip-fs:14px;--chip-p:8px 18px;--btn-fs:15px;--btn-p:11px 22px;border-radius:24px}
 
 .hs-img{position:absolute;inset:0;z-index:0;width:100%;height:100%;display:block;object-fit:cover;max-width:none;
   object-position:calc(var(--x)*100%) calc(var(--y)*100%);
@@ -503,7 +503,9 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hs-low{display:flex;flex-direction:column;align-items:flex-start;gap:12px;width:100%}
 .hs h2{margin:0;width:100%;min-height:2.3em;color:#0E3B26;font-size:var(--fs);font-weight:800;line-height:1.15;letter-spacing:-.01em;display:flex;align-items:flex-start;white-space:pre-line}
 .hs-btn{display:inline-flex;align-items:center;gap:6px;padding:var(--btn-p);border:0;border-radius:999px;background:#0C7D1D;color:#fff;font-size:var(--btn-fs);font-weight:600;box-shadow:0 4px 12px rgba(12,125,29,.22);cursor:pointer}
-.hs-btn{white-space:nowrap}
+.hs-btn{white-space:nowrap;line-height:1.2}
+.hs-btn .hs-field{line-height:1.2;height:auto;font-weight:inherit}
+.hs-btn .hs-ghost{line-height:1.2}
 
 /* Admin: inline editing (input/textarea bilkul live text jaise dikhte hain) */
 .hs-auto{display:inline-grid;align-items:center;min-width:1ch;max-width:100%}

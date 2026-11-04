@@ -147,7 +147,7 @@ export default function HeroAdmin({ freeAbove }: { freeAbove?: number }) {
     setMsg(`Slide ${slot} save ho gaya. Live site par dikh jayega.`);
   }
 
-  const chipDefault = freeAbove !== undefined ? meta.chip.replace("{amount}", `₹${freeAbove}`) : meta.chip.replace("{amount}", "").trim() || "Free Delivery";
+  const chipDefault = "Chip (optional)";
   const view: SlideView = {
     img: cur.image_url || FALLBACK[active - 1], alt: meta.alt, bg: meta.bg, chipIcon: meta.chipIcon,
     chip: cur.chip, title: cur.title, cta: cur.cta, showText: cur.show_text, m: cur.m, d: cur.d,
@@ -159,7 +159,7 @@ export default function HeroAdmin({ freeAbove }: { freeAbove?: number }) {
     <section style={{ margin: "24px 0", padding: 20, border: "1px solid #E7EEE4", borderRadius: 14, background: "#fff" }}>
       <h3 style={{ margin: "0 0 4px", fontSize: 18 }}>Hero banners</h3>
       <p style={{ margin: "0 0 14px", color: "#6B7A71", fontSize: 13 }}>
-        Text seedha image ke upar click karke likho (khaali chhodoge to default text dikhega). Image ko <b>drag</b> karke position aur neeche ke <b>zoom</b> se size set karo.
+        Text seedha image ke upar click karke likho (title/button khaali chhodoge to default dikhega, chip khaali = chip nahi dikhega). Image ko <b>drag</b> karke position aur neeche ke <b>zoom</b> se size set karo.
         Mobile aur Desktop ki setting alag save hoti hai.
       </p>
 

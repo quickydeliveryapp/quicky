@@ -7,10 +7,10 @@ export const FALLBACK = ["/hero-1-v5.webp", "/hero-2-v5.webp", "/hero-3-v5.webp"
 
 // Defaults: admin dashboard mein text khaali chhodne par yahi dikhega. {amount} = free delivery threshold
 export const META = [
-  { alt: "Smiling shopper carrying fresh vegetables at a market", chip: "Fresh & Healthy", chipIcon: "leaf", title: "Fresh picks, every day", cta: "Shop Now", bg: "#E4F3D1" },
-  { alt: "Smiling delivery rider with a bag of fresh vegetables", chip: "Delivery in 15 min", chipIcon: "truck", title: "Groceries in 15 minutes", cta: "Shop Now", bg: "#E9F6DD" },
-  { alt: "Smiling child holding a glass of milk at breakfast", chip: "Dairy & Bakery", chipIcon: "bag", title: "Morning essentials, always", cta: "Shop Now", bg: "#E5F6D5" },
-  { alt: "Happy family unpacking fresh groceries in the kitchen", chip: "Free above {amount}", chipIcon: "truck", title: "Stock up, save more", cta: "Shop Now", bg: "#E6F8D5" },
+  { alt: "Smiling shopper carrying fresh vegetables at a market", chip: "", chipIcon: "leaf", title: "Fresh picks, every day", cta: "Shop Now", bg: "#E4F3D1" },
+  { alt: "Smiling delivery rider with a bag of fresh vegetables", chip: "", chipIcon: "truck", title: "Groceries in 15 minutes", cta: "Shop Now", bg: "#E9F6DD" },
+  { alt: "Smiling child holding a glass of milk at breakfast", chip: "", chipIcon: "bag", title: "Morning essentials, always", cta: "Shop Now", bg: "#E5F6D5" },
+  { alt: "Happy family unpacking fresh groceries in the kitchen", chip: "", chipIcon: "truck", title: "Stock up, save more", cta: "Shop Now", bg: "#E6F8D5" },
 ];
 
 type Row = {
@@ -31,8 +31,9 @@ export default function Hero({ freeAbove, onShop }: { freeAbove?: number; onShop
   const amt = freeAbove !== undefined ? `₹${freeAbove}` : null;
   const SLIDES: SlideView[] = META.map((m, k) => {
     const r = rows.find((x) => x.id === k + 1);
-    let chip = (r?.chip || m.chip);
-    if (chip.includes("{amount}")) chip = amt ? chip.replace("{amount}", amt) : "Free Delivery";
+    // Default chip nahi hai: sirf admin ne likha ho to dikhega. {amount} = free delivery limit
+    let chip = r?.chip || "";
+    if (chip.includes("{amount}")) chip = amt ? chip.replace("{amount}", amt) : chip.replace("{amount}", "").trim();
     return {
       img: r?.image_url || FALLBACK[k],
       alt: m.alt, bg: m.bg, chipIcon: m.chipIcon,

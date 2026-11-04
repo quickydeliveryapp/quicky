@@ -57,12 +57,14 @@ export default function HeroSlide({
         loading={eager ? "eager" : "lazy"} decoding="async" />
       {s.showText && (
         <div className="hs-copy">
-          <span className="hs-chip">
-            <Icon name={s.chipIcon} size={14} />
-            {edit
-              ? <Auto value={s.chip} ph={edit.ph.chip} max={30} onChange={edit.onChip} />
-              : <span className="hs-chip-txt">{s.chip}</span>}
-          </span>
+          {(edit || s.chip) ? (
+            <span className="hs-chip">
+              <Icon name={s.chipIcon} size={14} />
+              {edit
+                ? <Auto value={s.chip} ph={edit.ph.chip} max={30} onChange={edit.onChip} />
+                : <span className="hs-chip-txt">{s.chip}</span>}
+            </span>
+          ) : <span />}
           <div className="hs-low">
             <h2>
               {edit

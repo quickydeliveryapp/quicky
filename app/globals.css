@@ -296,3 +296,13 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hdot{width:9px;height:9px}
 .hdot.on{width:26px}
 }
+
+/* ---- Hero: text aur image alag, image ek rounded frame mein ---- */
+.hslide{gap:10px}
+.hslide-copy{padding:12px 0 12px 12px}
+.hslide-img{min-height:170px;margin:10px 10px 10px 0;border-radius:14px;-webkit-mask-image:none;mask-image:none}
+@media(min-width:820px){
+.hslide{gap:24px}
+.hslide-copy{padding:44px 0 44px 48px}
+.hslide-img{min-height:340px;margin:20px 20px 20px 0;border-radius:24px;-webkit-mask-image:none;mask-image:none}
+}

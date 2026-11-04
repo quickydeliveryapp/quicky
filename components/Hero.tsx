@@ -55,7 +55,7 @@ export default function Hero({ freeAbove, onShop }: { freeAbove?: number; onShop
         onMouseEnter={pause} onMouseLeave={resume} onTouchStart={pause} onTouchEnd={resume}>
         {SLIDES.map((s, k) => (
           <div className="hslide" key={k} role="group" aria-roledescription="slide" aria-label={`${k + 1} of ${SLIDES.length}`}
-            style={{ background: s.grad, color: s.ink }}>
+            style={{ color: s.ink }}>
             <img className="hslide-img" src={s.img} alt={s.alt} loading={k === 0 ? "eager" : "lazy"} decoding="async" />
             <div className="hslide-copy">
               <span className="hchip" style={{ color: "#0C7D1D" }}><Icon name={s.chipIcon} size={16} /> {s.chip}</span>

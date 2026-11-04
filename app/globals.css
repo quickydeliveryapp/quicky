@@ -450,3 +450,9 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 @media(max-width:819px){
 #cat-title{scroll-margin-top:150px}
 }
+
+/* ---- Bottom "Categories" tab: Shop by Category heading sticky header ke neeche ---- */
+#categories{scroll-margin-top:100px}
+@media(max-width:819px){
+#categories{scroll-margin-top:180px}
+}

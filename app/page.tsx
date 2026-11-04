@@ -5,6 +5,7 @@ import { friendly } from "@/lib/messages";
 import { getState, setState, useStore } from "@/lib/store";
 import { CATS, OTHER, SHOW_EMPTY_CATEGORIES, categorize, isEnabled } from "@/lib/categories";
 import ProductCard, { P } from "@/components/ProductCard";
+import Hero from "@/components/Hero";
 import { Icon } from "@/lib/icons";
 
 // Category ki photo; photo na ho (jaise "Other") toh icon
@@ -105,15 +106,7 @@ export default function Home() {
         {!searching && active && <button className="alt backrow" onClick={() => pick(null)}><Icon name="arrowLeft" size={16} sw={2} /> All categories</button>}
 
         {!searching && !active && <>
-          <section className="hero">
-            <div className="hcopy">
-              <span className="hchip"><Icon name="leaf" size={16} /> Fresh &amp; Healthy</span>
-              <h2>Fresh Groceries<br />at Your Doorstep</h2>
-              <p>Quality products. Great prices. Delivered fast.</p>
-              <button onClick={toCategories}>Shop Now <Icon name="arrowRight" size={16} sw={2} /></button>
-            </div>
-            <img className="himg" src="/hero.webp" alt="" width={640} height={271} />
-          </section>
+          <Hero freeAbove={fees ? Number(fees.free_delivery_above) : undefined} onShop={toCategories} />
 
           {fees && (
             <div className="freebar">

@@ -6,16 +6,16 @@ type Slide = { img: string; alt: string; chip: string; chipIcon: string; title: 
 
 export default function Hero({ freeAbove, onShop }: { freeAbove?: number; onShop?: () => void }) {
   const SLIDES: Slide[] = [
-    { img: "/hero-1.webp", alt: "Fresh vegetables spilling out of a paper grocery bag", chip: "Fresh & Healthy", chipIcon: "leaf",
+    { img: "/hero-1-v2.webp", alt: "Fresh vegetables spilling out of a paper grocery bag", chip: "Fresh & Healthy", chipIcon: "leaf",
       title: ["Fresh Groceries", "at Your Doorstep"], sub: "Quality products. Great prices. Delivered fast.", cta: "Shop Now",
       grad: "linear-gradient(120deg,#F1F9EA 0%,#DDF0D0 100%)", ink: "#0E3B26", subInk: "#3F5B4A" },
-    { img: "/hero-2.webp", alt: "Family unpacking fresh groceries together in a bright kitchen", chip: "Delivery in 15 min", chipIcon: "truck",
+    { img: "/hero-2-v2.webp", alt: "Family unpacking fresh groceries together in a bright kitchen", chip: "Delivery in 15 min", chipIcon: "truck",
       title: ["Groceries in", "15 Minutes"], sub: "Packed fresh and delivered to your door, fast.", cta: "Order Now",
       grad: "linear-gradient(120deg,#E6F4FA 0%,#CDEBF7 100%)", ink: "#0E3B26", subInk: "#3F5B4A" },
-    { img: "/hero-3.webp", alt: "Bread, milk, butter and eggs on a wooden kitchen counter", chip: "Dairy, Bread & Eggs", chipIcon: "bag",
+    { img: "/hero-3-v2.webp", alt: "Bread, milk, butter and eggs on a wooden kitchen counter", chip: "Dairy, Bread & Eggs", chipIcon: "bag",
       title: ["Milk, Bread & Eggs,", "Always in Stock"], sub: "Your everyday essentials, ready when you need them.", cta: "Shop Dairy",
       grad: "linear-gradient(120deg,#FFF8E7 0%,#FCEFD0 100%)", ink: "#3A2A0E", subInk: "#5C4B2E" },
-    { img: "/hero-4.webp", alt: "Smiling delivery rider with a bag of fresh groceries on a scooter", chip: "Free Delivery", chipIcon: "truck",
+    { img: "/hero-4-v2.webp", alt: "Smiling delivery rider with a bag of fresh groceries on a scooter", chip: "Free Delivery", chipIcon: "truck",
       title: ["Free Delivery on Orders", freeAbove !== undefined ? `Above ₹${freeAbove}` : "Above a Minimum Order"],
       sub: "Stock up on your weekly groceries and save on delivery.", cta: "Start Shopping",
       grad: "linear-gradient(120deg,#EEF8F0 0%,#D6EFDB 100%)", ink: "#0E3B26", subInk: "#3F5B4A" },

@@ -324,3 +324,8 @@ main{padding:14px 16px calc(88px + env(safe-area-inset-bottom,0px))}
 .hslide{aspect-ratio:3/1;min-height:0}
 .hslide-img{min-height:0}
 }
+
+/* ---- Hero image: desktop par upar se crop (sir/sabzi nahi kategi) ---- */
+@media(min-width:820px){
+.hslide-img{object-position:right top}
+}

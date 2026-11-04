@@ -5,29 +5,39 @@ import { Icon } from "@/lib/icons";
 
 const FALLBACK = ["/hero-1-v5.webp", "/hero-2-v5.webp", "/hero-3-v5.webp", "/hero-4-v5.webp"];
 
-// Text, chip aur colours yahin se badlenge. Image admin dashboard se aati hai.
+// Defaults: admin dashboard mein text khaali chhodne par yahi dikhega. {amount} = free delivery threshold
 const META = [
-  { alt: "Smiling shopper carrying fresh vegetables at a market", chip: "Fresh & Healthy", chipIcon: "leaf", title: "Fresh picks, every day", bg: "#E4F3D1" },
-  { alt: "Smiling delivery rider with a bag of fresh vegetables", chip: "Delivery in 15 min", chipIcon: "truck", title: "Groceries in 15 minutes", bg: "#E9F6DD" },
-  { alt: "Smiling child holding a glass of milk at breakfast", chip: "Dairy & Bakery", chipIcon: "bag", title: "Morning essentials, always", bg: "#E5F6D5" },
-  { alt: "Happy family unpacking fresh groceries in the kitchen", chip: "Free Delivery", chipIcon: "truck", title: "Stock up, save more", bg: "#E6F8D5" },
+  { alt: "Smiling shopper carrying fresh vegetables at a market", chip: "Fresh & Healthy", chipIcon: "leaf", title: "Fresh picks, every day", cta: "Shop Now", bg: "#E4F3D1" },
+  { alt: "Smiling delivery rider with a bag of fresh vegetables", chip: "Delivery in 15 min", chipIcon: "truck", title: "Groceries in 15 minutes", cta: "Shop Now", bg: "#E9F6DD" },
+  { alt: "Smiling child holding a glass of milk at breakfast", chip: "Dairy & Bakery", chipIcon: "bag", title: "Morning essentials, always", cta: "Shop Now", bg: "#E5F6D5" },
+  { alt: "Happy family unpacking fresh groceries in the kitchen", chip: "Free above {amount}", chipIcon: "truck", title: "Stock up, save more", cta: "Shop Now", bg: "#E6F8D5" },
 ];
 
+type Row = { id: number; image_url: string | null; chip: string | null; title: string | null; cta: string | null; show_text: boolean | null };
+
 export default function Hero({ freeAbove, onShop }: { freeAbove?: number; onShop?: () => void }) {
-  const [imgs, setImgs] = useState<string[]>(FALLBACK);
+  const [rows, setRows] = useState<Row[]>([]);
 
   useEffect(() => {
-    supabase.from("hero_slides").select("id,image_url").order("id").then(({ data }) => {
-      if (!data?.length) return;
-      setImgs(FALLBACK.map((f, k) => (data as any[]).find((r) => r.id === k + 1)?.image_url || f));
+    supabase.from("hero_slides").select("id,image_url,chip,title,cta,show_text").order("id").then(({ data }) => {
+      if (data?.length) setRows(data as Row[]);
     });
   }, []);
 
-  const SLIDES = META.map((m, k) => ({
-    ...m,
-    img: imgs[k],
-    chip: k === 3 && freeAbove !== undefined ? `Free above ₹${freeAbove}` : m.chip,
-  }));
+  const amt = freeAbove !== undefined ? `₹${freeAbove}` : null;
+  const SLIDES = META.map((m, k) => {
+    const r = rows.find((x) => x.id === k + 1);
+    let chip = (r?.chip || m.chip);
+    if (chip.includes("{amount}")) chip = amt ? chip.replace("{amount}", amt) : "Free Delivery";
+    return {
+      ...m,
+      img: r?.image_url || FALLBACK[k],
+      chip,
+      title: r?.title || m.title,
+      cta: r?.cta || m.cta,
+      showText: r?.show_text !== false,
+    };
+  });
 
   const trackRef = useRef<HTMLDivElement>(null);
   const [i, setI] = useState(0);
@@ -63,13 +73,13 @@ export default function Hero({ freeAbove, onShop }: { freeAbove?: number; onShop
         {SLIDES.map((s, k) => (
           <div className="hslide" key={k} role="group" aria-roledescription="slide" aria-label={`${k + 1} of ${SLIDES.length}`} style={{ background: s.bg }}>
             <img className="hslide-img" src={s.img} alt={s.alt} loading={k === 0 ? "eager" : "lazy"} decoding="async" />
-            <div className="hslide-copy">
+            {s.showText && <div className="hslide-copy">
               <span className="hchip"><Icon name={s.chipIcon} size={16} /> {s.chip}</span>
               <div className="hline">
                 <h2>{s.title}</h2>
-                <button onClick={onShop}>Shop Now <Icon name="arrowRight" size={14} sw={2} /></button>
+                <button onClick={onShop}>{s.cta} <Icon name="arrowRight" size={14} sw={2} /></button>
               </div>
-            </div>
+            </div>}
           </div>
         ))}
       </div>

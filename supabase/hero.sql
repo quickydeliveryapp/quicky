@@ -32,3 +32,11 @@ create policy "hero public read" on storage.objects for select using (bucket_id 
 drop policy if exists "hero admin upload" on storage.objects;
 create policy "hero admin upload" on storage.objects for insert to authenticated
   with check (bucket_id = 'hero' and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'));
+
+-- 3) Text fields admin se editable (null ho to code ka default text dikhega)
+alter table public.hero_slides add column if not exists chip text;
+alter table public.hero_slides add column if not exists title text;
+alter table public.hero_slides add column if not exists cta text;
+
+-- 4) Text on/off toggle (default: on)
+alter table public.hero_slides add column if not exists show_text boolean not null default true;

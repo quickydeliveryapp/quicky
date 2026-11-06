@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { getState, initStore, setState, useStore } from "@/lib/store";
 import { detectAndSet, reverse } from "@/lib/geo";
 import { Icon } from "@/lib/icons";
+import { homeForRole } from "@/lib/roles";
 import "./dash-header.css";
 
 const svgProps = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true, focusable: "false" } as const;
@@ -37,9 +38,8 @@ export default function Header() {
         if (p) {
           setRole(p.role);
           // Redirect to the role's dashboard once per session
-          const dash: Record<string, string> = { admin: "/admin", area_manager: "/areamanager", rider: "/rider", shop_owner: "/shop", shop: "/shop" };
-          const target = dash[p.role];
-          if (target && window.location.pathname === "/" && !sessionStorage.getItem("qk_role_redirect")) {
+          const target = homeForRole(p.role);
+          if (target !== "/" && window.location.pathname === "/" && !sessionStorage.getItem("qk_role_redirect")) {
             sessionStorage.setItem("qk_role_redirect", "1");
             router.replace(target);
           }
@@ -73,7 +73,7 @@ export default function Header() {
   const isArea = role === "area_manager";
 
   // Dashboard routes: hide the storefront header (search, cart)
-  const isDash = /^\/(admin|shop|rider|areamanager)(\/|$)/.test(path ?? "");
+  const isDash = /^\/(admin|shop|rider|areamanager|dashboard)(\/|$)/.test(path ?? "");
   const p = path ?? "";
 
   // Each role sees only its own dashboard links, nothing else.

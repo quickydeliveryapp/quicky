@@ -10,12 +10,13 @@ export const ROLE_LABEL: Record<Role, string> = {
   customer: "Customer",
 };
 
-// Where each role goes after login. Customers have no dashboard, they use the storefront.
+// Fixed permalink for each role's dashboard. Everything else (login, header, role gate) reads from here.
+// Old /dashboard/<role> links redirect to these. Customers have no dashboard, they use the storefront.
 export const ROLE_HOME: Record<Role, string> = {
-  admin: "/dashboard/admin",
-  area_manager: "/dashboard/area-manager",
-  shop: "/dashboard/shop",
-  rider: "/dashboard/rider",
+  admin: "/admin",
+  area_manager: "/areamanager",
+  shop: "/shop",
+  rider: "/rider",
   customer: "/",
 };
 
@@ -38,3 +39,5 @@ export const PERMS: Record<Role, Perm[]> = {
 export const isRole = (v: unknown): v is Role => typeof v === "string" && (ROLES as readonly string[]).includes(v);
 export const can = (role: Role | null | undefined, perm: Perm) => !!role && PERMS[role].includes(perm);
 export const homeFor = (role: Role | null | undefined) => (role ? ROLE_HOME[role] : "/");
+// Same as homeFor but takes any string from the database (old "shop_owner" counts as shop)
+export const homeForRole = (role: string | null | undefined) => ROLE_HOME[(role === "shop_owner" ? "shop" : role) as Role] ?? "/";

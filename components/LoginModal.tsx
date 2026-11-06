@@ -3,9 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
+import { homeForRole } from "@/lib/roles";
 
-// Where each role lands after login (same map the header uses)
-const DASH: Record<string, string> = { admin: "/admin", area_manager: "/areamanager", rider: "/rider", shop_owner: "/shop", shop: "/shop" };
 
 // ?next=/admin: only same-site paths are allowed (no //evil.com, no /login loop)
 function safeNext(): string | null {
@@ -66,7 +65,7 @@ export default function LoginModal() {
     let target = safeNext();
     if (!target && data.user) {
       const { data: p } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
-      target = p ? DASH[p.role] ?? null : null;
+      target = p ? homeForRole(p.role) : null;
     }
     window.location.assign(target ?? "/");
   }

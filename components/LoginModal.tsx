@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
-import { homeForRole } from "@/lib/roles";
+import { homeForRole, ROLE_LABEL } from "@/lib/roles";
 
 
 // ?next=/admin: only same-site paths are allowed (no //evil.com, no /login loop)
@@ -21,6 +21,7 @@ export default function LoginModal() {
   const [otp, setOtp] = useState("");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [need, setNeed] = useState(""); // ?need=Shop: this page is for a different role than the one logged in
   const inputRef = useRef<HTMLInputElement>(null);
 
   const phoneOk = /^[6-9]\d{9}$/.test(digits);
@@ -34,6 +35,8 @@ export default function LoginModal() {
 
   useEffect(() => {
     if (window.location.pathname === "/login") setOpen(true);
+    const n = new URLSearchParams(window.location.search).get("need") ?? "";
+    setNeed(Object.values(ROLE_LABEL).includes(n) ? n : "");
     const h = () => setOpen(true);
     window.addEventListener("open-login", h);
     return () => window.removeEventListener("open-login", h);
@@ -80,7 +83,7 @@ export default function LoginModal() {
         <div className="mbody">
           <img className="mlogo" src="/icon-192.png" alt="Quicky" width={72} height={72} />
           <h2>{step === "phone" ? "Log in or Sign up" : "Verify your number"}</h2>
-          <p className="sub">{step === "phone" ? "Enter your mobile number to get an OTP" : `Enter the 6-digit OTP sent to +91 ${digits}`}</p>
+          <p className="sub">{step === "phone" ? (need ? `This page is only for ${need} accounts. Enter the mobile number of your ${need} account.` : "Enter your mobile number to get an OTP") : `Enter the 6-digit OTP sent to +91 ${digits}`}</p>
 
           {step === "phone" ? (
             <div className="phone">

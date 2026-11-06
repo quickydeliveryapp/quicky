@@ -50,7 +50,12 @@ export default function LoginModal() {
   }, [pathname]);
 
   useEffect(() => {
-    const h = () => setOpen(true);
+    // Optional detail: { need: "Shop" } shows which account this page is for (sent by RoleGate)
+    const h = (e: Event) => {
+      const n = (e as CustomEvent<{ need?: string }>).detail?.need ?? "";
+      setNeed(Object.values(ROLE_LABEL).includes(n) ? n : "");
+      setOpen(true);
+    };
     window.addEventListener("open-login", h);
     return () => window.removeEventListener("open-login", h);
   }, []);

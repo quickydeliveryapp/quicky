@@ -72,9 +72,11 @@ export default function LoginModal() {
 
   async function send() {
     setBusy(true); setMsg("");
-    const { error } = await supabase.auth.signInWithOtp({ phone: "+91" + digits });
+    // On a role page (/admin, /shop ...) only existing accounts can log in. No automatic sign up.
+    const { error } = await supabase.auth.signInWithOtp({ phone: "+91" + digits, ...(need ? { options: { shouldCreateUser: false } } : {}) });
     setBusy(false);
-    if (error) setMsg(friendly(error.message)); else setStep("otp");
+    if (error) setMsg(need && /signups?\s+not\s+allowed|not\s+found/i.test(error.message) ? `No ${need} account found for this number.` : friendly(error.message));
+    else setStep("otp");
   }
   async function verify() {
     setBusy(true); setMsg("");
@@ -94,14 +96,14 @@ export default function LoginModal() {
   if (!open) return null;
   return (
     <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label="Log in or sign up">
+      <div className="modal" role="dialog" aria-modal="true" aria-label={need ? `${need} login` : "Log in or sign up"}>
         <button className="mback" aria-label="Back" onClick={step === "otp" ? back : close}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
         </button>
         <div className="mbody">
           <img className="mlogo" src="/icon-192.png" alt="Quicky" width={72} height={72} />
-          <h2>{step === "phone" ? "Log in or Sign up" : "Verify your number"}</h2>
-          <p className="sub">{step === "phone" ? (need ? `This page is only for ${need} accounts. Enter the mobile number of your ${need} account.` : "Enter your mobile number to get an OTP") : `Enter the 6-digit OTP sent to +91 ${digits}`}</p>
+          <h2>{step === "phone" ? (need ? `${need} login` : "Log in or Sign up") : "Verify your number"}</h2>
+          <p className="sub">{step === "phone" ? (need ? `Enter your ${need} account mobile number to get an OTP` : "Enter your mobile number to get an OTP") : `Enter the 6-digit OTP sent to +91 ${digits}`}</p>
 
           {step === "phone" ? (
             <div className="phone">
@@ -123,7 +125,7 @@ export default function LoginModal() {
             {busy ? "Please wait..." : step === "phone" ? "Continue" : "Verify"}
           </button>
         </div>
-        <div className="mfoot">By continuing, you agree to our Terms of service &amp; Privacy policy</div>
+        {!need && <div className="mfoot">By continuing, you agree to our Terms of service &amp; Privacy policy</div>}
       </div>
     </div>
   );

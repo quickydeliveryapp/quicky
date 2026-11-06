@@ -1,0 +1,29 @@
+/* Dashboard header: icons, "View as" menu. Scoped so the storefront header is unchanged. */
+.dright{gap:8px}
+.dright .dlink,.dright .dlogout{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;font-size:14px;font-weight:600}
+.dright .dlink{color:var(--g)}
+.dright .dlink:hover{background:var(--tint)}
+.dright .dlogout{background:none;color:var(--ink)}
+.dright .dlogout:hover{background:#FDE8E8;color:var(--red)}
+.dright svg,.hdr .hlogin svg{flex:none}
+
+/* Storefront logout: icon + text on desktop (phone keeps the existing hidden state) */
+@media(min-width:820px){.hdr .hlogin{display:inline-flex;align-items:center;gap:8px}}
+
+/* View as menu (admin only) */
+.dmenu{position:relative}
+.dmenu summary{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;color:var(--ink);font-size:14px;font-weight:600;list-style:none;cursor:pointer;user-select:none}
+.dmenu summary::-webkit-details-marker{display:none}
+.dmenu summary::after{content:"";width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px)}
+.dmenu summary:hover,.dmenu[open] summary{background:var(--tint)}
+.dmenu-list{position:absolute;top:calc(100% + 6px);right:0;z-index:20;display:flex;flex-direction:column;min-width:190px;padding:6px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(22,35,28,.12)}
+.dmenu-note{padding:6px 12px 4px;color:var(--muted);font-size:12px}
+.dmenu-list a{padding:9px 12px;border-radius:8px;color:var(--ink);font-size:14px;font-weight:500;text-decoration:none}
+.dmenu-list a:hover{background:var(--tint)}
+
+@media(max-width:819px){
+.dright{gap:2px}
+.dright .dlink,.dright .dlogout{padding:8px}
+.dright .dlink span,.dright .dlogout span{display:none}
+.dmenu summary{padding:8px}
+}

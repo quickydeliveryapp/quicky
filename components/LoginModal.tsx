@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 import { homeForRole, ROLE_LABEL } from "@/lib/roles";
@@ -15,6 +15,8 @@ function safeNext(): string | null {
 // Kahin se bhi kholne ke liye: window.dispatchEvent(new Event("open-login"))
 export default function LoginModal() {
   const router = useRouter();
+  const pathname = usePathname();
+  const routeOpen = useRef(false); // true while the dialog is open because we are on /login
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [digits, setDigits] = useState("");
@@ -33,10 +35,21 @@ export default function LoginModal() {
   }
   function back() { setStep("phone"); setOtp(""); setMsg(""); }
 
+  // The header is mounted for the whole app, so /login can be reached without a page reload
+  // (e.g. a role gate redirect). React to the path, not only to the first load.
   useEffect(() => {
-    if (window.location.pathname === "/login") setOpen(true);
-    const n = new URLSearchParams(window.location.search).get("need") ?? "";
-    setNeed(Object.values(ROLE_LABEL).includes(n) ? n : "");
+    if (pathname === "/login") {
+      routeOpen.current = true;
+      setOpen(true);
+      const n = new URLSearchParams(window.location.search).get("need") ?? "";
+      setNeed(Object.values(ROLE_LABEL).includes(n) ? n : "");
+    } else if (routeOpen.current) {
+      routeOpen.current = false;
+      setOpen(false); setStep("phone"); setOtp(""); setMsg(""); setNeed("");
+    }
+  }, [pathname]);
+
+  useEffect(() => {
     const h = () => setOpen(true);
     window.addEventListener("open-login", h);
     return () => window.removeEventListener("open-login", h);

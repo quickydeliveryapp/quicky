@@ -1,0 +1,88 @@
+/* Admin panel UI. Everything is scoped to .adm / .adm-* so other pages are untouched. */
+.adm{display:flex;flex-direction:column;gap:16px}
+
+/* Tabs: one scrollable row on phones instead of wrapping into 3 lines */
+.adm .dash-tabs{flex-wrap:nowrap;margin:0;padding-bottom:4px;overflow-x:auto;scrollbar-width:none}
+.adm .dash-tabs::-webkit-scrollbar{display:none}
+.adm .dash-tabs button{flex:none;padding:8px 16px;font-size:14px;white-space:nowrap}
+
+/* Feedback message */
+.adm-toast{position:sticky;top:8px;z-index:6;padding:10px 14px;border-radius:10px;background:#E3F4DA;color:var(--g);font-size:14px;font-weight:600}
+.adm-toast.bad{background:#FDE8E8;color:var(--red)}
+
+/* Top numbers */
+.adm-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.adm-stat{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.adm-stat b{display:block;font-size:26px;font-weight:700;line-height:1.15;letter-spacing:-.02em}
+.adm-stat span{color:var(--muted);font-size:13px}
+.adm-stat.bad b{color:var(--red)}
+.adm-stat.warn b{color:#9A6B00}
+
+/* Status badges */
+.adm-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:#FFF4D6;color:#7A5B00;font-size:12px;font-weight:600;white-space:nowrap}
+.adm-badge.ok{background:#E3F4DA;color:var(--g)}
+.adm-badge.bad{background:#FDE8E8;color:var(--red)}
+.adm-badge.info{background:#E6F0FB;color:#1C4E8C}
+.adm-badge.off{background:#EEF1EE;color:var(--muted)}
+.adm-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#B8C2BB}
+.adm-dot.on{background:#22A83A}
+
+/* Filter chips */
+.adm-chips{display:flex;flex-wrap:wrap;gap:8px}
+.adm .adm-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#fff;color:var(--ink);font-size:13px;font-weight:600;box-shadow:inset 0 0 0 1px var(--line)}
+.adm .adm-chip:hover{background:var(--tint)}
+.adm .adm-chip i{color:var(--muted);font-size:12px;font-style:normal;font-weight:600}
+.adm .adm-chip.on{background:var(--g);color:#fff;box-shadow:none}
+.adm .adm-chip.on:hover{background:var(--g2)}
+.adm .adm-chip.on i{color:#D8F0DC}
+
+/* Orders */
+.adm-list{display:flex;flex-direction:column;gap:10px}
+.adm-order{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.adm-order.late{border-left:4px solid var(--red);background:#FFF9F9}
+.adm-o-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.adm-o-id,.adm-o-time{color:var(--muted);font-size:13px}
+.adm-o-amt{margin-left:auto;font-size:18px;font-weight:700}
+.adm-o-addr{margin:8px 0 10px;font-size:14px}
+.adm-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px 16px;margin:0;padding-top:10px;border-top:1px solid var(--line)}
+.adm-meta dt{color:var(--muted);font-size:12px}
+.adm-meta dd{margin:2px 0 0;font-size:14px;font-weight:600}
+
+/* People / shop cards */
+.adm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.adm-card{display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.adm-head{display:flex;align-items:center;gap:12px}
+.adm-av{display:grid;flex:none;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--tint);color:var(--g);font-weight:700}
+.adm-head>div{min-width:0;flex:1}
+.adm-name{display:block;overflow:hidden;font-size:15px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
+.adm-sub{display:block;color:var(--muted);font-size:13px}
+.adm-badges{display:flex;flex-wrap:wrap;gap:6px}
+.adm-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.adm .adm-actions button{padding:8px 14px;font-size:13px}
+.adm button.danger{background:#fff;color:var(--red);box-shadow:inset 0 0 0 1.5px var(--red)}
+.adm button.danger:hover{background:#FDE8E8}
+
+/* Money figures */
+.adm-figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.adm-fig{padding:10px 12px;border-radius:10px;background:var(--tint)}
+.adm-fig span{display:block;color:var(--muted);font-size:12px}
+.adm-fig b{font-size:16px;font-weight:700}
+.adm-fig.hl{background:var(--g);color:#fff}
+.adm-fig.hl span{color:#D8F0DC}
+.adm-fig.neg{background:#FDE8E8}
+.adm-fig.neg b{color:var(--red)}
+
+/* Settings rows (commission, fees) */
+.adm-field{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.adm-field>span{font-size:14px;font-weight:600}
+.adm .adm-input{width:110px;margin:0;text-align:right}
+.adm-h{margin:8px 0 0;font-size:16px;font-weight:700}
+.adm-hint{margin:0;color:var(--muted);font-size:13px}
+
+.adm-empty{padding:40px 16px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center}
+
+@media(max-width:819px){
+.adm-stat b{font-size:22px}
+.adm-o-amt{font-size:17px}
+.adm-field{flex-wrap:wrap}
+}

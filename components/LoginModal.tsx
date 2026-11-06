@@ -4,6 +4,15 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 
+// Where each role lands after login (same map the header uses)
+const DASH: Record<string, string> = { admin: "/admin", area_manager: "/areamanager", rider: "/rider", shop_owner: "/shop", shop: "/shop" };
+
+// ?next=/admin: only same-site paths are allowed (no //evil.com, no /login loop)
+function safeNext(): string | null {
+  const n = new URLSearchParams(window.location.search).get("next");
+  return n && /^\/(?![\/\\]|login)/.test(n) ? n : null;
+}
+
 // Kahin se bhi kholne ke liye: window.dispatchEvent(new Event("open-login"))
 export default function LoginModal() {
   const router = useRouter();
@@ -49,10 +58,17 @@ export default function LoginModal() {
   }
   async function verify() {
     setBusy(true); setMsg("");
-    const { error } = await supabase.auth.verifyOtp({ phone: "+91" + digits, token: otp, type: "sms" });
-    setBusy(false);
-    if (error) { setMsg(friendly(error.message)); return; }
-    if (window.location.pathname === "/login") window.location.assign("/"); else window.location.reload();
+    const { data, error } = await supabase.auth.verifyOtp({ phone: "+91" + digits, token: otp, type: "sms" });
+    if (error) { setBusy(false); setMsg(friendly(error.message)); return; }
+    // Opened from the storefront Login button: stay on the same page
+    if (window.location.pathname !== "/login") { window.location.reload(); return; }
+    // Opened on /login: go back to the page the user wanted, else straight to their own dashboard, else home
+    let target = safeNext();
+    if (!target && data.user) {
+      const { data: p } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
+      target = p ? DASH[p.role] ?? null : null;
+    }
+    window.location.assign(target ?? "/");
   }
 
   if (!open) return null;

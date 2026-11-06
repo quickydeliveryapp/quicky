@@ -55,7 +55,7 @@ export default function Admin() {
 
   async function load() {
     const { data: u } = await supabase.auth.getUser();
-    if (!u.user) { window.location.href = "/login"; return; }
+    if (!u.user) { window.location.replace("/login?next=" + encodeURIComponent(window.location.pathname)); return; }
     const { data: me } = await supabase.from("profiles").select("role").eq("id", u.user.id).single();
     const r = me?.role ?? "customer"; setRole(r);
     if (r !== "admin" && r !== "area_manager") return;

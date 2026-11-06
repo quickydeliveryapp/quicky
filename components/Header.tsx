@@ -10,7 +10,6 @@ import "./dash-header.css";
 
 const svgProps = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true, focusable: "false" } as const;
 const IconLogout = () => (<svg {...svgProps}><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3" /><path d="M16 8l4 4-4 4" /><path d="M20 12H9" /></svg>);
-const IconStore = () => (<svg {...svgProps}><path d="M4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9" /><path d="M3 10l1.5-5h15L21 10" /><path d="M3 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0" /><path d="M10 20v-5h4v5" /></svg>);
 
 export default function Header() {
   const { loc, q, cart } = useStore();
@@ -24,7 +23,9 @@ export default function Header() {
   useEffect(() => {
     initStore();
     const saved = getState().loc;
-    if (!saved) detectAndSet().catch(() => setState({ locOpen: true }));
+    // Customer location is not needed on the login page or the admin / area manager dashboards
+    const skipLoc = /^\/(login|admin|areamanager|dashboard)(\/|$)/.test(window.location.pathname);
+    if (!saved) { if (!skipLoc) detectAndSet().catch(() => setState({ locOpen: true })); }
     else reverse(saved.lat, saved.lng).then((p) => {
       const cur = getState().loc;
       if (cur && cur.lat === saved.lat && cur.lng === saved.lng && p.label !== "Current location" && (cur.city !== p.city || cur.label !== p.label)) setState({ loc: { ...cur, label: p.label, city: p.city } });
@@ -53,14 +54,6 @@ export default function Header() {
     supabase.rpc("delivery_eta", { p_lat: loc.lat, p_lng: loc.lng }).then(({ data, error }) => setEta(error ? undefined : (data as number | null)));
   }, [loc?.lat, loc?.lng]);
 
-  // Close the "View as" menu when clicking anywhere else
-  useEffect(() => {
-    const h = (e: MouseEvent) => document.querySelectorAll("details.dmenu[open]").forEach((d) => { if (!d.contains(e.target as Node)) d.removeAttribute("open"); });
-    document.addEventListener("click", h);
-    return () => document.removeEventListener("click", h);
-  }, []);
-  const closeMenu = (e: React.MouseEvent<HTMLElement>) => { (e.currentTarget.closest("details") as HTMLDetailsElement | null)?.removeAttribute("open"); };
-
   const items = Object.values(cart);
   const count = items.reduce((s, i) => s + i.qty, 0);
   const total = items.reduce((s, i) => s + i.qty * i.price, 0);
@@ -82,47 +75,36 @@ export default function Header() {
   // Dashboard routes: hide the storefront header (search, cart)
   const isDash = /^\/(admin|shop|rider|areamanager)(\/|$)/.test(path ?? "");
   const p = path ?? "";
-  const section = /^\/shop(\/|$)/.test(p) ? "shop" : /^\/rider(\/|$)/.test(p) ? "rider" : /^\/areamanager(\/|$)/.test(p) ? "area" : "admin";
-  const sectionLabel = { shop: "Shop", rider: "Rider", area: "Area manager", admin: "Admin" }[section];
 
-  // Each role sees only its own links. An admin previewing another role's panel gets that panel's links plus a way back.
-  const shopLinks = [["/shop", "Orders"], ["/shop/inventory", "Inventory"], ["/shop/earnings", "Earnings"]];
-  const links: string[][] = isAdmin
-    ? section === "shop" ? [["/admin", "Back to admin"], ...shopLinks]
-    : section === "rider" ? [["/admin", "Back to admin"], ["/rider", "Rider"]]
-    : section === "area" ? [["/admin", "Back to admin"], ["/areamanager", "Area manager"]]
-    : [["/admin", "Admin"]]
-    : [
-      ...(isShop ? shopLinks : []),
-      ...(isRider ? [["/rider", "Rider"]] : []),
-      ...(isArea ? [["/areamanager", "Area manager"]] : []),
-    ];
+  // Each role sees only its own dashboard links, nothing else.
+  const links: string[][] = [
+    ...(isShop ? [["/shop", "Orders"], ["/shop/inventory", "Inventory"], ["/shop/earnings", "Earnings"]] : []),
+    ...(isRider ? [["/rider", "Rider"]] : []),
+    ...(isAdmin ? [["/admin", "Admin"]] : []),
+    ...(isArea ? [["/areamanager", "Area manager"]] : []),
+  ];
   // On a dashboard, a menu with a single link is just the page you are already on, so hide it
   const showNav = isDash ? links.length > 1 : links.length > 0;
   const isOn = (href: string) => p === href || (p.startsWith(href + "/") && !links.some(([h]) => h !== href && h.length > href.length && p.startsWith(h)));
 
-  const dashTitle = isAdmin
-    ? (section === "admin" ? "Admin dashboard" : `${sectionLabel} panel (admin view)`)
-    : role === "area_manager" ? "Area manager"
-    : (role === "shop_owner" || role === "shop") ? "Shop dashboard"
-    : role === "rider" ? "Rider dashboard" : "Dashboard";
+  const dashTitle = isAdmin ? "Admin dashboard"
+    : isArea ? "Area manager"
+    : isShop ? "Shop dashboard"
+    : isRider ? "Rider dashboard" : "Dashboard";
   const logout = async () => { await supabase.auth.signOut(); try { sessionStorage.removeItem("qk_role_redirect"); } catch {} window.location.href = "/"; };
+
+  // Login page: just the logo, no storefront search / cart / location behind the dialog
+  if (path === "/login") return (
+    <header className="dhdr">
+      <Link href="/" className="brand hlogo" aria-label="Quicky home"><img src="/logo-nav-v3.webp" alt="Quicky" width={168} height={56} decoding="async" /></Link>
+    </header>
+  );
 
   if (isDash) return (<>
     <header className="dhdr">
       <Link href="/" className="brand hlogo" aria-label="Quicky home"><img src="/logo-nav-v3.webp" alt="Quicky" width={168} height={56} decoding="async" /></Link>
       <div className="dtitle">{dashTitle}</div>
       <div className="dright">
-        {isAdmin && <details className="dmenu">
-          <summary>View as</summary>
-          <div className="dmenu-list">
-            <span className="dmenu-note">See a panel as that role does</span>
-            <Link href="/shop" onClick={closeMenu}>Shop</Link>
-            <Link href="/rider" onClick={closeMenu}>Rider</Link>
-            <Link href="/areamanager" onClick={closeMenu}>Area manager</Link>
-          </div>
-        </details>}
-        {isAdmin && <Link href="/" className="dlink" aria-label="Customer view" title="Customer view"><IconStore /><span>Customer view</span></Link>}
         {authReady && loggedIn && <button className="hlogin dlogout" onClick={logout} aria-label="Log out" title="Log out"><IconLogout /><span>Logout</span></button>}
       </div>
     </header>

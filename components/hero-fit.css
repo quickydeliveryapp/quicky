@@ -1,0 +1,18 @@
+/* Hero fit: the banner keeps one fixed shape (aspect ratio) and everything inside it scales with its width,
+   so the admin preview and the live site look the same at any screen width.
+   Reference sizes: phone 390px wide (ratio 1.95, 200px high), desktop 1200px wide (ratio 3.75, 320px high).
+   Doubled class (.hs.hs) so these rules win over the older .hs rules in globals.css. */
+.hs.hs{--ar:1.95;--px:4.1cqw;--py:3.6cqw;--tw:58%;--fs:5.13cqw;--btn-fs:3.08cqw;--btn-p:1.8cqw 3.6cqw;--g1:2.56cqw;--g2:3.08cqw;
+  height:auto;aspect-ratio:var(--ar);align-self:flex-start}
+@media(max-width:819px){.hs.hs:not(.pm):not(.pd){max-height:280px}} /* tablets: do not let the banner get too tall */
+@media(min-width:820px){.hs.hs{--ar:3.75;--px:4.67cqw;--py:3cqw;--tw:50%;--fs:3.2cqw;--btn-fs:1.25cqw;--btn-p:.92cqw 1.83cqw;--g1:.83cqw;--g2:1cqw}}
+/* Admin preview forces a device */
+.hs.hs.pm{--ar:1.95;--px:4.1cqw;--py:3.6cqw;--tw:58%;--fs:5.13cqw;--btn-fs:3.08cqw;--btn-p:1.8cqw 3.6cqw;--g1:2.56cqw;--g2:3.08cqw}
+.hs.hs.pd{--ar:3.75;--px:4.67cqw;--py:3cqw;--tw:50%;--fs:3.2cqw;--btn-fs:1.25cqw;--btn-p:.92cqw 1.83cqw;--g1:.83cqw;--g2:1cqw}
+
+.hs .hs-copy{gap:var(--g1)}
+.hs .hs-low{gap:var(--g2)}
+/* Title offset is a fraction of the banner height; height = width / ratio */
+.hs .hs-ttl{top:calc(var(--ty,0)*100cqw/var(--ar))}
+.hs .hs-btn{gap:.45em}
+.hs .hs-btn svg{width:1.15em;height:1.15em;flex:none}

@@ -12,7 +12,7 @@ const blank = (): Draft => ({ image_url: "", title: "", cta: "", show_text: true
 // Preview frame size, same as the live site: phone 390x200, desktop ~940x320 (content width after the sidebar)
 const FRAME: Record<Device, { w: number; h: number; label: string }> = {
   m: { w: 390, h: 200, label: "Mobile" },
-  d: { w: 940, h: 320, label: "Desktop" },
+  d: { w: 1200, h: 320, label: "Desktop" },
 };
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 const r3 = (v: number) => Math.round(v * 1000) / 1000;

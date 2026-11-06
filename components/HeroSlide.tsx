@@ -1,6 +1,7 @@
 "use client";
 import { Icon } from "@/lib/icons";
 import { MoveIcon } from "@/components/HeroIcons";
+import "./hero-fit.css";
 
 export type Adj = { z: number; x: number; y: number };
 export const DEFAULT_ADJ: Adj = { z: 1, x: 0.5, y: 0.5 };

@@ -1,4 +1,4 @@
-/* Shop orders screen. Scoped to .shp / .shp-* */
+/* Shop dashboard. Scoped to .shp / .shp-* */
 .shp{display:flex;flex-direction:column;gap:14px}
 .shp-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:#fff}
 .shp-name{margin:0;font-size:18px;font-weight:700}
@@ -12,9 +12,24 @@
 .shp button.danger:hover{background:#FDE8E8}
 .shp-hint{margin:0;color:var(--muted);font-size:13px}
 .shp-warn{margin:0;padding:10px 14px;border-radius:10px;background:#FFF4D6;color:#7A5B00;font-size:14px;font-weight:600}
+.shp-err{margin:0;padding:10px 14px;border-radius:10px;background:#FDE8E8;color:var(--red);font-size:14px;font-weight:600}
 .shp-toast{position:sticky;top:8px;z-index:6;margin:0;padding:10px 14px;border-radius:10px;background:#E3F4DA;color:var(--g);font-size:14px;font-weight:600}
 .shp-toast.bad{background:#FDE8E8;color:var(--red)}
 
+/* Numbers at a glance */
+.shp-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.shp .shp-tile{display:block;width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);font-weight:400;text-align:left;text-decoration:none;cursor:pointer}
+.shp .shp-tile:hover{background:var(--tint)}
+.shp-tile b{display:block;font-size:28px;font-weight:700;line-height:1.1;letter-spacing:-.02em}
+.shp-tile span{display:block;margin-top:2px;color:var(--muted);font-size:13px}
+.shp-tile small{display:block;margin-top:4px;color:var(--muted);font-size:12px;line-height:1.35}
+.shp .shp-tile.hot{border-color:var(--red);background:#FFF9F9}
+.shp-tile.hot b{color:var(--red)}
+.shp-tile.warn b{color:#9A6B00}
+.shp-tile.good b{color:var(--g)}
+.shp-live{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:12.5px}
+
+/* Phone: pick a column */
 .shp-chips{display:flex;flex-wrap:wrap;gap:8px}
 .shp .shp-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:#fff;color:var(--ink);font-size:14px;font-weight:600;box-shadow:inset 0 0 0 1px var(--line)}
 .shp .shp-chip:hover{background:var(--tint)}
@@ -24,7 +39,17 @@
 .shp .shp-chip.on i{background:rgba(255,255,255,.22);color:#fff}
 .shp .shp-chip.alert i{background:var(--red);color:#fff}
 
-.shp-list{display:flex;flex-direction:column;gap:12px}
+/* Board: New | Packing | Ready, all visible on a laptop */
+.shp-board{display:block}
+.shp-col{display:none;flex-direction:column;gap:12px}
+.shp-col.on{display:flex}
+.shp-colh{display:flex;align-items:center;gap:8px;margin:0;font-size:15px;font-weight:700}
+.shp-colh i{min-width:24px;padding:1px 8px;border-radius:999px;background:#EEF1EE;color:var(--muted);font-size:12px;font-style:normal;text-align:center}
+.shp-none{margin:0;padding:22px 12px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:13.5px;text-align:center}
+.shp-calm{padding:36px 20px;border:1px solid var(--line);border-radius:14px;background:#fff;text-align:center}
+.shp-calm b{display:block;margin-bottom:4px;font-size:18px}
+.shp-calm p{margin:0;color:var(--muted)}
+
 .shp-order{padding:16px;border:1px solid var(--line);border-radius:14px;background:#fff}
 .shp-order.late{border-left:4px solid var(--red);background:#FFF9F9}
 .shp-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
@@ -36,22 +61,35 @@
 .shp-badge.bad{background:#FDE8E8;color:var(--red)}
 .shp-badge.info{background:#E6F0FB;color:#1C4E8C}
 .shp-items{margin:12px 0;padding:0;list-style:none;border-top:1px solid var(--line)}
-.shp-items li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+.shp-items li{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
 .shp-items input[type=checkbox]{flex:none;width:20px;height:20px;margin:0}
 .shp-qty{flex:none;min-width:34px;font-weight:700}
 .shp-items small{color:var(--muted)}
-.shp .shp-link{margin-left:auto;padding:4px 0;border-radius:4px;background:none;color:var(--red);font-size:13px;font-weight:600}
+.shp-stk{margin-left:auto;color:var(--muted);font-size:12.5px}
+.shp-stk.bad{color:var(--red);font-weight:700}
+.shp .shp-link{padding:2px 0;border-radius:4px;background:none;color:var(--red);font-size:12.5px;font-weight:600}
 .shp .shp-link:hover{background:none;text-decoration:underline}
 .shp-addr{color:var(--muted);font-size:14px}
 .shp-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .shp .shp-actions button{padding:11px 20px;font-size:15px}
 .shp .shp-actions button:disabled{background:#A6A6A6;cursor:not-allowed}
-.shp .shp-actions button.alt:disabled{background:#fff;color:#A6A6A6;box-shadow:inset 0 0 0 1.5px #D5DCD3}
+.shp-need{margin:10px 0 0;padding:9px 12px;border-radius:10px;background:#FDE8E8;color:var(--red);font-size:13px;line-height:1.45}
+.shp-need a{color:var(--red);font-weight:700}
 .shp-qr{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:14px;padding:14px;border-radius:12px;background:var(--tint)}
 .shp-qr p{margin:0 0 4px;font-size:14px}
-.shp-empty{padding:40px 16px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center}
-.shp-need{margin:12px 0 0;color:var(--muted);font-size:13px}
 
+.shp-hist{padding:16px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.shp-hist h3{margin:0 0 6px;font-size:15px}
+.shp-hrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.shp-hrow .shp-sum{flex:1 1 220px;min-width:0;overflow:hidden;color:var(--muted);text-overflow:ellipsis;white-space:nowrap}
+.shp .shp-more{margin-top:8px;padding:6px 0;background:none;color:var(--g);font-weight:600}
+.shp .shp-more:hover{background:none;text-decoration:underline}
+
+@media(min-width:1000px){
+.shp-chips{display:none}
+.shp-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.shp-col{display:flex}
+}
 @media(max-width:519px){
 .shp-tools{width:100%}
 .shp .shp-tools button{flex:1}

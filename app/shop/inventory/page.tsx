@@ -30,13 +30,13 @@ function profit(buy: number | null, sale: number, cat: string | null, rates: Rat
 }
 function Margin({ buy, sale, cat, qty, rates }: { buy: number | null; sale: number; cat: string | null; qty: number; rates: Rate[] }) {
   const p = profit(buy, sale, cat, rates);
-  if (!p) return <div className="inv-m none">{buy == null ? "Add the buy price to see your margin" : "Enter the sale price"}</div>;
+  if (!p) return <div className="inv-m none">{buy == null ? "Add the buy price to see margin" : "Enter the sale price"}</div>;
   const real = p.net ?? p.m;
   return (<div className={"inv-m" + (real < 0 ? " neg" : "")}>
-    <b>{rupee(p.m)} per unit ({p.pct.toFixed(0)}%)</b>
-    {p.rate != null && p.rate > 0 && <small>{rupee(p.net as number)} after {p.rate}% Quicky commission</small>}
-    {p.rate === 0 && <small>Quicky commission not set for this category</small>}
-    {qty > 0 && <small>On {qty} in stock: {rupee(real * qty)}</small>}
+    <b>Margin {rupee(p.m)} ({p.pct.toFixed(0)}%)</b>
+    {p.rate != null && p.rate > 0 && <small>You keep <strong>{rupee(p.net as number)}</strong> after {p.rate}% commission</small>}
+    {p.rate === 0 && <small>Commission not set for this category</small>}
+    {qty > 0 && <small>{rupee(real * qty)} profit on {qty} in stock</small>}
     {real < 0 && <small className="warn">You are selling below cost</small>}
   </div>);
 }
@@ -303,7 +303,7 @@ export default function Inventory() {
               {ex && <span className={"inv-exp " + ex.cls}>{ex.text}</span>}</label>
             <div className="c-margin"><Margin buy={r.buy_price} sale={r.price} cat={r.products.category} qty={r.stock} rates={rates} /></div>
             <div className="c-act inv-act">
-              <label><input type="checkbox" checked={r.is_available} onChange={(e) => update(r, { is_available: e.target.checked })} /> On sale</label>
+              <label className="inv-onsale"><input type="checkbox" className="inv-sw" checked={r.is_available} onChange={(e) => update(r, { is_available: e.target.checked })} /> On sale</label>
               <button className="danger" onClick={() => remove(r)}>Remove</button>
             </div>
           </div>);

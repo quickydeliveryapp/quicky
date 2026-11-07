@@ -108,7 +108,7 @@ export default function Header() {
         {authReady && loggedIn && <button className="hlogin dlogout" onClick={logout} aria-label="Log out" title="Log out"><IconLogout /><span>Logout</span></button>}
       </div>
     </header>
-    {showNav && <nav className="subnav">{links.map(([href, label]) => <Link key={href} className={"navlink" + (isOn(href) ? " on" : "")} href={href}>{label}</Link>)}</nav>}
+    {showNav && <nav className="dnav" aria-label="Dashboard sections">{links.map(([href, label]) => <Link key={href} className={isOn(href) ? "on" : ""} aria-current={isOn(href) ? "page" : undefined} href={href}>{label}</Link>)}</nav>}
   </>);
 
   return (<>

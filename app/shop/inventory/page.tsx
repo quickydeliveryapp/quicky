@@ -155,6 +155,13 @@ export default function Inventory() {
         p_buy_price: f.buy === "" ? null : Number(f.buy), p_expiry: f.expiry || null, p_image_url: url,
       });
       if (error) { say(friendly(error.message), false); setBusy(false); return; }
+      if (url && known?.image) { // the product already had a photo: replace it with the new one
+        const { data: pr } = await supabase.from("products").select("id").eq("barcode", barcode.trim()).maybeSingle();
+        if (pr) {
+          const { error: e2 } = await supabase.rpc("set_product_image", { p_product: pr.id, p_url: url });
+          if (e2) { say("Saved, but the photo could not be replaced: " + friendly(e2.message), false); setBusy(false); clear(); load(); return; }
+        }
+      }
     } catch (e) { say(e instanceof Error ? e.message : "Could not upload the photo", false); setBusy(false); return; }
     setBusy(false); say("Saved."); clear(); load();
   }
@@ -180,7 +187,7 @@ export default function Inventory() {
     try {
       const url = await uploadPhoto(file);
       const { error } = await supabase.rpc("set_product_image", { p_product: r.product_id, p_url: url });
-      if (error) say(friendly(error.message), false); else { say("Photo added."); load(); }
+      if (error) say(friendly(error.message), false); else { say("Photo updated."); load(); }
     } catch (e) { say(e instanceof Error ? e.message : "Could not upload the photo", false); }
     setBusy(false);
   }
@@ -220,12 +227,11 @@ export default function Inventory() {
       {heads}
       <div className="inv-grid inv-addrow">
         <div className="c-thumb">
-          {known?.image
-            ? <span className="inv-thumb has" title="Photo already added"><img src={known.image} alt="" /></span>
-            : <label className={"inv-thumb" + (preview ? " new" : "")} title="Add a photo">
-                {preview ? <img src={preview} alt="New product" /> : <ImagePlusIcon />}
-                <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) setImgFile(file); e.target.value = ""; }} />
-              </label>}
+          <label className={"inv-thumb" + (addImg ? " has" : "") + (preview ? " new" : "")} title={addImg ? "Click to change the photo" : "Add a photo"}>
+            {addImg ? <img src={addImg} alt="Product photo" /> : <ImagePlusIcon />}
+            {addImg && <span className="ov"><CameraIcon /></span>}
+            <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) setImgFile(file); e.target.value = ""; }} />
+          </label>
         </div>
         <div className="c-main inv-bc">
           <input autoFocus placeholder="Barcode or QR code" aria-label="Barcode or QR code" value={barcode}
@@ -270,10 +276,11 @@ export default function Inventory() {
           const ex = expiryInfo(r.expiry_date);
           return (<div className="inv-grid inv-row" key={r.product_id}>
             <div className="c-thumb">
-              {r.products.image_url
-                ? <span className="inv-thumb has"><img src={r.products.image_url} alt={r.products.name} /></span>
-                : <label className="inv-thumb" title="Add a photo"><ImagePlusIcon />
-                    <input type="file" accept="image/*" disabled={busy} onChange={(e) => { const file = e.target.files?.[0]; if (file) addPhoto(r, file); e.target.value = ""; }} /></label>}
+              <label className={"inv-thumb" + (r.products.image_url ? " has" : "")} title={r.products.image_url ? "Click to change the photo" : "Add a photo"}>
+                {r.products.image_url ? <img src={r.products.image_url} alt={r.products.name} /> : <ImagePlusIcon />}
+                {r.products.image_url && <span className="ov"><CameraIcon /></span>}
+                <input type="file" accept="image/*" disabled={busy} onChange={(e) => { const file = e.target.files?.[0]; if (file) addPhoto(r, file); e.target.value = ""; }} />
+              </label>
             </div>
             <div className="c-main">
               <span className="inv-name">{r.products.name}</span>

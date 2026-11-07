@@ -28,11 +28,13 @@
 .inv .inv-cam:hover{background:#E3F0DC}
 .inv .inv-cam.on{background:var(--g);color:#fff}
 
-.inv-thumb{display:grid;place-items:center;width:56px;height:56px;margin:0;overflow:hidden;border:1.5px dashed #B9C9B3;border-radius:12px;background:var(--tint);color:var(--g);cursor:pointer}
+.inv-thumb{position:relative;display:grid;place-items:center;width:56px;height:56px;margin:0;overflow:hidden;border:1.5px dashed #B9C9B3;border-radius:12px;background:var(--tint);color:var(--g);cursor:pointer}
 .inv-thumb:hover{background:#E8F2E2}
 .inv-thumb img{display:block;width:100%;height:100%;object-fit:contain;background:#fff}
-.inv-thumb.has{border-style:solid;border-color:var(--line);cursor:default}
-.inv-thumb.has:hover{background:var(--tint)}
+.inv-thumb.has{border-style:solid;border-color:var(--line)}
+.inv-thumb.has:hover{border-color:var(--g)}
+.inv-thumb .ov{position:absolute;right:3px;bottom:3px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(22,35,28,.72);color:#fff}
+.inv-thumb .ov svg{width:12px;height:12px}
 .inv-thumb input{display:none}
 .inv-thumb.new{border-style:solid;border-color:var(--g)}
 

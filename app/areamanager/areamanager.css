@@ -30,3 +30,15 @@
 .am-check input{width:18px;height:18px;margin:0}
 .am-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
 .adm .am-head button{padding:8px 14px;font-size:13px}
+
+/* Rider details */
+.am-form select{width:100%;margin:0;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:16px}
+.am-form select:focus{border-color:var(--g);outline:none;box-shadow:0 0 0 3px rgba(12,125,29,.12)}
+.am-sub{margin:4px 0 0;font-size:14px;font-weight:700}
+.am-more summary{cursor:pointer;color:var(--g);font-size:13px;font-weight:600}
+.am-more .adm-meta{margin-top:10px}
+.am-more a,.adm-meta a{color:var(--g);text-decoration:none;font-weight:600}
+.am-edit{display:flex;flex-direction:column;gap:12px}
+.am-one{display:block;margin:0}
+.am-one span{display:block;margin:0 0 3px;color:var(--muted);font-size:12px;font-weight:600}
+.am-one input{width:100%;margin:0;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:16px}

@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
+import { RiderDetailsFields, checkDetails, emptyDetails, type Details } from "./RiderDetails";
 
 type Kind = "rider" | "shop";
 type Invite = { out_id: string; out_phone: string; out_role: string; out_name: string | null; out_shop_name: string | null; out_created_at: string };
@@ -29,6 +30,7 @@ export default function OnboardPanel({ initialKind = "rider", onChanged }: { ini
   const [shopName, setShopName] = useState("");
   const [address, setAddress] = useState("");
   const [loc, setLoc] = useState("");
+  const [det, setDet] = useState<Details>(emptyDetails());
   const [approve, setApprove] = useState(true);
   const [busy, setBusy] = useState(false);
   const [locBusy, setLocBusy] = useState(false);
@@ -57,6 +59,11 @@ export default function OnboardPanel({ initialKind = "rider", onChanged }: { ini
     const ph = normPhone(phone);
     if (!ph) { setMsg({ text: "Enter a valid 10-digit mobile number.", ok: false }); return; }
     let ll: [number, number] | null = null;
+    if (kind === "rider") {
+      if (!name.trim()) { setMsg({ text: "Enter the rider's full name.", ok: false }); return; }
+      const bad = checkDetails(det);
+      if (bad) { setMsg({ text: bad, ok: false }); return; }
+    }
     if (kind === "shop") {
       if (!shopName.trim()) { setMsg({ text: "Enter the shop name.", ok: false }); return; }
       ll = parseLoc(loc);
@@ -68,11 +75,12 @@ export default function OnboardPanel({ initialKind = "rider", onChanged }: { ini
       p_phone: ph, p_role: kind, p_name: name.trim() || null, p_approve: kind === "rider" ? approve : false,
       p_shop_name: kind === "shop" ? shopName.trim() : null, p_shop_address: kind === "shop" ? address.trim() || null : null,
       p_lat: ll ? ll[0] : null, p_lng: ll ? ll[1] : null,
+      p_details: kind === "rider" ? det : null,
     });
     setBusy(false);
     if (error) { setMsg({ text: friendly(error.message), ok: false }); return; }
     setDone({ kind, status: data === "invited" ? "invited" : "added", phone: ph, label: kind === "shop" ? shopName.trim() : name.trim(), approved: kind === "rider" && approve });
-    setPhone(""); setName(""); setShopName(""); setAddress(""); setLoc("");
+    setPhone(""); setName(""); setShopName(""); setAddress(""); setLoc(""); setDet(emptyDetails());
     loadInvites(); onChanged();
   }
 
@@ -90,7 +98,7 @@ export default function OnboardPanel({ initialKind = "rider", onChanged }: { ini
 
   return (<div className="am-onb">
     <ol className="am-steps" aria-label="How onboarding works">
-      <li><b>1. Enter details</b><span>Phone number, and the shop name and location for a shop.</span></li>
+      <li><b>1. Enter details</b><span>Phone number. For a rider: vehicle, licence and emergency contact. For a shop: name and location.</span></li>
       <li><b>2. They sign in</b><span>With that phone number. If they already have an account, it is set up at once.</span></li>
       <li><b>3. Approval</b><span>You approve riders. Quicky approves shops.</span></li>
       <li><b>4. Go online</b><span>Riders and shops start taking orders.</span></li>
@@ -114,7 +122,7 @@ export default function OnboardPanel({ initialKind = "rider", onChanged }: { ini
       <div className="am-form">
         <label><span>Mobile number</span>
           <input type="tel" inputMode="tel" placeholder="9999999995" value={phone} onChange={(e) => setPhone(e.target.value)} /></label>
-        <label><span>{kind === "shop" ? "Owner name (optional)" : "Full name (optional)"}</span>
+        <label><span>{kind === "shop" ? "Owner name (optional)" : "Full name"}</span>
           <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} /></label>
         {kind === "shop" && <>
           <label><span>Shop name</span>
@@ -130,6 +138,10 @@ export default function OnboardPanel({ initialKind = "rider", onChanged }: { ini
           <p className="adm-hint wide">Best done while you are standing at the shop. Orders are matched to shops by this location. You can also paste the coordinates from Google Maps.</p>
         </>}
       </div>
+      {kind === "rider" && <>
+        <h4 className="am-sub">Rider details</h4>
+        <RiderDetailsFields value={det} onChange={setDet} />
+      </>}
       {kind === "rider" && <label className="am-check"><input type="checkbox" checked={approve} onChange={(e) => setApprove(e.target.checked)} /> Approve this rider right away</label>}
       <div className="adm-actions"><button disabled={busy || !phone.trim()} onClick={submit}>{busy ? "Please wait..." : kind === "shop" ? "Onboard shop" : "Onboard rider"}</button></div>
     </div>)}

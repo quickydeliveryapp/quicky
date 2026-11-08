@@ -6,6 +6,7 @@ import { friendly } from "@/lib/messages";
 import { useProfile } from "@/lib/useProfile";
 import DepositPanel from "./DepositPanel";
 import OnboardPanel from "./OnboardPanel";
+import { RiderDetailsFields, checkDetails, emptyDetails, fromRow, vehicleLabel, idLabel, telHref, type Details } from "./RiderDetails";
 import "../admin/admin.css";
 import "./areamanager.css";
 
@@ -42,17 +43,22 @@ function AreaView() {
   const [shopNames, setShopNames] = useState<Record<string, string>>({});
   const [kind, setKind] = useState<"rider" | "shop">("rider");
   const [shopInfo, setShopInfo] = useState<Record<string, any>>({});
+  const [riderDet, setRiderDet] = useState<Record<string, Details>>({});
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDet, setEditDet] = useState<Details>(emptyDetails());
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ text: string; ok: boolean } | null>(null);
   const [now, setNow] = useState(Date.now());
 
   // Row level security limits all of this to the manager's own area.
   const load = useCallback(async () => {
-    const [pe, o, sh, ms] = await Promise.all([
+    const [pe, o, sh, ms, rd] = await Promise.all([
       supabase.from("profiles").select("id,role,full_name,phone,is_online,rider_approved").in("role", ["shop", "rider"]).order("role"),
       supabase.from("orders").select("id,status,total,address,created_at,expected_delivery_at,cash_collected,fulfilment_shop_id,rider_id").order("created_at", { ascending: false }).limit(50),
       supabase.rpc("shop_summary"),
       supabase.rpc("am_shops"),
+      supabase.rpc("am_rider_details"),
     ]);
     if (pe.error) setToast({ text: friendly(pe.error.message), ok: false }); else setPeople(pe.data || []);
     if (o.error) setToast({ text: friendly(o.error.message), ok: false }); else setOrders(o.data || []);
@@ -62,6 +68,9 @@ function AreaView() {
     const info: Record<string, any> = {};
     ((ms.data as any[]) || []).forEach((x) => { info[x.out_owner] = x; });
     setShopInfo(info);
+    const rdm: Record<string, Details> = {};
+    ((rd.data as any[]) || []).forEach((x) => { rdm[x.out_rider] = fromRow(x); });
+    setRiderDet(rdm);
     setNow(Date.now());
   }, []);
 
@@ -78,6 +87,16 @@ function AreaView() {
   }
   const ask = (text: string, fn: () => void) => { if (window.confirm(text)) fn(); };
 
+  function startEdit(r: any) {
+    setEditId(r.id); setEditName(r.full_name || ""); setEditDet(riderDet[r.id] ?? emptyDetails());
+  }
+  function saveEdit() {
+    if (!editId) return;
+    if (!editName.trim()) { setToast({ text: "Enter the rider's full name.", ok: false }); return; }
+    const bad = checkDetails(editDet);
+    if (bad) { setToast({ text: bad, ok: false }); return; }
+    call("am_set_rider_details", { p_rider: editId, p_details: editDet, p_name: editName.trim() }, () => setEditId(null));
+  }
   const goOnboard = (k: "rider" | "shop") => { setKind(k); setTab("onboard"); };
 
   const riders = people.filter((p) => p.role === "rider");
@@ -158,22 +177,43 @@ function AreaView() {
     {tab === "riders" && <>
       <div className="am-head"><p className="adm-hint">Riders in your area. Approve them so they can take orders.</p><button onClick={() => goOnboard("rider")}>+ Onboard a rider</button></div>
       {riders.length === 0 ? <Empty>No riders in your area yet. Tap Onboard a rider to add one.</Empty> : <div className="adm-grid">
-        {riders.map((r) => (
+        {riders.map((r) => { const d = riderDet[r.id]; const editing = editId === r.id; return (
           <div className="adm-card" key={r.id}>
             <div className="adm-head">
               <span className="adm-av">{String(r.phone || r.full_name || "?").slice(-2)}</span>
               <div><span className="adm-name">{r.full_name || r.phone}</span>
-                <span className="adm-sub"><span className={"adm-dot" + (r.is_online ? " on" : "")} /> {r.is_online ? "Online" : "Offline"}</span></div>
+                <span className="adm-sub"><span className={"adm-dot" + (r.is_online ? " on" : "")} /> {r.is_online ? "Online" : "Offline"}{d ? " · " + vehicleLabel(d.vehicle_type) + (d.vehicle_number ? " " + d.vehicle_number : "") : ""}</span></div>
               <span className={"adm-badge " + (r.rider_approved ? "ok" : "")}>{r.rider_approved ? "Approved" : "Pending"}</span>
             </div>
+            {!d && !editing && <p className="adm-hint">No details added yet. Add the vehicle, licence and emergency contact.</p>}
+            {d && !editing && <details className="am-more">
+              <summary>Rider details</summary>
+              <dl className="adm-meta">
+                <div><dt>Mobile</dt><dd>{r.phone ? <a href={telHref(r.phone)}>{r.phone}</a> : "—"}</dd></div>
+                <div><dt>Vehicle</dt><dd>{vehicleLabel(d.vehicle_type)}{d.vehicle_number ? " · " + d.vehicle_number : ""}</dd></div>
+                {d.licence_number && <div><dt>Licence</dt><dd>{d.licence_number}</dd></div>}
+                {d.id_type && <div><dt>ID proof</dt><dd>{idLabel(d.id_type)} ending {d.id_last4}</dd></div>}
+                <div><dt>Emergency contact</dt><dd>{d.emergency_name} · <a href={telHref(d.emergency_phone)}>{d.emergency_phone}</a></dd></div>
+                {d.address && <div><dt>Address</dt><dd>{d.address}</dd></div>}
+              </dl>
+            </details>}
+            {editing && (<div className="am-edit">
+              <label className="am-one"><span>Full name</span><input value={editName} onChange={(e) => setEditName(e.target.value)} /></label>
+              <RiderDetailsFields value={editDet} onChange={setEditDet} />
+              <div className="adm-actions">
+                <button disabled={busy} onClick={saveEdit}>Save details</button>
+                <button className="alt" disabled={busy} onClick={() => setEditId(null)}>Cancel</button>
+              </div>
+            </div>)}
             <div className="adm-actions">
               {r.rider_approved
                 ? <button className="danger" disabled={busy} onClick={() => ask("Revoke approval for " + (r.full_name || r.phone) + "? They won't be able to take orders.", () => call("set_rider_approved", { p_id: r.id, p_ok: false }))}>Revoke approval</button>
                 : <button disabled={busy} onClick={() => call("set_rider_approved", { p_id: r.id, p_ok: true })}>Approve rider</button>}
               <button className="alt" disabled={busy} onClick={() => call("am_set_online", { p_id: r.id, p_online: !r.is_online })}>{r.is_online ? "Set offline" : "Set online"}</button>
+              {!editing && <button className="alt" disabled={busy} onClick={() => startEdit(r)}>{d ? "Edit details" : "Add details"}</button>}
               <button className="danger" disabled={busy} onClick={() => ask("Remove this rider from your area?", () => call("am_remove_member", { p_id: r.id }))}>Remove</button>
             </div>
-          </div>))}
+          </div>); })}
       </div>}
     </>}
 

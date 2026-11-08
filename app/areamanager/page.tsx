@@ -4,6 +4,7 @@ import RoleGate from "@/components/RoleGate";
 import { supabase } from "@/lib/supabase";
 import { useProfile } from "@/lib/useProfile";
 import OrdersPanel from "./OrdersPanel";
+import DepositPanel from "./DepositPanel";
 
 type Row = { id: string; role: string; full_name: string | null; is_online: boolean };
 
@@ -106,6 +107,8 @@ function AreaView() {
         {list("Shops", "shop")}
         {list("Riders", "rider")}
       </div>
+
+      <DepositPanel />
 
       <OrdersPanel people={rows} />
     </>

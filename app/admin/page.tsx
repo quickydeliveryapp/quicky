@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 import HeroAdmin from "@/components/HeroAdmin";
+import DepositPanel from "../areamanager/DepositPanel";
 import "./admin.css";
 
 type Tab = "orders" | "riders" | "shops" | "commission" | "settlement" | "cash" | "fees" | "hero";
@@ -212,6 +213,8 @@ export default function Admin() {
           </div>
         </div>))}
     </div>)}
+
+    {tab === "cash" && <DepositPanel />}
 
     {tab === "cash" && (cash.length === 0 ? <Empty>No rider cash to show yet.</Empty> : <div className="adm-grid">
       {cash.map((r) => (

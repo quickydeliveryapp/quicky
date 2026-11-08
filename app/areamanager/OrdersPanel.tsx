@@ -9,7 +9,7 @@ type Order = {
   status: string;
   total: number | null;
   address: string | null;
-  shop_id: string | null;
+  fulfilment_shop_id: string | null;
   rider_id: string | null;
   created_at: string;
 };
@@ -54,7 +54,7 @@ export default function OrdersPanel({ people }: { people: Person[] }) {
     start.setHours(0, 0, 0, 0);
     const { data, error } = await supabase
       .from("orders")
-      .select("id,status,total,address,shop_id,rider_id,created_at")
+      .select("id,status,total,address,fulfilment_shop_id,rider_id,created_at")
       .gte("created_at", start.toISOString())
       .order("created_at", { ascending: false });
     if (error) setErr(error.message);
@@ -147,7 +147,7 @@ export default function OrdersPanel({ people }: { people: Person[] }) {
               </div>
               <div style={{ flex: 1, minWidth: 160, fontSize: 13 }}>
                 <div>{o.address || "No address"}</div>
-                <div style={{ color: "#6B7A71" }}>Shop: {nameOf(o.shop_id)}</div>
+                <div style={{ color: "#6B7A71" }}>Shop: {nameOf(o.fulfilment_shop_id)}</div>
               </div>
               <div style={{ fontSize: 13, minWidth: 110 }}>{STATUS_LABEL[o.status] ?? o.status}</div>
               <div style={{ fontSize: 13, minWidth: 120 }}>

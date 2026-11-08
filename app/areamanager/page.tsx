@@ -5,13 +5,14 @@ import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 import { useProfile } from "@/lib/useProfile";
 import DepositPanel from "./DepositPanel";
+import OnboardPanel from "./OnboardPanel";
 import "../admin/admin.css";
 import "./areamanager.css";
 
-type Tab = "orders" | "riders" | "shops" | "deposits";
+type Tab = "orders" | "riders" | "shops" | "onboard" | "deposits";
 type Filter = "all" | "active" | "unassigned" | "delayed" | "delivered" | "cancelled";
 
-const TAB_LABEL: Record<Tab, string> = { orders: "Orders", riders: "Riders", shops: "Shops", deposits: "Rider cash" };
+const TAB_LABEL: Record<Tab, string> = { orders: "Orders", riders: "Riders", shops: "Shops", onboard: "Onboard", deposits: "Rider cash" };
 const STATUS_LABEL: Record<string, string> = {
   placed: "Placed", accepted: "Accepted", packed: "Packed", picked_up: "On the way", delivered: "Delivered", cancelled: "Cancelled",
 };
@@ -39,23 +40,28 @@ function AreaView() {
   const [people, setPeople] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [shopNames, setShopNames] = useState<Record<string, string>>({});
-  const [phone, setPhone] = useState("");
+  const [kind, setKind] = useState<"rider" | "shop">("rider");
+  const [shopInfo, setShopInfo] = useState<Record<string, any>>({});
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ text: string; ok: boolean } | null>(null);
   const [now, setNow] = useState(Date.now());
 
   // Row level security limits all of this to the manager's own area.
   const load = useCallback(async () => {
-    const [pe, o, sh] = await Promise.all([
+    const [pe, o, sh, ms] = await Promise.all([
       supabase.from("profiles").select("id,role,full_name,phone,is_online,rider_approved").in("role", ["shop", "rider"]).order("role"),
       supabase.from("orders").select("id,status,total,address,created_at,expected_delivery_at,cash_collected,fulfilment_shop_id,rider_id").order("created_at", { ascending: false }).limit(50),
       supabase.rpc("shop_summary"),
+      supabase.rpc("am_shops"),
     ]);
     if (pe.error) setToast({ text: friendly(pe.error.message), ok: false }); else setPeople(pe.data || []);
     if (o.error) setToast({ text: friendly(o.error.message), ok: false }); else setOrders(o.data || []);
     const names: Record<string, string> = {};
     ((sh.data as any[]) || []).forEach((s) => { names[s.out_shop_id] = s.out_name; });
     setShopNames(names);
+    const info: Record<string, any> = {};
+    ((ms.data as any[]) || []).forEach((x) => { info[x.out_owner] = x; });
+    setShopInfo(info);
     setNow(Date.now());
   }, []);
 
@@ -72,12 +78,7 @@ function AreaView() {
   }
   const ask = (text: string, fn: () => void) => { if (window.confirm(text)) fn(); };
 
-  function addMember() {
-    const digits = phone.replace(/\D/g, "");
-    if (!digits) return;
-    const full = digits.length === 10 ? "91" + digits : digits;
-    call("am_add_member", { p_phone: full }, () => setPhone(""));
-  }
+  const goOnboard = (k: "rider" | "shop") => { setKind(k); setTab("onboard"); };
 
   const riders = people.filter((p) => p.role === "rider");
   const shops = people.filter((p) => p.role === "shop");
@@ -100,15 +101,6 @@ function AreaView() {
   const shown = orders.filter((o) =>
     filter === "all" ? true : filter === "active" ? isActive(o) : filter === "unassigned" ? unassigned(o) : filter === "delayed" ? delayed(o) : o.status === filter);
   const waiting = riders.filter((r) => !r.rider_approved).length;
-
-  const addCard = (<div className="adm-card">
-    <span className="adm-name">Add to your area</span>
-    <div className="am-add">
-      <input type="tel" inputMode="tel" placeholder="Phone, e.g. 9999999995" aria-label="Phone number" value={phone} onChange={(e) => setPhone(e.target.value)} />
-      <button disabled={busy || !phone.trim()} onClick={addMember}>Add to area</button>
-    </div>
-    <p className="adm-hint">Only a shop or rider whose role is already set and who has no area can be added.</p>
-  </div>);
 
   return (<div className="adm">
     <p className="adm-hint">{profile?.area ? `Shops and riders in ${profile.area}.` : "No area assigned yet. Ask an admin to assign one."}</p>
@@ -164,8 +156,8 @@ function AreaView() {
     </>}
 
     {tab === "riders" && <>
-      {addCard}
-      {riders.length === 0 ? <Empty>No riders in your area yet.</Empty> : <div className="adm-grid">
+      <div className="am-head"><p className="adm-hint">Riders in your area. Approve them so they can take orders.</p><button onClick={() => goOnboard("rider")}>+ Onboard a rider</button></div>
+      {riders.length === 0 ? <Empty>No riders in your area yet. Tap Onboard a rider to add one.</Empty> : <div className="adm-grid">
         {riders.map((r) => (
           <div className="adm-card" key={r.id}>
             <div className="adm-head">
@@ -186,22 +178,25 @@ function AreaView() {
     </>}
 
     {tab === "shops" && <>
-      {addCard}
-      {shops.length === 0 ? <Empty>No shops in your area yet.</Empty> : <div className="adm-grid">
-        {shops.map((s) => (
+      <div className="am-head"><p className="adm-hint">Shops in your area. New shops need Quicky&apos;s approval before they get orders.</p><button onClick={() => goOnboard("shop")}>+ Onboard a shop</button></div>
+      {shops.length === 0 ? <Empty>No shops in your area yet. Tap Onboard a shop to add one.</Empty> : <div className="adm-grid">
+        {shops.map((s) => { const inf = shopInfo[s.id]; return (
           <div className="adm-card" key={s.id}>
             <div className="adm-head">
-              <span className="adm-av">{String(s.full_name || "?").charAt(0).toUpperCase()}</span>
-              <div><span className="adm-name">{s.full_name || String(s.id).slice(0, 8)}</span>
-                <span className="adm-sub"><span className={"adm-dot" + (s.is_online ? " on" : "")} /> {s.is_online ? "Online" : "Offline"}</span></div>
+              <span className="adm-av">{String(inf?.out_name || s.full_name || "?").charAt(0).toUpperCase()}</span>
+              <div><span className="adm-name">{inf?.out_name || s.full_name || String(s.id).slice(0, 8)}</span>
+                <span className="adm-sub"><span className={"adm-dot" + (s.is_online ? " on" : "")} /> {s.is_online ? "Online" : "Offline"}{inf?.out_address ? " · " + inf.out_address : ""}</span></div>
+              {inf && <span className={"adm-badge " + (inf.out_status === "approved" ? "ok" : inf.out_status === "suspended" ? "bad" : "")}>{inf.out_status === "approved" ? "Approved" : inf.out_status === "suspended" ? "Suspended" : "Awaiting approval"}</span>}
             </div>
             <div className="adm-actions">
               <button className="alt" disabled={busy} onClick={() => call("am_set_online", { p_id: s.id, p_online: !s.is_online })}>{s.is_online ? "Set offline" : "Set online"}</button>
               <button className="danger" disabled={busy} onClick={() => ask("Remove this shop from your area?", () => call("am_remove_member", { p_id: s.id }))}>Remove</button>
             </div>
-          </div>))}
+          </div>); })}
       </div>}
     </>}
+
+    {tab === "onboard" && <OnboardPanel initialKind={kind} onChanged={load} />}
 
     {tab === "deposits" && <DepositPanel />}
   </div>);

@@ -16,6 +16,7 @@ type Tab = "deliveries" | "history" | "cash" | "profile";
 type Range = "today" | "week" | "month" | "all";
 type Prefs = { sound: boolean; vibrate: boolean; large: boolean };
 const DEFAULT_PREFS: Prefs = { sound: true, vibrate: true, large: false };
+type Sheet = { kind: "choose" } | { kind: "cash" } | { kind: "pay"; pa: string; pn: string; am: string; link: string };
 const RANGES: [Range, string][] = [["today", "Today"], ["week", "7 days"], ["month", "30 days"], ["all", "All"]];
 
 const rupee = (n: number) => "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
@@ -81,6 +82,35 @@ function Scanner({ title, hint, onResult, onClose }: { title: string; hint: stri
   </div>);
 }
 
+const Chevrons = () => (<svg {...sv}><path d="M7 6l6 6-6 6" /><path d="M13 6l6 6-6 6" /></svg>);
+
+// Slide the knob to the end to confirm. Keyboard and screen reader users can press the knob instead.
+function SlideToConfirm({ label, onDone }: { label: string; onDone: () => void }) {
+  const track = useRef<HTMLDivElement>(null);
+  const [x, setX] = useState(0);
+  const [drag, setDrag] = useState(false);
+  const from = useRef(0);
+  const max = () => Math.max(1, (track.current?.clientWidth ?? 0) - 60);
+  const finish = () => { setX(0); setDrag(false); onDone(); };
+  return (<div className="rdr-slide" ref={track}>
+    <span className="rdr-slide-t" style={{ opacity: Math.max(0, 1 - (x / max()) * 1.4) }}>{label}</span>
+    <button type="button" className="rdr-slide-k" role="slider" aria-label={`${label}. Drag right, or press Enter`}
+      aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round((x / max()) * 100)}
+      style={{ transform: `translateX(${x}px)`, transition: drag ? "none" : "transform .2s" }}
+      onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); from.current = e.clientX - x; setDrag(true); }}
+      onPointerMove={(e) => { if (drag) setX(Math.min(max(), Math.max(0, e.clientX - from.current))); }}
+      onPointerUp={() => { if (!drag) return; setDrag(false); if (x >= max() * 0.85) finish(); else setX(0); }}
+      onPointerCancel={() => { setDrag(false); setX(0); }}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowRight") { e.preventDefault(); const n = x + max() / 4; if (n >= max() * 0.85) finish(); else setX(n); }
+        if (e.key === "ArrowLeft") { e.preventDefault(); setX(Math.max(0, x - max() / 4)); }
+      }}
+      onClick={(e) => { if (e.detail === 0) finish(); }}>
+      <Chevrons />
+    </button>
+  </div>);
+}
+
 function Steps({ at }: { at: 1 | 2 | 3 }) {
   const items = ["Accepted", "Picked up", "Delivered"];
   return (<div className="rdr-steps" aria-label={`Step ${at} of 3`}>
@@ -95,10 +125,10 @@ export default function Rider() {
   const [me, setMe] = useState<Me | null>(null);
   const [orders, setOrders] = useState<RO[]>([]);
   const [done, setDone] = useState<Done[]>([]);
-  const [deps, setDeps] = useState<{ amount: number; created_at: string }[]>([]);
+  const [deps, setDeps] = useState<{ amount: number; created_at: string; method: string }[]>([]);
   const [tab, setTab] = useState<Tab>("deliveries");
   const [pay, setPayState] = useState<Record<string, Pay>>({});
-  const [scan, setScan] = useState<null | "pickup" | "upi">(null);
+  const [scan, setScan] = useState<null | "pickup" | "upi" | "deposit">(null);
   const [upiText, setUpiText] = useState("");
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ text: string; ok: boolean } | null>(null);
@@ -108,6 +138,9 @@ export default function Rider() {
   const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const seen = useRef<Set<string> | null>(null);
+  const [limit, setLimit] = useState(200);
+  const [amUpis, setAmUpis] = useState<{ upi: string; name: string }[]>([]);
+  const [sheet, setSheet] = useState<Sheet | null>(null);
 
   const say = (text: string, ok = true) => setToast({ text, ok });
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 5000); return () => clearTimeout(t); }, [toast]);
@@ -115,11 +148,13 @@ export default function Rider() {
   const load = useCallback(async () => {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
-    const [p, o, d, dp] = await Promise.all([
+    const [p, o, d, dp, fe, am] = await Promise.all([
       supabase.from("profiles").select("id,phone,is_online,rider_approved,upi_id").eq("id", u.user.id).single(),
       supabase.rpc("rider_orders"),
       supabase.from("orders").select("id,total,cash_collected,payment_method,delivered_at,address,cash_received,change_returned").eq("status", "delivered").order("delivered_at", { ascending: false }),
-      supabase.from("cash_deposits").select("amount,created_at").order("created_at", { ascending: false }),
+      supabase.from("cash_deposits").select("*").order("created_at", { ascending: false }),
+      supabase.from("fee_settings").select("*").eq("id", 1).single(),
+      supabase.rpc("my_area_manager_upis"),
     ]);
     if (p.data) setMe({ ...(p.data as Me), phone: (p.data as Me).phone ?? u.user.phone ?? null });
     if (o.error) say(friendly(o.error.message), false);
@@ -128,7 +163,9 @@ export default function Rider() {
       eta: r.out_eta, rider: r.out_rider, shopName: r.out_shop_name, shopAddress: r.out_shop_address, shopLat: r.out_shop_lat, shopLng: r.out_shop_lng, phone: r.out_customer_phone,
     })));
     if (!d.error) setDone((d.data as Done[]) || []);
-    if (!dp.error) setDeps(((dp.data as any[]) || []).map((r) => ({ amount: Number(r.amount), created_at: r.created_at })));
+    if (!dp.error) setDeps(((dp.data as any[]) || []).map((r) => ({ amount: Number(r.amount), created_at: r.created_at, method: r.method ?? "cash" })));
+    if (fe.data) setLimit(Number((fe.data as any).rider_cash_limit ?? 200));
+    if (!am.error) setAmUpis(((am.data as any[]) || []).map((r) => ({ upi: String(r.out_upi), name: String(r.out_name) })));
     setReady(true);
   }, []);
 
@@ -208,6 +245,23 @@ export default function Rider() {
     if (!VPA.test(id)) { say("This QR does not contain a UPI ID. Scan the QR from your UPI app.", false); return; }
     saveUpi(id);
   }
+  function onDepositScan(text: string) {
+    setScan(null);
+    const t = text.trim();
+    if (!/^upi:\/\//i.test(t)) { say("This is not a UPI payment QR. Ask your area manager to show the deposit QR.", false); return; }
+    try {
+      const q = new URL(t).searchParams;
+      const pa = q.get("pa") || "";
+      if (!VPA.test(pa)) throw new Error("bad");
+      setSheet({ kind: "pay", pa, pn: q.get("pn") || "", am: q.get("am") || "", link: t });
+    } catch { say("This is not a valid UPI payment QR.", false); }
+  }
+  useEffect(() => {
+    if (!sheet) return;
+    const k = (e: KeyboardEvent) => { if (e.key === "Escape") setSheet(null); };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [sheet]);
 
   const payOf = (id: string): Pay => pay[id] ?? { method: "cash", received: "", returned: false, upiOk: false };
   const setPay = (id: string, patch: Partial<Pay>) => setPayState((m) => ({ ...m, [id]: { ...payOf(id), ...patch } }));
@@ -220,7 +274,8 @@ export default function Rider() {
     setBusy(false);
     if (error) { say(friendly(error.message), false); return; }
     setPayState((m) => { const n = { ...m }; delete n[o.id]; return n; });
-    say(`Delivered. ${rupee(o.total)} added to the money you owe Quicky.`);
+    const after = money(owe + o.total);
+    say(after > 0 ? `Delivered. You now owe Quicky ${rupee(after)}.` : after === 0 ? "Delivered. Your balance with Quicky is settled." : `Delivered. You still have ${rupee(-after)} advance balance with Quicky.`);
     load();
   }
 
@@ -325,6 +380,58 @@ export default function Rider() {
     </article>);
   }
 
+  function depositCard() {
+    if (owe <= 0) return null;
+    const over = owe > limit;
+    return (<section className={"rdr-dep" + (over ? " over" : "")} aria-label="Deposit">
+      <div className="rdr-line">
+        <span className="rdr-ic"><Wallet /></span>
+        <div><b>{over ? `Please deposit ${rupee(owe)}` : `You hold ${rupee(owe)} of Quicky's money`}</b>
+          <span>{over ? `This is more than the limit of ${rupee(limit)}.` : `You can deposit once it goes above ${rupee(limit)}.`}</span></div>
+      </div>
+      {over && <SlideToConfirm label="Slide to deposit" onDone={() => setSheet({ kind: "choose" })} />}
+    </section>);
+  }
+  const creditNote = owe < 0 ? (<p className="rdr-note exact"><Check /> You have {rupee(-owe)} advance balance with Quicky. It is adjusted automatically against the payments you collect.</p>) : null;
+
+  function depositSheet() {
+    if (!sheet) return null;
+    const close = () => setSheet(null);
+    let body: React.ReactNode = null;
+    if (sheet.kind === "choose") body = (<>
+      <h3 className="rdr-h" style={{ margin: 0 }}>Deposit {rupee(owe)}</h3>
+      <p className="rdr-hint">How do you want to pay Quicky?</p>
+      <button className="rdr-opt" autoFocus onClick={() => { setSheet(null); setScan("deposit"); }}>
+        <span className="rdr-ic"><QrIcon /></span><span><b>Pay by UPI</b><small>Scan the QR on your area manager&apos;s phone</small></span></button>
+      <button className="rdr-opt" onClick={() => setSheet({ kind: "cash" })}>
+        <span className="rdr-ic"><Cash /></span><span><b>Give cash</b><small>Hand it to your area manager</small></span></button>
+    </>);
+    if (sheet.kind === "cash") body = (<>
+      <h3 className="rdr-h" style={{ margin: 0 }}>Give {rupee(owe)} in cash</h3>
+      <p className="rdr-hint">Hand the cash to your area manager. They will record it, and your balance updates here. If you give more than you owe, the extra stays as your advance balance.</p>
+      <button className="rdr-btn" autoFocus onClick={close}>Got it</button>
+    </>);
+    if (sheet.kind === "pay") {
+      const known = amUpis.map((u) => u.upi.toLowerCase());
+      const ver = known.length === 0 ? "unknown" : known.includes(sheet.pa.toLowerCase()) ? "ok" : "bad";
+      const amName = amUpis.find((u) => u.upi.toLowerCase() === sheet.pa.toLowerCase())?.name;
+      body = (<>
+        <h3 className="rdr-h" style={{ margin: 0 }}>Check before you pay</h3>
+        <div className="rdr-bill"><span>Amount</span><b>{sheet.am ? rupee(Number(sheet.am)) : "Set in your UPI app"}</b></div>
+        <div className="rdr-line"><span className="rdr-ic"><User /></span><div><b>{amName || sheet.pn || "Payee"}</b><span>{sheet.pa}</span></div></div>
+        {ver === "ok" && <p className="rdr-note exact"><Check /> This is your area manager&apos;s UPI ID.</p>}
+        {ver === "unknown" && <p className="rdr-note change" style={{ flexDirection: "row" }}>We could not check this UPI ID. Make sure the name is your area manager before you pay.</p>}
+        {ver === "bad" && <p className="rdr-note short" role="alert">This is not your area manager&apos;s UPI ID. Do not pay. Ask your area manager to show the QR from their Quicky dashboard.</p>}
+        {ver !== "bad" && <a className="rdr-btn" href={sheet.link}><QrIcon /> Open UPI app</a>}
+        <p className="rdr-hint">Your phone will ask which UPI app to pay with. After you pay, your area manager confirms it, and your balance updates here.</p>
+        <button className="rdr-btn alt" onClick={close}>Cancel</button>
+      </>);
+    }
+    return (<div className="rdr-sheet-bg" onClick={close}>
+      <div className="rdr-sheet" role="dialog" aria-modal="true" aria-label="Deposit" onClick={(e) => e.stopPropagation()}>{body}</div>
+    </div>);
+  }
+
   const phoneLabel = me?.phone ? "+" + me.phone.replace(/^\+/, "") : "Rider";
 
   return (<div className="rdr" style={{ ["--tx" as string]: prefs.large ? 1.18 : 1 } as React.CSSProperties}>
@@ -348,6 +455,8 @@ export default function Rider() {
     </nav>
 
     {tab === "deliveries" && <>
+      {depositCard()}
+      {creditNote}
       {me && !me.rider_approved && <p className="rdr-toast bad">Your account is waiting for approval from Quicky. You can take orders once it is approved.</p>}
       {mine.length > 0 && <><h3 className="rdr-h">Your deliveries</h3>{mine.map(activeCard)}</>}
       {canTake && avail.length > 0 && <><h3 className="rdr-h">Ready for pickup ({avail.length})</h3>{avail.map(availCard)}</>}
@@ -359,19 +468,20 @@ export default function Rider() {
     </>}
 
     {tab === "cash" && <>
+      {depositCard()}
       <div className="rdr-tiles">
-        <div className="rdr-tile hl"><b>{rupee(owe)}</b><span>You need to deposit with Quicky</span></div>
+        <div className="rdr-tile hl"><b>{rupee(Math.abs(owe))}</b><span>{owe > 0 ? "You need to deposit with Quicky" : owe < 0 ? "Advance balance with Quicky" : "All settled with Quicky"}</span></div>
         <div className="rdr-tile"><b>{todays.length}</b><span>Delivered today</span></div>
         <div className="rdr-tile"><b>{rupee(todayCash)}</b><span>Collected today</span></div>
         <div className="rdr-tile"><b>{rupee(collected)}</b><span>Collected in total</span></div>
         <div className="rdr-tile"><b>{rupee(deposited)}</b><span>Deposited in total</span></div>
       </div>
-      <p className="rdr-hint">Cash and UPI payments both come to you, so both are added to the amount you deposit with Quicky.</p>
+      <p className="rdr-hint">Cash and UPI payments both come to you, so both are added to what you owe Quicky. If you deposit more than you owe, the extra stays as an advance balance and is adjusted against your next payments.{limit > 0 ? ` Deposit limit: ${rupee(limit)}.` : ""}</p>
       {deps.length > 0 && <>
         <h3 className="rdr-h">Your deposits</h3>
         <div className="rdr-card"><div className="rdr-list">
           {deps.slice(0, 5).map((d, i) => (<div className="rdr-li" key={i}>
-            <span className="rdr-ic"><Check /></span><div className="grow"><b>{rupee(d.amount)} deposited</b><span>{dayTime(d.created_at)}</span></div>
+            <span className="rdr-ic"><Check /></span><div className="grow"><b>{rupee(d.amount)} deposited {d.method === "upi" ? "via UPI" : "in cash"}</b><span>{dayTime(d.created_at)}</span></div>
           </div>))}
         </div></div></>}
     </>}
@@ -450,5 +560,7 @@ export default function Rider() {
 
     {scan === "pickup" && <Scanner title="Scan pickup QR" hint="Point the camera at the QR on the bag" onResult={pickup} onClose={() => setScan(null)} />}
     {scan === "upi" && <Scanner title="Scan your UPI QR" hint="Point the camera at the QR from your UPI app" onResult={onUpiScan} onClose={() => setScan(null)} />}
+    {scan === "deposit" && <Scanner title="Scan the deposit QR" hint="Point the camera at the QR on your area manager's phone" onResult={onDepositScan} onClose={() => setScan(null)} />}
+    {depositSheet()}
   </div>);
 }

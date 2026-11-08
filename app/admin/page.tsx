@@ -219,11 +219,12 @@ export default function Admin() {
           <div className="adm-head">
             <span className="adm-av">{String(r.rider_phone || "?").slice(-2)}</span>
             <div><span className="adm-name">{r.rider_phone}</span><span className="adm-sub">{r.deliveries} deliveries</span></div>
+            {Number(r.pending) > Number(fees?.rider_cash_limit ?? Infinity) && <span className="adm-badge bad">Over limit</span>}
           </div>
           <div className="adm-figs">
             <Fig label="Collected" value={rupee(r.collected)} />
             <Fig label="Deposited" value={rupee(r.deposited)} />
-            <Fig label="Still to deposit" value={rupee(r.pending)} cls="hl" />
+            <Fig label={Number(r.pending) < 0 ? "Advance balance" : "Still to deposit"} value={rupee(Math.abs(Number(r.pending)))} cls="hl" />
           </div>
           <div className="adm-actions">
             <button onClick={() => { const a = Number(window.prompt("Cash deposited by rider (₹)?")); if (a > 0) run(supabase.rpc("record_cash_deposit", { p_rider: r.out_rider, p_amount: a })); }}>Record deposit</button>
@@ -233,11 +234,12 @@ export default function Admin() {
 
     {tab === "fees" && (fees ? <>
       <div className="adm-grid">
-        {[["delivery_fee", "Delivery fee (₹)"], ["free_delivery_above", "Free delivery above (₹)"], ["small_cart_threshold", "Small cart fee applies below (₹)"], ["small_cart_fee", "Small cart fee (₹)"]].map(([k, l]) => (
+        {[["delivery_fee", "Delivery fee (₹)"], ["free_delivery_above", "Free delivery above (₹)"], ["small_cart_threshold", "Small cart fee applies below (₹)"], ["small_cart_fee", "Small cart fee (₹)"], ["rider_cash_limit", "Rider cash limit (₹)"]].map(([k, l]) => (
           <label className="adm-field" key={k}><span>{l}</span>
             <input className="adm-input" defaultValue={fees[k]} inputMode="decimal"
               onBlur={(e) => Number(e.target.value) !== Number(fees[k]) && run(supabase.from("fee_settings").update({ [k]: Number(e.target.value) }).eq("id", 1))} /></label>))}
       </div>
+      <p className="adm-hint">Rider cash limit: a rider sees the Deposit option once they hold more than this much of Quicky&apos;s money.</p>
       <h3 className="adm-h">Profit per delivered order</h3>
       {summary && Number(summary.delivered) > 0 ? (() => {
         const n = Number(summary.delivered);

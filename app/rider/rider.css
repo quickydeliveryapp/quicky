@@ -148,3 +148,19 @@
 .rdr button:focus-visible,.rdr a:focus-visible,.rdr summary:focus-visible,.rdr input:focus-visible{outline:3px solid var(--g);outline-offset:2px}
 .rdr-tick:focus-within{outline:3px solid var(--g);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.rdr *{transition:none!important}}
+
+/* deposit: slide to deposit, and the sheet */
+.rdr-dep{display:flex;flex-direction:column;gap:12px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.rdr-dep.over{border-color:#E8B4B4;background:#FFF9F9}
+.rdr-slide{position:relative;display:flex;align-items:center;justify-content:center;height:60px;padding:4px;border-radius:999px;background:#E3F0DC;overflow:hidden;user-select:none;-webkit-user-select:none}
+.rdr-slide-t{padding-left:48px;color:var(--g);font-size:calc(15px*var(--tx,1));font-weight:700;pointer-events:none}
+.rdr .rdr-slide-k{position:absolute;top:4px;left:4px;display:grid;place-items:center;width:52px;height:52px;padding:0;border-radius:50%;background:var(--g);color:#fff;box-shadow:0 2px 6px rgba(12,125,29,.35);cursor:grab;touch-action:none}
+.rdr .rdr-slide-k:hover{background:var(--g)}
+.rdr .rdr-slide-k:active{cursor:grabbing}
+.rdr-sheet-bg{position:fixed;inset:0;z-index:65;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5)}
+.rdr-sheet{display:flex;flex-direction:column;gap:12px;width:100%;max-width:520px;max-height:90vh;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));overflow:auto;border-radius:22px 22px 0 0;background:#fff}
+.rdr .rdr-opt{display:flex;align-items:center;gap:14px;width:100%;padding:14px;border-radius:14px;background:#fff;color:var(--ink);font-weight:400;text-align:left;box-shadow:inset 0 0 0 1.5px var(--line)}
+.rdr .rdr-opt:hover{background:var(--tint)}
+.rdr-opt b{display:block;font-size:calc(16px*var(--tx,1))}
+.rdr-opt small{display:block;margin-top:2px;color:var(--muted);font-size:calc(13px*var(--tx,1))}
+@media(min-width:820px){.rdr-sheet-bg{align-items:center}.rdr-sheet{border-radius:22px}}

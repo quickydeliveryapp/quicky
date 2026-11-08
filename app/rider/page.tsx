@@ -10,9 +10,13 @@ type RO = {
   eta: string | null; rider: string | null; shopName: string | null; shopAddress: string | null; shopLat: number | null; shopLng: number | null; phone: string | null;
 };
 type Me = { id: string; phone: string | null; is_online: boolean; rider_approved: boolean; upi_id: string | null };
-type Done = { id: string; total: number; cash_collected: number | null; payment_method: string | null; delivered_at: string | null; address: string };
+type Done = { id: string; total: number; cash_collected: number | null; payment_method: string | null; delivered_at: string | null; address: string; cash_received: number | null; change_returned: number | null };
 type Pay = { method: "cash" | "upi"; received: string; returned: boolean; upiOk: boolean };
-type Tab = "deliveries" | "cash" | "profile";
+type Tab = "deliveries" | "history" | "cash" | "profile";
+type Range = "today" | "week" | "month" | "all";
+type Prefs = { sound: boolean; vibrate: boolean; large: boolean };
+const DEFAULT_PREFS: Prefs = { sound: true, vibrate: true, large: false };
+const RANGES: [Range, string][] = [["today", "Today"], ["week", "7 days"], ["month", "30 days"], ["all", "All"]];
 
 const rupee = (n: number) => "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
 const clock = (ts: string) => new Date(ts).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" });
@@ -37,6 +41,17 @@ const Pkg = () => (<svg {...sv}><path d="M3.5 8L12 3.5 20.5 8v8L12 20.5 3.5 16z"
 const Check = () => (<svg {...sv}><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>);
 const Close = () => (<svg {...sv}><path d="M18 6L6 18M6 6l12 12" /></svg>);
 const Return = () => (<svg {...sv}><path d="M9 14L4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg>);
+const History = () => (<svg {...sv}><path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v4.5h4.5" /><path d="M12 7.5V12l3 2" /></svg>);
+const Help = () => (<svg {...sv}><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7" /><path d="M12 17h.01" /></svg>);
+const Sliders = () => (<svg {...sv}><path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" /></svg>);
+
+// A small on/off switch with a text label, so the state never depends on colour alone
+function Switch({ on, onChange, label, text, disabled }: { on: boolean; onChange: () => void; label: string; text?: string; disabled?: boolean }) {
+  return (<button type="button" role="switch" aria-checked={on} aria-label={label} disabled={disabled} className={"rdr-tg" + (on ? " on" : "")} onClick={onChange}>
+    {text && <span className="rdr-tg-t">{text}</span>}
+    <span className="rdr-tg-k" aria-hidden="true"><i /></span>
+  </button>);
+}
 
 // ---- camera scanner (pickup QR, own UPI QR) ----
 function Scanner({ title, hint, onResult, onClose }: { title: string; hint: string; onResult: (v: string) => void; onClose: () => void }) {
@@ -88,6 +103,11 @@ export default function Rider() {
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ text: string; ok: boolean } | null>(null);
   const [now, setNow] = useState(Date.now());
+  const [ready, setReady] = useState(false);
+  const [range, setRange] = useState<Range>("today");
+  const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const seen = useRef<Set<string> | null>(null);
 
   const say = (text: string, ok = true) => setToast({ text, ok });
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 5000); return () => clearTimeout(t); }, [toast]);
@@ -98,7 +118,7 @@ export default function Rider() {
     const [p, o, d, dp] = await Promise.all([
       supabase.from("profiles").select("id,phone,is_online,rider_approved,upi_id").eq("id", u.user.id).single(),
       supabase.rpc("rider_orders"),
-      supabase.from("orders").select("id,total,cash_collected,payment_method,delivered_at,address").eq("status", "delivered").order("delivered_at", { ascending: false }),
+      supabase.from("orders").select("id,total,cash_collected,payment_method,delivered_at,address,cash_received,change_returned").eq("status", "delivered").order("delivered_at", { ascending: false }),
       supabase.from("cash_deposits").select("amount,created_at").order("created_at", { ascending: false }),
     ]);
     if (p.data) setMe({ ...(p.data as Me), phone: (p.data as Me).phone ?? u.user.phone ?? null });
@@ -109,6 +129,7 @@ export default function Rider() {
     })));
     if (!d.error) setDone((d.data as Done[]) || []);
     if (!dp.error) setDeps(((dp.data as any[]) || []).map((r) => ({ amount: Number(r.amount), created_at: r.created_at })));
+    setReady(true);
   }, []);
 
   useEffect(() => {
@@ -130,10 +151,28 @@ export default function Rider() {
   const todays = done.filter((d) => d.delivered_at && new Date(d.delivered_at).toDateString() === todayStr);
   const todayCash = todays.reduce((a, d) => a + Number(d.cash_collected || 0), 0);
 
+  // ---- settings (kept on this phone) ----
+  useEffect(() => { try { const v = localStorage.getItem("qk_rider_prefs"); if (v) setPrefs({ ...DEFAULT_PREFS, ...JSON.parse(v) }); } catch {} }, []);
+  const setPref = (patch: Partial<Prefs>) => setPrefs((cur) => { const n = { ...cur, ...patch }; try { localStorage.setItem("qk_rider_prefs", JSON.stringify(n)); } catch {} return n; });
+
+  // ---- tell the rider when a new order is ready for pickup ----
+  useEffect(() => {
+    if (!ready) return;
+    const ids = avail.map((o) => o.id);
+    if (seen.current === null) { seen.current = new Set(ids); return; }
+    const fresh = canTake ? ids.filter((id) => !seen.current!.has(id)) : [];
+    seen.current = new Set(ids);
+    if (fresh.length === 0) return;
+    say(fresh.length === 1 ? "A new order is ready for pickup." : `${fresh.length} new orders are ready for pickup.`);
+    if (prefs.sound && audioRef.current) { const a = audioRef.current; a.currentTime = 0; a.play().catch(() => {}); setTimeout(() => a.pause(), 4000); }
+    if (prefs.vibrate && typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+  }, [orders, ready]);
+
   // ---- actions ----
   async function toggleOnline() {
     if (!me) return;
     if (!me.rider_approved) { say("Your account is waiting for approval from Quicky.", false); return; }
+    if (me.is_online && mine.length > 0 && !window.confirm("You have a delivery in progress. Go offline anyway?")) return;
     const { error } = await supabase.rpc("set_online", { p_online: !me.is_online });
     if (error) say(friendly(error.message), false);
     load();
@@ -288,22 +327,24 @@ export default function Rider() {
 
   const phoneLabel = me?.phone ? "+" + me.phone.replace(/^\+/, "") : "Rider";
 
-  return (<div className="rdr">
+  return (<div className="rdr" style={{ ["--tx" as string]: prefs.large ? 1.18 : 1 } as React.CSSProperties}>
+    <audio ref={audioRef} src="/alert.mp3" preload="auto" />
     <section className="rdr-me">
       <span className="rdr-av"><Bike /></span>
       <div className="rdr-me-t">
-        <b>{me?.is_online ? "You are online" : "You are offline"}</b>
-        <span>{me ? (me.rider_approved ? phoneLabel : "Waiting for approval") : "Loading..."}</span>
+        <b>{phoneLabel}</b>
+        <span>{me ? (me.rider_approved ? "Approved rider" : "Waiting for approval") : "Loading..."}</span>
       </div>
-      <input className="rdr-sw" type="checkbox" role="switch" aria-label="Go online" checked={!!me?.is_online} disabled={!me} onChange={toggleOnline} />
+      <Switch on={!!me?.is_online} text={me?.is_online ? "Online" : "Offline"} label={me?.is_online ? "Online. Tap to go offline" : "Offline. Tap to go online"} disabled={!me} onChange={toggleOnline} />
     </section>
 
     {toast && <p className={"rdr-toast" + (toast.ok ? "" : " bad")} role="status">{toast.text}</p>}
 
     <nav className="rdr-nav" aria-label="Rider sections">
-      <button className={tab === "deliveries" ? "on" : ""} onClick={() => setTab("deliveries")}><Bike /> Deliveries{mine.length > 0 && <span className="rdr-bd">{mine.length}</span>}</button>
-      <button className={tab === "cash" ? "on" : ""} onClick={() => setTab("cash")}><Wallet /> Cash</button>
-      <button className={tab === "profile" ? "on" : ""} onClick={() => setTab("profile")}><User /> Profile</button>
+      <button className={tab === "deliveries" ? "on" : ""} aria-current={tab === "deliveries" ? "page" : undefined} onClick={() => setTab("deliveries")}><Bike /> Deliveries{mine.length > 0 && <span className="rdr-bd" aria-label={`${mine.length} in progress`}>{mine.length}</span>}</button>
+      <button className={tab === "history" ? "on" : ""} aria-current={tab === "history" ? "page" : undefined} onClick={() => setTab("history")}><History /> History</button>
+      <button className={tab === "cash" ? "on" : ""} aria-current={tab === "cash" ? "page" : undefined} onClick={() => setTab("cash")}><Wallet /> Cash</button>
+      <button className={tab === "profile" ? "on" : ""} aria-current={tab === "profile" ? "page" : undefined} onClick={() => setTab("profile")}><User /> Profile</button>
     </nav>
 
     {tab === "deliveries" && <>
@@ -326,14 +367,6 @@ export default function Rider() {
         <div className="rdr-tile"><b>{rupee(deposited)}</b><span>Deposited in total</span></div>
       </div>
       <p className="rdr-hint">Cash and UPI payments both come to you, so both are added to the amount you deposit with Quicky.</p>
-      <h3 className="rdr-h">Recent deliveries</h3>
-      {done.length === 0 ? <div className="rdr-empty"><Wallet /><b>No deliveries yet</b><span>Your finished deliveries show up here.</span></div> : (
-        <div className="rdr-card"><div className="rdr-list">
-          {done.slice(0, 20).map((d) => (<div className="rdr-li" key={d.id}>
-            <span className="rdr-ic">{d.payment_method === "upi" ? <QrIcon /> : <Cash />}</span>
-            <div className="grow"><b>{rupee(Number(d.cash_collected ?? d.total))} {d.payment_method === "upi" ? "via UPI" : "in cash"}</b><span>{d.delivered_at ? dayTime(d.delivered_at) : ""} · {d.address}</span></div>
-          </div>))}
-        </div></div>)}
       {deps.length > 0 && <>
         <h3 className="rdr-h">Your deposits</h3>
         <div className="rdr-card"><div className="rdr-list">
@@ -342,6 +375,40 @@ export default function Rider() {
           </div>))}
         </div></div></>}
     </>}
+
+    {tab === "history" && (() => {
+      const sod = new Date(); sod.setHours(0, 0, 0, 0);
+      const from = range === "today" ? sod.getTime() : range === "week" ? now - 7 * 86400000 : range === "month" ? now - 30 * 86400000 : 0;
+      const list = done.filter((d) => d.delivered_at && new Date(d.delivered_at).getTime() >= from);
+      const sum = (xs: Done[]) => xs.reduce((a, d) => a + Number(d.cash_collected ?? d.total), 0);
+      const upiSum = sum(list.filter((d) => d.payment_method === "upi"));
+      const all = sum(list);
+      return (<>
+        <div className="rdr-chips" role="group" aria-label="Time range">
+          {RANGES.map(([k, l]) => <button key={k} className={range === k ? "on" : ""} aria-pressed={range === k} onClick={() => setRange(k)}>{l}</button>)}
+        </div>
+        <div className="rdr-tiles">
+          <div className="rdr-tile"><b>{list.length}</b><span>Deliveries</span></div>
+          <div className="rdr-tile"><b>{rupee(all)}</b><span>Collected</span></div>
+          <div className="rdr-tile"><b>{rupee(all - upiSum)}</b><span>In cash</span></div>
+          <div className="rdr-tile"><b>{rupee(upiSum)}</b><span>Via UPI</span></div>
+        </div>
+        {list.length === 0 ? <div className="rdr-empty"><History /><b>No deliveries in this time</b><span>Pick another time range above.</span></div> : (
+          <div className="rdr-card"><div className="rdr-list">
+            {list.slice(0, 100).map((d) => {
+              const gave = Number(d.cash_received || 0), back = Number(d.change_returned || 0);
+              return (<div className="rdr-li" key={d.id}>
+                <span className="rdr-ic">{d.payment_method === "upi" ? <QrIcon /> : <Cash />}</span>
+                <div className="grow">
+                  <b>{rupee(Number(d.cash_collected ?? d.total))} {d.payment_method === "upi" ? "via UPI" : "in cash"}</b>
+                  <span>{d.delivered_at ? dayTime(d.delivered_at) : ""} · {d.address}</span>
+                  {back > 0 && <span>Customer gave {rupee(gave)}, you returned {rupee(back)}</span>}
+                </div>
+              </div>);
+            })}
+          </div>{list.length > 100 && <p className="rdr-hint">Showing the latest 100 deliveries.</p>}</div>)}
+      </>);
+    })()}
 
     {tab === "profile" && <>
       <div className="rdr-card">
@@ -357,6 +424,27 @@ export default function Rider() {
         </div>
         {me?.upi_id && <button className="rdr-btn alt" onClick={() => { if (window.confirm("Remove your UPI ID?")) saveUpi(""); }}>Remove UPI ID</button>}
         <p className="rdr-hint">At delivery, the app shows a QR with the exact bill for the customer to scan. The money comes to your account, and it is added to what you deposit with Quicky.</p>
+      </div>
+
+      <div className="rdr-card">
+        <div className="rdr-line"><span className="rdr-ic"><Sliders /></span><div><b>Settings</b><span>Saved on this phone</span></div></div>
+        <div className="rdr-set"><div><b>New order sound</b><span>Plays when an order is ready for pickup</span></div><Switch on={prefs.sound} label="New order sound" text={prefs.sound ? "On" : "Off"} onChange={() => setPref({ sound: !prefs.sound })} /></div>
+        <div className="rdr-set"><div><b>Vibration</b><span>Buzzes when a new order comes</span></div><Switch on={prefs.vibrate} label="Vibration" text={prefs.vibrate ? "On" : "Off"} onChange={() => setPref({ vibrate: !prefs.vibrate })} /></div>
+        <div className="rdr-set"><div><b>Large text</b><span>Makes the writing bigger</span></div><Switch on={prefs.large} label="Large text" text={prefs.large ? "On" : "Off"} onChange={() => setPref({ large: !prefs.large })} /></div>
+      </div>
+
+      <div className="rdr-card">
+        <div className="rdr-line"><span className="rdr-ic"><Help /></span><div><b>How it works</b><span>Tap a question to open it</span></div></div>
+        <details className="rdr-qa"><summary>How does a delivery work?</summary>
+          <ol><li>Go online.</li><li>Accept an order that is ready for pickup.</li><li>Go to the shop and scan the QR on the bag.</li><li>Deliver it and collect the bill.</li><li>Choose cash or UPI, then tap Mark as delivered.</li></ol></details>
+        <details className="rdr-qa"><summary>The customer gave more money</summary>
+          <p>Enter the cash you received. The app shows the change to return. Give the change back, tick the box, and then you can mark the order as delivered.</p></details>
+        <details className="rdr-qa"><summary>The customer gave less money</summary>
+          <p>Collect the full bill first. The order cannot be marked as delivered until the cash matches the bill.</p></details>
+        <details className="rdr-qa"><summary>How do UPI payments work?</summary>
+          <p>Add your UPI above. At delivery choose UPI, and the customer scans the QR with the exact bill. Tick the box once the money reaches you.</p></details>
+        <details className="rdr-qa"><summary>Where do I see what I owe Quicky?</summary>
+          <p>Open the Cash tab. It shows the money you collected, what you already deposited, and what is left to deposit.</p></details>
       </div>
     </>}
 

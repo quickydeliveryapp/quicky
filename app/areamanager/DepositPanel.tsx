@@ -19,6 +19,7 @@ export default function DepositPanel() {
   const [amt, setAmt] = useState("");
   const [method, setMethod] = useState<"upi" | "cash">("upi");
   const [upiText, setUpiText] = useState("");
+  const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ text: string; ok: boolean } | null>(null);
   const say = (text: string, ok = true) => setToast({ text, ok });
@@ -50,7 +51,12 @@ export default function DepositPanel() {
     const v = upiText.trim();
     if (!VPA.test(v)) { say("That does not look like a valid UPI ID (for example name@bank).", false); return; }
     const { error } = await supabase.rpc("set_my_upi", { p_upi: v });
-    if (error) say(friendly(error.message), false); else { say("Your UPI ID is saved."); setUpiText(""); load(); }
+    if (error) say(friendly(error.message), false); else { say(upi ? "Your UPI ID is updated." : "Your UPI ID is saved."); setUpiText(""); setEditing(false); load(); }
+  }
+  async function removeUpi() {
+    if (!window.confirm("Remove your UPI ID? The deposit QR will not work until you add one again.")) return;
+    const { error } = await supabase.rpc("set_my_upi", { p_upi: "" });
+    if (error) say(friendly(error.message), false); else { say("Your UPI ID is removed."); setUpiText(""); setEditing(false); load(); }
   }
   async function record() {
     if (!sel || !valid) return;
@@ -81,6 +87,19 @@ export default function DepositPanel() {
         <input inputMode="decimal" placeholder="₹ 0" value={amt} onChange={(e) => setAmt(e.target.value.replace(/[^0-9.]/g, ""))} /></label>
     </div>
 
+    <div className="dep-me">
+      <div className="grow"><small>Your UPI ID (the deposit QR pays to it)</small><b>{upi || "Not added yet"}</b></div>
+      {upi && !editing && <>
+        <button className="dep-pick" onClick={() => { setUpiText(upi); setEditing(true); }}>Change</button>
+        <button className="dep-pick danger" onClick={removeUpi}>Remove</button>
+      </>}
+    </div>
+    {(!upi || editing) && <div className="dep-upi">
+      <input placeholder="your UPI ID, e.g. name@bank" aria-label="Your UPI ID" value={upiText} onChange={(e) => setUpiText(e.target.value)} autoCapitalize="none" autoCorrect="off" />
+      <button className="dep-go" disabled={!upiText.trim() || upiText.trim() === upi} onClick={saveUpi}>{upi ? "Update" : "Save"}</button>
+      {editing && <button className="dep-pick" onClick={() => { setEditing(false); setUpiText(""); }}>Cancel</button>}
+    </div>}
+
     <div className="dep-seg" role="group" aria-label="How is the rider paying?">
       <button className={method === "upi" ? "on" : ""} aria-pressed={method === "upi"} onClick={() => setMethod("upi")}>UPI (show QR)</button>
       <button className={method === "cash" ? "on" : ""} aria-pressed={method === "cash"} onClick={() => setMethod("cash")}>Cash</button>
@@ -93,13 +112,7 @@ export default function DepositPanel() {
         <p>Ask {sel!.rider_phone} to scan this QR in the rider app. It pays to <b style={{ fontSize: 14 }}>{upi}</b>.</p>
       </div>
     ) : <p className="dep-hint">Choose a rider and enter the amount to show the QR.</p>) : (
-      <div>
-        <p className="dep-hint">Add your UPI ID first. The deposit QR pays to it.</p>
-        <div className="dep-upi" style={{ marginTop: 8 }}>
-          <input placeholder="your UPI ID, e.g. name@bank" aria-label="Your UPI ID" value={upiText} onChange={(e) => setUpiText(e.target.value)} autoCapitalize="none" autoCorrect="off" />
-          <button className="dep-go" disabled={!upiText.trim()} onClick={saveUpi}>Save</button>
-        </div>
-      </div>))}
+      <p className="dep-hint">Add your UPI ID above first. The deposit QR pays to it.</p>))}
 
     <button className="dep-go" disabled={!valid || busy || (method === "upi" && !upi)} onClick={record}>
       {busy ? "Please wait..." : method === "upi" ? `I received ${valid ? rupee(a) : "the payment"} on UPI` : `Record cash received${valid ? " " + rupee(a) : ""}`}

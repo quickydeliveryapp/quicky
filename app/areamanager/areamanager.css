@@ -1,0 +1,9 @@
+/* Area manager dashboard extras. Layout, cards, chips and badges come from ../admin/admin.css (.adm-*). */
+.am-add{display:flex;flex-wrap:wrap;gap:8px}
+.am-add input{flex:1 1 220px;margin:0;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:16px}
+.am-add input:focus,.am-select:focus{border-color:var(--g);outline:none;box-shadow:0 0 0 3px rgba(12,125,29,.12)}
+.am-add button{padding:11px 18px;border-radius:10px;font-size:14px;font-weight:600}
+.am-select{width:100%;max-width:260px;margin:0;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:14px}
+.am-assign{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.am-assign span{color:var(--muted);font-size:12px}
+.adm .dep{margin:0}

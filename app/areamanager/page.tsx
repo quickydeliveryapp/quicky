@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import RoleGate from "@/components/RoleGate";
+import DashShell from "@/components/DashShell";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 import { useProfile } from "@/lib/useProfile";
@@ -121,7 +122,14 @@ function AreaView() {
     filter === "all" ? true : filter === "active" ? isActive(o) : filter === "unassigned" ? unassigned(o) : filter === "delayed" ? delayed(o) : o.status === filter);
   const waiting = riders.filter((r) => !r.rider_approved).length;
 
+  const navItems = (Object.keys(TAB_LABEL) as Tab[]).map((t) => ({
+    key: t, label: TAB_LABEL[t], icon: t,
+    badge: t === "orders" ? counts.delayed : t === "riders" ? waiting : 0,
+    tone: (t === "orders" ? "bad" : "warn") as "bad" | "warn",
+  }));
+
   return (<div className="adm">
+    <DashShell items={navItems} active={tab} onSelect={(k) => setTab(k as Tab)}>
     <p className="adm-hint">{profile?.area ? `Shops and riders in ${profile.area}.` : "No area assigned yet. Ask an admin to assign one."}</p>
 
     <div className="adm-stats">
@@ -131,9 +139,6 @@ function AreaView() {
       <div className={"adm-stat" + (waiting ? " warn" : "")}><b>{waiting}</b><span>Riders waiting for approval</span></div>
     </div>
 
-    <div className="dash-tabs">
-      {(Object.keys(TAB_LABEL) as Tab[]).map((t) => <button key={t} className={t === tab ? "" : "alt"} onClick={() => setTab(t)}>{TAB_LABEL[t]}</button>)}
-    </div>
     {toast && <p className={"adm-toast" + (toast.ok ? "" : " bad")} role="status">{toast.text}</p>}
 
     {tab === "orders" && <>
@@ -239,6 +244,7 @@ function AreaView() {
     {tab === "onboard" && <OnboardPanel initialKind={kind} onChanged={load} />}
 
     {tab === "deposits" && <DepositPanel />}
+    </DashShell>
   </div>);
 }
 

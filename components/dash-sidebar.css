@@ -1,0 +1,32 @@
+/* Dashboard sidebar (admin, area manager). Laptop: fixed column. Phone: top bar + slide-in menu. */
+.dsb{display:grid;grid-template-columns:232px minmax(0,1fr);gap:28px;align-items:start}
+.dsb-content{min-width:0}
+.dsb-side{position:sticky;top:16px;display:flex;flex-direction:column;gap:18px;max-height:calc(100vh - 32px);padding:14px 10px;overflow-y:auto;border:1px solid var(--line);border-radius:16px;background:#fff}
+.dsb-title{margin:0;padding:2px 12px 0;color:var(--ink);font-size:15px;font-weight:700}
+.dsb-gt{margin:0 0 4px;padding:0 12px;color:var(--muted);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.dsb-list{display:flex;flex-direction:column;gap:2px}
+.dsb-link{display:flex;align-items:center;gap:12px;min-height:44px;padding:9px 12px;border-radius:10px;color:var(--ink);font-size:14.5px;font-weight:600;text-decoration:none}
+.dsb-link svg{flex:none;width:20px;height:20px;color:var(--muted)}
+.dsb-link:hover{background:var(--tint)}
+.dsb-link[aria-current="page"]{background:#E8F5E4;color:var(--g)}
+.dsb-link[aria-current="page"] svg{color:var(--g)}
+.dsb a:focus-visible,.dsb button:focus-visible{outline:3px solid var(--g);outline-offset:2px}
+
+/* phone */
+.dsb-bar{display:none}
+.dsb-over{position:fixed;inset:0;z-index:62;background:rgba(0,0,0,.5)}
+.dsb-drawer{display:flex;flex-direction:column;gap:18px;width:min(300px,86vw);height:100%;padding:14px 10px calc(14px + env(safe-area-inset-bottom,0px));overflow-y:auto;background:#fff;animation:dsb-in .2s ease-out}
+.dsb-dh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 4px 0 12px}
+.dsb-dh b{font-size:16px}
+.dsb .dsb-x,.dsb .dsb-menu{display:grid;flex:none;place-items:center;width:44px;height:44px;padding:0;border-radius:12px;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.dsb .dsb-x:hover,.dsb .dsb-menu:hover{background:var(--tint)}
+.dsb-x svg,.dsb-menu svg{width:22px;height:22px}
+@keyframes dsb-in{from{transform:translateX(-100%)}to{transform:none}}
+@media(prefers-reduced-motion:reduce){.dsb-drawer{animation:none}}
+
+@media(max-width:819px){
+.dsb{display:block}
+.dsb-side{display:none}
+.dsb-bar{position:sticky;top:0;z-index:8;display:flex;align-items:center;gap:12px;margin:-6px 0 12px;padding:8px 0;background:#fff}
+.dsb-cur{font-size:17px;font-weight:700}
+}

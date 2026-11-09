@@ -1,17 +1,19 @@
 "use client";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 import HeroAdmin from "@/components/HeroAdmin";
-import DepositPanel from "../areamanager/DepositPanel";
 import "./admin.css";
 
 type Tab = "orders" | "riders" | "shops" | "commission" | "settlement" | "cash" | "fees" | "hero";
+// the sidebar address -> the section it shows
+const SLUG: Record<string, Tab> = { orders: "orders", riders: "riders", shops: "shops", commission: "commission", payouts: "settlement", "rider-cash": "cash", fees: "fees", banners: "hero" };
 type Filter = "all" | "active" | "delayed" | "delivered" | "cancelled";
 
 const TAB_LABEL: Record<Tab, string> = {
   orders: "Orders", riders: "Riders", shops: "Shops", commission: "Commission",
-  settlement: "Shop payouts", cash: "Rider cash", fees: "Fees", hero: "Banners",
+  settlement: "Shop payouts", cash: "Rider cash", fees: "Fees and limits", hero: "Banners",
 };
 const STATUS_LABEL: Record<string, string> = {
   placed: "Placed", accepted: "Accepted", packed: "Packed", picked_up: "On the way", delivered: "Delivered", cancelled: "Cancelled",
@@ -39,7 +41,8 @@ const Fig = ({ label, value, cls = "" }: { label: string; value: React.ReactNode
 
 export default function Admin() {
   const [role, setRole] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>("orders");
+  const path = usePathname() ?? "";
+  const tab: Tab = SLUG[path.split("/")[2] ?? ""] ?? "orders";
   const [filter, setFilter] = useState<Filter>("all");
   const [orders, setOrders] = useState<any[]>([]);
   const [riders, setRiders] = useState<any[]>([]);
@@ -90,7 +93,6 @@ export default function Admin() {
 
   if (role === null) return <p className="adm-empty">Loading...</p>;
   if (role !== "admin" && role !== "area_manager") return <p className="adm-empty">You don&apos;t have access to this page.</p>;
-  const tabs: Tab[] = role === "admin" ? ["orders", "riders", "shops", "commission", "settlement", "cash", "fees", "hero"] : ["orders", "riders", "cash"];
 
   const isActive = (o: any) => o.status !== "delivered" && o.status !== "cancelled";
   const shopName = (id: string) => shops.find((s) => s.id === id)?.name;
@@ -108,6 +110,8 @@ export default function Admin() {
   const sortedShops = [...shops].sort((a, b) => (SHOP_ORDER[a.status] ?? 3) - (SHOP_ORDER[b.status] ?? 3));
 
   return (<div className="adm">
+    <h2 className="adm-title">{TAB_LABEL[tab]}</h2>
+    {tab === "orders" && (
     <div className="adm-stats">
       <div className="adm-stat"><b>{counts.active}</b><span>Orders in progress</span></div>
       <div className={"adm-stat" + (counts.delayed ? " bad" : "")}><b>{counts.delayed}</b><span>Delayed orders</span></div>
@@ -115,9 +119,7 @@ export default function Admin() {
       <div className={"adm-stat" + (toApprove ? " warn" : "")}><b>{toApprove}</b><span>{role === "admin" ? "Shops waiting for approval" : "Riders waiting for approval"}</span></div>
     </div>
 
-    <div className="dash-tabs">
-      {tabs.map((t) => <button key={t} className={t === tab ? "" : "alt"} onClick={() => setTab(t)}>{TAB_LABEL[t]}</button>)}
-    </div>
+    )}
     {toast && <p className={"adm-toast" + (toast.ok ? "" : " bad")} role="status">{toast.text}</p>}
 
     {tab === "orders" && <>
@@ -213,8 +215,6 @@ export default function Admin() {
           </div>
         </div>))}
     </div>)}
-
-    {tab === "cash" && <DepositPanel />}
 
     {tab === "cash" && (cash.length === 0 ? <Empty>No rider cash to show yet.</Empty> : <div className="adm-grid">
       {cash.map((r) => (

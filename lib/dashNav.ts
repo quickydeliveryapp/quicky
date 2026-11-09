@@ -15,6 +15,7 @@ export const ADMIN_NAV: NavGroup[] = [
     { href: "/admin/fees", label: "Fees and limits", icon: "sliders" },
   ] },
   { title: "Content", items: [
+    { href: "/admin/categories", label: "Categories", icon: "grid" },
     { href: "/admin/banners", label: "Banners", icon: "image" },
   ] },
 ];

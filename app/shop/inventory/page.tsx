@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
-import { CATS, categorize, OTHER } from "@/lib/categories";
+import { CATS, categorize, OTHER, useCategories } from "@/lib/categories";
 import "./inventory.css";
 
 type Prod = { name: string; unit: string | null; barcode: string | null; category: string | null; image_url: string | null };
@@ -10,7 +10,7 @@ type Row = { product_id: string; price: number; buy_price: number | null; stock:
 type Rate = { category: string; rate: number };
 type Known = { source: "mine" | "catalog" | "off" | "new"; image: string | null; locked: boolean };
 
-const CAT_OPTIONS = CATS.filter((c) => c.enabled).map((c) => c.name);
+const catOptions = () => CATS.filter((c) => c.enabled).map((c) => c.name);
 const empty = { name: "", unit: "", category: "", buy: "", price: "", stock: "", expiry: "" };
 const LOW_STOCK = 5;
 const rupee = (n: number) => "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
@@ -70,6 +70,7 @@ async function uploadPhoto(file: File): Promise<string> {
 }
 
 export default function Inventory() {
+  useCategories(); // re-draws once the category list from the database arrives
   const [rows, setRows] = useState<Row[]>([]);
   const [rates, setRates] = useState<Rate[]>([]);
   const [q, setQ] = useState("");
@@ -257,7 +258,7 @@ export default function Inventory() {
             <label className="inv-f"><span>Category</span>
               <select value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })}>
                 <option value="">Pick a category</option>
-                {CAT_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
+                {catOptions().map((c) => <option key={c} value={c}>{c}</option>)}
               </select></label>
           </div>)}
       <video ref={videoRef} className={"inv-video" + (scanning ? " on" : "")} playsInline muted />

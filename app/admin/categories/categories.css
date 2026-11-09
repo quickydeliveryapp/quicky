@@ -1,0 +1,14 @@
+/* Admin > Categories */
+.cat-pic{flex:none;width:48px;height:48px;padding:4px;border-radius:12px;background:var(--tint);object-fit:contain}
+.adm .cat-letter{width:48px;height:48px;border-radius:12px}
+.cat-add{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px}
+.cat-add label.cat-name{flex:1 1 240px;margin:0}
+.cat-add label>span:first-child,.cat-file-wrap>span{display:block;margin:0 0 3px;color:var(--muted);font-size:12px;font-weight:600}
+.cat-add input[type=text]{width:100%;margin:0;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:16px}
+.cat-add input[type=text]:focus{border-color:var(--g);outline:none;box-shadow:0 0 0 3px rgba(12,125,29,.12)}
+.cat-file-wrap{display:flex;align-items:center;gap:10px}
+.cat-file{display:inline-flex;align-items:center;min-height:40px;padding:8px 14px;border-radius:10px;background:#fff;color:var(--g);font-size:14px;font-weight:600;cursor:pointer;box-shadow:inset 0 0 0 1.5px var(--g)}
+.cat-file:hover{background:var(--tint)}
+.cat-file:focus-within{outline:3px solid var(--g);outline-offset:2px}
+.cat-file input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.cat-add .cat-pic{width:44px;height:44px}

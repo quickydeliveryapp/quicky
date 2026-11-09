@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 // Sidebar ki fixed categories (display order). enabled:false = abhi customer ko nahi dikhegi (licence/age-check ke baad true karna)
 // img = category ki photo (public/cats/). Baad mein apni photos se badalni hon toh bas wahi file replace karo
 export type Cat = { name: string; icon: string; img: string; enabled: boolean };
@@ -55,7 +57,7 @@ export function categorize(raw: string | null | undefined): string {
   if (!t) return OTHER;
   const exact = CATS.find((c) => c.name.toLowerCase() === t);
   if (exact) return exact.name;
-  for (const [name, re] of RULES) if (re.test(t)) return name;
+  for (const [name, re] of RULES) if (re.test(t) && CATS.some((c) => c.name === name)) return name;
   return OTHER;
 }
 
@@ -63,3 +65,26 @@ export const isEnabled = (name: string) => name === OTHER || !!CATS.find((c) => 
 
 // true = saari categories hamesha dikhengi (Blinkit jaisa). false = sirf wahi jinme abhi products hain
 export const SHOW_EMPTY_CATEGORIES = true;
+
+// ---- Categories from the database (Admin > Categories). The list at the top of this file is the fallback. ----
+let catsLoad: Promise<void> | null = null;
+function loadCats(): Promise<void> {
+  if (!catsLoad) catsLoad = (async () => {
+    try {
+      const { data, error } = await supabase.from("categories").select("name,icon,img,enabled").order("sort");
+      if (!error && data && data.length) {
+        CATS.splice(0, CATS.length, ...data.map((r: any) => ({ name: String(r.name), icon: r.icon || "bag", img: r.img || "", enabled: !!r.enabled })));
+      }
+    } catch {}
+  })();
+  return catsLoad;
+}
+if (typeof window !== "undefined") loadCats();
+
+// Call this at the top of a page that shows categories. It re-draws the page once the database list has arrived
+// (the number it returns changes then, so lists built from categories can depend on it).
+export function useCategories(): number {
+  const [ver, setVer] = useState(0);
+  useEffect(() => { let on = true; loadCats().then(() => { if (on) setVer((v) => v + 1); }); return () => { on = false; }; }, []);
+  return ver;
+}

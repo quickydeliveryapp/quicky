@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 import { getState, setState, useStore } from "@/lib/store";
-import { CATS, OTHER, SHOW_EMPTY_CATEGORIES, categorize, isEnabled } from "@/lib/categories";
+import { CATS, OTHER, SHOW_EMPTY_CATEGORIES, categorize, isEnabled, useCategories } from "@/lib/categories";
 import ProductCard, { P } from "@/components/ProductCard";
 import Hero from "@/components/Hero";
 import { Icon } from "@/lib/icons";
@@ -76,7 +76,8 @@ export default function Home() {
   }, [products]);
 
   // Band (disabled) categories ke products customer ko nahi dikhte
-  const visible = useMemo(() => products.filter((p) => isEnabled(categorize(p.category))), [products]);
+  const catVer = useCategories(); // re-draws once the category list from the database arrives
+  const visible = useMemo(() => products.filter((p) => isEnabled(categorize(p.category))), [products, catVer]);
 
   // Naam ke hisaab se A-Z (popular ka data aane par badal denge)
   const allSorted = useMemo(() => [...visible].sort((a, b) => a.name.localeCompare(b.name)), [visible]);

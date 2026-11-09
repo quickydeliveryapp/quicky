@@ -20,9 +20,13 @@ export const ADMIN_NAV: NavGroup[] = [
 ];
 
 export const AREA_NAV: NavGroup[] = [
-  { items: [
-    { href: "/areamanager", label: "Team", icon: "users" },
-    { href: "/areamanager/orders", label: "Orders", icon: "orders" },
-    { href: "/areamanager/deposits", label: "Deposits", icon: "wallet" },
+  { title: "Operations", items: [
+    { href: "/areamanager", label: "Orders", icon: "orders" },
+    { href: "/areamanager/riders", label: "Riders", icon: "bike" },
+    { href: "/areamanager/shops", label: "Shops", icon: "store" },
+    { href: "/areamanager/onboard", label: "Onboard", icon: "userplus" },
+  ] },
+  { title: "Money", items: [
+    { href: "/areamanager/deposits", label: "Rider cash", icon: "cash" },
   ] },
 ];

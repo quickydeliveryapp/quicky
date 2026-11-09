@@ -1,20 +1,20 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import RoleGate from "@/components/RoleGate";
-import DashShell from "@/components/DashShell";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 import { useProfile } from "@/lib/useProfile";
-import DepositPanel from "./DepositPanel";
 import OnboardPanel from "./OnboardPanel";
 import { RiderDetailsFields, checkDetails, emptyDetails, fromRow, vehicleLabel, idLabel, telHref, type Details } from "./RiderDetails";
 import "../admin/admin.css";
 import "./areamanager.css";
 
-type Tab = "orders" | "riders" | "shops" | "onboard" | "deposits";
+type Tab = "orders" | "riders" | "shops" | "onboard";
+// the sidebar address (/areamanager/riders ...) -> the section it shows; /areamanager itself is Orders
+const SLUG: Record<string, Tab> = { riders: "riders", shops: "shops", onboard: "onboard" };
 type Filter = "all" | "active" | "unassigned" | "delayed" | "delivered" | "cancelled";
 
-const TAB_LABEL: Record<Tab, string> = { orders: "Orders", riders: "Riders", shops: "Shops", onboard: "Onboard", deposits: "Rider cash" };
 const STATUS_LABEL: Record<string, string> = {
   placed: "Placed", accepted: "Accepted", packed: "Packed", picked_up: "On the way", delivered: "Delivered", cancelled: "Cancelled",
 };
@@ -37,7 +37,9 @@ const Empty = ({ children }: { children: React.ReactNode }) => <p className="adm
 
 function AreaView() {
   const { profile } = useProfile();
-  const [tab, setTab] = useState<Tab>("orders");
+  const pathname = usePathname() || "";
+  const router = useRouter();
+  const tab: Tab = SLUG[pathname.split("/")[2] ?? ""] ?? "orders";
   const [filter, setFilter] = useState<Filter>("all");
   const [people, setPeople] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
@@ -98,7 +100,9 @@ function AreaView() {
     if (bad) { setToast({ text: bad, ok: false }); return; }
     call("am_set_rider_details", { p_rider: editId, p_details: editDet, p_name: editName.trim() }, () => setEditId(null));
   }
-  const goOnboard = (k: "rider" | "shop") => { setKind(k); setTab("onboard"); };
+  const goOnboard = (k: "rider" | "shop") => router.push("/areamanager/onboard#" + k);
+  // /areamanager/onboard#shop opens the shop form
+  useEffect(() => { setKind(window.location.hash === "#shop" ? "shop" : "rider"); }, [pathname]);
 
   const riders = people.filter((p) => p.role === "rider");
   const shops = people.filter((p) => p.role === "shop");
@@ -122,15 +126,8 @@ function AreaView() {
     filter === "all" ? true : filter === "active" ? isActive(o) : filter === "unassigned" ? unassigned(o) : filter === "delayed" ? delayed(o) : o.status === filter);
   const waiting = riders.filter((r) => !r.rider_approved).length;
 
-  const navItems = (Object.keys(TAB_LABEL) as Tab[]).map((t) => ({
-    key: t, label: TAB_LABEL[t], icon: t,
-    badge: t === "orders" ? counts.delayed : t === "riders" ? waiting : 0,
-    tone: (t === "orders" ? "bad" : "warn") as "bad" | "warn",
-  }));
-
   return (<div className="adm">
-    <DashShell items={navItems} active={tab} onSelect={(k) => setTab(k as Tab)}>
-    <p className="adm-hint">{profile?.area ? `Shops and riders in ${profile.area}.` : "No area assigned yet. Ask an admin to assign one."}</p>
+    {profile && !profile.area && <p className="adm-hint">No area assigned yet. Ask an admin to assign one.</p>}
 
     <div className="adm-stats">
       <div className="adm-stat"><b>{counts.active}</b><span>Orders in progress</span></div>
@@ -242,9 +239,6 @@ function AreaView() {
     </>}
 
     {tab === "onboard" && <OnboardPanel initialKind={kind} onChanged={load} />}
-
-    {tab === "deposits" && <DepositPanel />}
-    </DashShell>
   </div>);
 }
 

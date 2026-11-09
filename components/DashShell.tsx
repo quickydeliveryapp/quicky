@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { NavGroup } from "@/lib/dashNav";
 import "./dash-sidebar.css";
-import "./dash-sharp.css";
 
 // Outline icons (24x24, drawn in the text colour). The names match lib/dashNav.ts.
 const ICONS: Record<string, React.ReactNode> = {

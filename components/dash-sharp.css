@@ -1,0 +1,8 @@
+/* Admin and area manager dashboards: sharp corners everywhere.
+   To go back to rounded corners, delete the line  import "./dash-sharp.css";  in components/DashShell.tsx */
+.adm, .dsb,
+.adm *, .dsb *,
+.adm *::before, .adm *::after,
+.dsb *::before, .dsb *::after { border-radius: 0 !important; }
+/* the little online/offline status dot stays round */
+.adm .adm-dot, .dsb .adm-dot { border-radius: 50% !important; }

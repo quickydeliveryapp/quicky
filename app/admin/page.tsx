@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { friendly } from "@/lib/messages";
 import HeroAdmin from "@/components/HeroAdmin";
+import * as catLib from "@/lib/categories";
 import "./admin.css";
 
 type Tab = "orders" | "riders" | "shops" | "commission" | "settlement" | "cash" | "fees" | "hero";
@@ -32,6 +33,17 @@ function ago(ts: string, now: number) {
   const h = Math.floor(m / 60);
   if (h < 24) return h + " h ago";
   return new Date(ts).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
+
+// category name -> picture, read from lib/categories.ts (the same pictures the customer app uses)
+const CAT_IMG: Record<string, string> = {};
+(Object.values(catLib) as unknown[]).forEach((v) => {
+  if (Array.isArray(v)) v.forEach((c: any) => { if (c && typeof c.name === "string" && typeof c.img === "string") CAT_IMG[c.name.toLowerCase()] = c.img; });
+});
+function CatPic({ name }: { name: string }) {
+  const src = CAT_IMG[String(name).toLowerCase()];
+  // eslint-disable-next-line @next/next/no-img-element
+  return src ? <img className="adm-cat-img" src={src} alt="" loading="lazy" /> : <span className="adm-av">{String(name).charAt(0)}</span>;
 }
 
 const Empty = ({ children }: { children: React.ReactNode }) => <p className="adm-empty">{children}</p>;
@@ -190,7 +202,7 @@ export default function Admin() {
       <p className="adm-hint">Commission % by category. Changes apply to new orders only.</p>
       {rates.length === 0 ? <Empty>No categories set up yet.</Empty> : <div className="adm-grid">
         {rates.map((c) => (<div className="adm-field" key={c.category}>
-          <span>{c.category}</span>
+          <span className="adm-cat"><CatPic name={c.category} /><span>{c.category}</span></span>
           <span><input className="adm-input" style={{ width: 80 }} defaultValue={c.rate} inputMode="decimal" aria-label={c.category + " commission percent"}
             onBlur={(e) => Number(e.target.value) !== Number(c.rate) && run(supabase.from("category_commissions").update({ rate: Number(e.target.value) }).eq("category", c.category))} /> %</span>
         </div>))}

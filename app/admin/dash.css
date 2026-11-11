@@ -114,7 +114,43 @@
 .dash-card .ui-table th{background:#F6F9F6}
 
 /* pages other than Orders have no welcome line, so leave room for the profile at the top right */
-@media(min-width:820px){.dash-welcome{margin-top:-52px;padding-right:260px}}
 
 .dash-card-head+.dash-list,.dash-card-head+.dash-grid{margin-top:20px}
 .dash-card .ui-th{border:0}
+
+/* ---- Compact sizes (everything a little smaller so it sits comfortably next to the sidebar) ---- */
+.dash-welcome h2{font-size:clamp(20px,2.4vw,26px)}
+.dash-welcome p{margin-top:4px;font-size:14px}
+.dash-stats{gap:12px;margin:14px 0 18px}
+.dash-stat{gap:14px;padding:14px 16px;border-radius:16px}
+.dash-stat-ic{width:48px;height:48px}
+.dash-stat-ic svg{width:24px;height:24px}
+.dash-stat b{font-size:26px}
+.dash-stat span.dash-stat-l{margin-top:2px;font-size:13px;line-height:1.3}
+.dash-card{padding:18px;border-radius:16px}
+.dash-card-head h3{font-size:21px}
+.dash-sub{font-size:13px}
+.dash-search input,.dash-range{height:40px;font-size:14px}
+.dash-search input{padding-left:40px}
+.dash-search svg{left:12px;width:16px;height:16px}
+.dash-pills{gap:8px;margin:14px 0 14px}
+.adm .dash-pill{padding:7px 16px;font-size:13.5px}
+.dash-list{gap:10px}
+.dash-row{grid-template-columns:minmax(180px,1.3fr) minmax(110px,.9fr) minmax(160px,1.1fr) minmax(140px,1fr) auto;padding:12px 14px;border-radius:14px}
+.dash-main{padding-right:14px}
+.dash-badge{gap:6px;padding:4px 12px 4px 8px;font-size:13px}
+.dash-badge svg{width:18px;height:18px}
+.dash-id{margin:8px 0 2px;font-size:12.5px}
+.dash-addr{font-size:14.5px;line-height:1.35}
+.dash-cell{gap:10px;padding:0 12px 0 14px}
+.dash-cell>svg{width:19px;height:19px}
+.dash-cell span{font-size:12.5px}
+.dash-cell b{margin-top:2px;font-size:14px}
+.dash-end{gap:8px;padding-left:12px}
+.dash-amt{font-size:20px}
+.adm .dash-view{padding:7px 14px;border-radius:10px;font-size:13px}
+.dash-tile{padding:12px 14px;border-radius:14px}
+.dash-grid{gap:12px;margin-top:14px}
+.dash-input{height:38px;font-size:14px}
+.dash-fig b{font-size:19px}
+.dash-h{font-size:16px}

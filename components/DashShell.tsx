@@ -1,13 +1,11 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import type { NavGroup } from "@/lib/dashNav";
 import "./dash-sidebar.css";
 
-// Change these two if your logo file or support contact is different.
-const LOGO = "/logo-nav-v3.webp";
+// Change this if your support contact is different.
 const SUPPORT_HREF = "mailto:support@quicky.app";
 
 // Outline icons (24x24, drawn in the text colour). The names match lib/dashNav.ts.
@@ -26,9 +24,6 @@ const ICONS: Record<string, React.ReactNode> = {
   userplus: <><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" /></>,
   menu: <><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></>,
   close: <><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></>,
-  bell: <><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15L6 17Z" /><path d="M10 21h4" /></>,
-  chev: <path d="m6 9 6 6 6-6" />,
-  logout: <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5M21 12H9" /></>,
   help: <><path d="M5 14v-2a7 7 0 0 1 14 0v2" /><rect x="3.5" y="13" width="4" height="6" rx="1.5" /><rect x="16.5" y="13" width="4" height="6" rx="1.5" /><path d="M19 19c0 1.5-2 2-5 2" /></>,
 };
 
@@ -59,65 +54,36 @@ function Menu({ groups, path, onGo }: { groups: NavGroup[]; path: string; onGo?:
 }
 
 const Help = () => (<a className="dsb-help" href={SUPPORT_HREF}><Icon name="help" /><div><b>Need Help?</b><span>Contact Support →</span></div></a>);
-// eslint-disable-next-line @next/next/no-img-element
-const Logo = ({ cls }: { cls: string }) => <Link href="/" className={cls} aria-label="Quicky home"><img src={LOGO} alt="Quicky" /></Link>;
 
-// Sidebar + top bar for the admin and area manager dashboards.
-// Laptop: fixed left column, bell and profile at the top right. Phone: top bar with a slide-in menu.
+// Sidebar for the admin and area manager dashboards: a column on a laptop, a top bar with a slide-in menu on a phone.
+// The page header above (logo, title, Logout) is not touched.
 export default function DashShell({ groups, title, children }: { groups: NavGroup[]; title?: string; children: React.ReactNode }) {
   const path = usePathname() || "";
   const [open, setOpen] = useState(false);
-  const [menu, setMenu] = useState(false);
-  const [name, setName] = useState("");
-  const prof = useRef<HTMLDivElement>(null);
-  useEffect(() => { setOpen(false); setMenu(false); }, [path]);
+  useEffect(() => { setOpen(false); }, [path]);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }: any) => {
-      const m = data?.user?.user_metadata ?? {};
-      setName(String(m.full_name ?? m.name ?? "").trim());
-    });
-  }, []);
-  useEffect(() => {
-    if (!menu) return;
-    const off = (e: MouseEvent) => { if (prof.current && !prof.current.contains(e.target as Node)) setMenu(false); };
-    document.addEventListener("mousedown", off);
-    return () => document.removeEventListener("mousedown", off);
-  }, [menu]);
-
-  const shown = name || title || "Admin";
-  const initials = shown.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
-  const logout = async () => { await supabase.auth.signOut(); window.location.href = "/"; };
+  const current = groups.flatMap((g) => g.items).find((i) => isCurrent(path, i.href));
 
   return (<div className="dsb">
     <aside className="dsb-side">
-      <Logo cls="dsb-logo" />
       <Menu groups={groups} path={path} />
       <Help />
     </aside>
     <div className="dsb-content">
       <div className="dsb-bar">
         <button type="button" className="dsb-menu" aria-label="Open menu" aria-expanded={open} onClick={() => setOpen(true)}><Icon name="menu" /></button>
-        <Logo cls="dsb-barlogo" />
-        <span className="dsb-grow" />
-        <button type="button" className="dsb-bell" aria-label="Notifications"><Icon name="bell" /><i /></button>
-        <div className="dsb-prof" ref={prof}>
-          <button type="button" className="dsb-pbtn" aria-haspopup="menu" aria-expanded={menu} onClick={() => setMenu((v) => !v)}>
-            <span className="dsb-av">{initials}</span><span className="dsb-pname">{shown}</span><Icon name="chev" />
-          </button>
-          {menu && <div className="dsb-pmenu" role="menu"><button type="button" role="menuitem" onClick={logout}><Icon name="logout" />Logout</button></div>}
-        </div>
+        <span className="dsb-cur">{current?.label ?? title ?? "Menu"}</span>
       </div>
       {children}
     </div>
     {open && (<div className="dsb-over" onClick={() => setOpen(false)}>
       <div className="dsb-drawer" role="dialog" aria-modal="true" aria-label="Menu" onClick={(e) => e.stopPropagation()}>
-        <div className="dsb-dh"><Logo cls="dsb-logo" />
+        <div className="dsb-dh"><b>{title ?? "Menu"}</b>
           <button type="button" className="dsb-x" aria-label="Close menu" onClick={() => setOpen(false)}><Icon name="close" /></button></div>
         <Menu groups={groups} path={path} onGo={() => setOpen(false)} />
         <Help />

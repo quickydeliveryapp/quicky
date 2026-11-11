@@ -1,24 +1,53 @@
-/* Dashboard sidebar (admin, area manager). Laptop: fixed column. Phone: top bar + slide-in menu. */
-.dsb{display:grid;grid-template-columns:232px minmax(0,1fr);gap:28px;align-items:start}
-.dsb-content{min-width:0}
-.dsb-side{position:sticky;top:16px;display:flex;flex-direction:column;gap:18px;max-height:calc(100vh - 32px);padding:14px 10px;overflow-y:auto;border:1px solid var(--line);border-radius:16px;background:#fff}
-.dsb-title{margin:0;padding:2px 12px 0;color:var(--ink);font-size:15px;font-weight:700}
-.dsb-gt{margin:0 0 4px;padding:0 12px;color:var(--muted);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.dsb-list{display:flex;flex-direction:column;gap:2px}
-.dsb-link{display:flex;align-items:center;gap:12px;min-height:44px;padding:9px 12px;border-radius:10px;color:var(--ink);font-size:14.5px;font-weight:600;text-decoration:none}
-.dsb-link svg{flex:none;width:20px;height:20px;color:var(--muted)}
+/* Dashboard frame (admin, area manager): logo sidebar on the left, bell + profile top right.
+   Phone: top bar with a slide-in menu. The old "Admin dashboard / Logout" strip is hidden because the profile menu has Logout. */
+body:has(.dsb) .dhdr{display:none}
+main:has(.dsb){max-width:none;margin:0;padding:0}
+
+.dsb{display:grid;grid-template-columns:280px minmax(0,1fr);align-items:start;min-height:100vh}
+.dsb-content{position:relative;min-width:0;padding:84px 40px 56px}
+
+/* sidebar */
+.dsb-side{position:sticky;top:0;display:flex;flex-direction:column;gap:22px;height:100vh;padding:26px 20px 22px;overflow-y:auto;border-right:1px solid var(--line);background:#fff}
+.dsb-logo{display:block;padding:0 6px;line-height:0}
+.dsb-logo img{display:block;height:46px;width:auto}
+.dsb-nav{display:flex;flex-direction:column}
+.dsb-group+.dsb-group{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.dsb-gt{display:none}
+.dsb-list{display:flex;flex-direction:column;gap:4px}
+.dsb-link{display:flex;align-items:center;gap:14px;min-height:46px;padding:10px 16px;border-radius:14px;color:var(--ink);font-size:16px;font-weight:600;text-decoration:none}
+.dsb-link svg{flex:none;width:22px;height:22px;color:#3E4A42}
 .dsb-link:hover{background:var(--tint)}
-.dsb-link[aria-current="page"]{background:#E8F5E4;color:var(--g)}
+.dsb-link[aria-current="page"]{background:#E4F5E6;color:var(--g)}
 .dsb-link[aria-current="page"] svg{color:var(--g)}
+.dsb-help{display:flex;align-items:center;gap:14px;margin-top:auto;padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:#F6F9F6;color:var(--ink);text-decoration:none}
+.dsb-help svg{flex:none;width:32px;height:32px;color:var(--g)}
+.dsb-help b{display:block;font-size:15px}
+.dsb-help span{color:var(--muted);font-size:13px}
 .dsb a:focus-visible,.dsb button:focus-visible{outline:3px solid var(--g);outline-offset:2px}
 
-/* phone */
-.dsb-bar{display:none}
+/* top bar: bell + profile (floats top right on a laptop) */
+.dsb-bar{position:absolute;top:22px;right:40px;z-index:6;display:flex;align-items:center;gap:14px}
+.dsb .dsb-menu,.dsb-barlogo,.dsb-grow{display:none}
+.dsb .dsb-bell{position:relative;display:grid;place-items:center;width:44px;height:44px;padding:0;border-radius:12px;background:none;color:var(--ink)}
+.dsb .dsb-bell:hover{background:var(--tint)}
+.dsb-bell svg{width:24px;height:24px}
+.dsb-bell i{position:absolute;top:9px;right:11px;width:10px;height:10px;border:2px solid #fff;border-radius:50%;background:#E5382B}
+.dsb-prof{position:relative}
+.dsb .dsb-pbtn{display:flex;align-items:center;gap:10px;padding:4px 6px 4px 4px;border-radius:999px;background:none;color:var(--ink);font-size:15px;font-weight:600}
+.dsb .dsb-pbtn:hover{background:var(--tint)}
+.dsb-pbtn svg{width:16px;height:16px}
+.dsb-av{display:grid;flex:none;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--g);color:#fff;font-size:16px;font-weight:700}
+.dsb-pmenu{position:absolute;top:calc(100% + 8px);right:0;min-width:170px;padding:6px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 12px 32px rgba(22,35,28,.14)}
+.dsb .dsb-pmenu button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:10px;background:none;color:var(--ink);font-size:14.5px;text-align:left}
+.dsb .dsb-pmenu button:hover{background:#FDE8E8;color:var(--red)}
+.dsb-pmenu svg{width:18px;height:18px}
+
+/* phone drawer */
 .dsb-over{position:fixed;inset:0;z-index:62;background:rgba(0,0,0,.5)}
-.dsb-drawer{display:flex;flex-direction:column;gap:18px;width:min(300px,86vw);height:100%;padding:14px 10px calc(14px + env(safe-area-inset-bottom,0px));overflow-y:auto;background:#fff;animation:dsb-in .2s ease-out}
-.dsb-dh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 4px 0 12px}
-.dsb-dh b{font-size:16px}
-.dsb .dsb-x,.dsb .dsb-menu{display:grid;flex:none;place-items:center;width:44px;height:44px;padding:0;border-radius:12px;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.dsb-drawer{display:flex;flex-direction:column;gap:18px;width:min(300px,86vw);height:100%;padding:18px 16px calc(16px + env(safe-area-inset-bottom,0px));overflow-y:auto;background:#fff;animation:dsb-in .2s ease-out}
+.dsb-dh{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dsb .dsb-x,.dsb .dsb-menu{flex:none;place-items:center;width:44px;height:44px;padding:0;border-radius:12px;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.dsb .dsb-x{display:grid}
 .dsb .dsb-x:hover,.dsb .dsb-menu:hover{background:var(--tint)}
 .dsb-x svg,.dsb-menu svg{width:22px;height:22px}
 @keyframes dsb-in{from{transform:translateX(-100%)}to{transform:none}}
@@ -27,6 +56,12 @@
 @media(max-width:819px){
 .dsb{display:block}
 .dsb-side{display:none}
-.dsb-bar{position:sticky;top:0;z-index:8;display:flex;align-items:center;gap:12px;margin:-6px 0 12px;padding:8px 0;background:#fff}
-.dsb-cur{font-size:17px;font-weight:700}
+.dsb-content{padding:0 16px 40px}
+.dsb-bar{position:sticky;top:0;right:auto;z-index:8;margin:0 -16px 12px;padding:10px 16px;gap:10px;background:#fff;border-bottom:1px solid var(--line)}
+.dsb .dsb-menu{display:grid}
+.dsb-barlogo{display:block;line-height:0}
+.dsb-barlogo img{display:block;height:34px;width:auto}
+.dsb-grow{display:block;flex:1}
+.dsb-pname,.dsb-pbtn svg{display:none}
+.dsb .dsb-pbtn{padding:0}
 }

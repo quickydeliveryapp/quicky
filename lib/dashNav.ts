@@ -4,15 +4,16 @@ export type NavGroup = { title?: string; items: NavItem[] };
 
 export const ADMIN_NAV: NavGroup[] = [
   { title: "Operations", items: [
-    { href: "/admin", label: "Orders", icon: "orders" },
+    { href: "/admin", label: "Dashboard", icon: "home" },
+    { href: "/admin/orders", label: "Orders", icon: "orders" },
     { href: "/admin/riders", label: "Riders", icon: "bike" },
     { href: "/admin/shops", label: "Shops", icon: "store" },
   ] },
   { title: "Money", items: [
     { href: "/admin/commission", label: "Commission", icon: "percent" },
-    { href: "/admin/payouts", label: "Shop payouts", icon: "wallet" },
-    { href: "/admin/rider-cash", label: "Rider cash", icon: "cash" },
-    { href: "/admin/fees", label: "Fees and limits", icon: "sliders" },
+    { href: "/admin/payouts", label: "Shop Payouts", icon: "wallet" },
+    { href: "/admin/rider-cash", label: "Rider Cash", icon: "cash" },
+    { href: "/admin/fees", label: "Fees & Limits", icon: "sliders" },
   ] },
   { title: "Content", items: [
     { href: "/admin/categories", label: "Categories", icon: "grid" },

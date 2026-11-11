@@ -114,9 +114,7 @@
 .dash-card .ui-table th{background:#F6F9F6}
 
 /* pages other than Orders have no welcome line, so leave room for the profile at the top right */
-.dash-offset{padding-top:72px}
-@media(max-width:1023px){.dash-offset{padding-top:0}}
+@media(min-width:820px){.dash-welcome{margin-top:-52px;padding-right:260px}}
 
 .dash-card-head+.dash-list,.dash-card-head+.dash-grid{margin-top:20px}
 .dash-card .ui-th{border:0}
-.dash-offset{padding-top:0!important}

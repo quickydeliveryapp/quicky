@@ -219,7 +219,7 @@ export default function Admin() {
       ? `${shops.length} shop${shops.length === 1 ? "" : "s"}${toApprove && role === "admin" ? ` · ${toApprove} waiting for approval` : ""}`
       : undefined;
 
-  return (<div className={"adm" + (tab === "orders" ? "" : " dash-offset")}>
+  return (<div className="adm">
     {tab === "orders"
       ? <div className="dash-welcome"><h2>{userName ? `Welcome back, ${userName}!` : "Welcome back!"}</h2><p>Here&apos;s what&apos;s happening with your platform.</p></div>
       : null}

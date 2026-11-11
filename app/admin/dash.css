@@ -36,7 +36,7 @@
 
 /* ---- order rows ---- */
 .dash-list{display:flex;flex-direction:column;gap:14px}
-.dash-row{display:grid;grid-template-columns:minmax(220px,1.5fr) minmax(130px,1fr) minmax(150px,1fr) minmax(150px,1fr) auto;align-items:center;gap:0;padding:18px 20px;border:1px solid var(--line,#E4EAE4);border-radius:16px;background:#fff;box-shadow:0 1px 2px rgba(16,40,20,.03)}
+.dash-row{display:grid;grid-template-columns:minmax(200px,1.3fr) minmax(130px,.9fr) minmax(200px,1.1fr) minmax(170px,1fr) auto;align-items:center;gap:0;padding:18px 20px;border:1px solid var(--line,#E4EAE4);border-radius:16px;background:#fff;box-shadow:0 1px 2px rgba(16,40,20,.03)}
 .dash-row.late{border-color:#F3C7C2;background:#FFFBFA}
 .dash-main{min-width:0;padding-right:20px}
 .dash-badges{display:flex;flex-wrap:wrap;gap:8px}
@@ -46,10 +46,10 @@
 .dash-badge.info{background:#DCEAFB;color:#1457B8}
 .dash-id{margin:10px 0 2px;color:var(--muted,#5F6B63);font-size:14px}
 .dash-addr{margin:0;font-size:17px;font-weight:700;color:var(--ink,#0F1A12);overflow-wrap:anywhere}
-.dash-cell{display:flex;align-items:center;gap:14px;align-self:stretch;min-width:0;padding:0 20px;border-left:1px solid var(--line,#E4EAE4)}
+.dash-cell{display:flex;align-items:center;gap:14px;align-self:stretch;min-width:0;padding:0 16px 0 20px;border-left:1px solid var(--line,#E4EAE4)}
 .dash-cell>svg{flex:none;color:#5F6B63}
 .dash-cell span{display:block;color:var(--muted,#5F6B63);font-size:14px}
-.dash-cell b{display:block;margin-top:4px;font-size:16px;font-weight:700;color:var(--ink,#0F1A12);overflow-wrap:anywhere}
+.dash-cell b{display:block;margin-top:4px;font-size:16px;font-weight:700;color:var(--ink,#0F1A12);overflow-wrap:break-word}
 .dash-end{display:flex;flex-direction:column;align-items:flex-end;gap:12px;padding-left:20px}
 .dash-amt{font-size:26px;font-weight:800;color:var(--ink,#0F1A12);font-variant-numeric:tabular-nums}
 .adm .dash-view{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border:1px solid #BFE3C5;border-radius:12px;background:#EEF9F0;color:#0C7D1D;font-size:14.5px;font-weight:700;white-space:nowrap;box-shadow:none;cursor:pointer}
@@ -85,3 +85,37 @@
 .dash-cell.c3{grid-column:1/-1;border-left:0;padding-left:0}
 .adm .dash-pill{padding:8px 16px;font-size:14px}
 }
+
+/* ---- shared card pieces used by every tab ---- */
+.dash-sub{margin:4px 0 0;color:var(--muted,#5F6B63);font-size:14.5px}
+.dash-card+.dash-card{margin-top:20px}
+.dash-hl{color:#0C7D1D}
+.dash-h{margin:26px 0 12px;font-size:18px;font-weight:800;color:var(--ink,#0F1A12)}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:20px}
+.dash-tile{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 18px;border:1px solid var(--line,#E4EAE4);border-radius:16px;background:#fff}
+.dash-field{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin:0}
+.dash-field>span{color:var(--muted,#5F6B63);font-size:14px;font-weight:600}
+.dash-pct{display:inline-flex;align-items:center;gap:8px;font-weight:700}
+.dash-input{height:44px;margin:0;padding:0 14px;border:1px solid var(--line,#E4EAE4);border-radius:12px;background:#F3F5F3;font:inherit;font-size:15px;font-weight:600;color:var(--ink,#0F1A12);box-sizing:border-box}
+.dash-field .dash-input{width:100%}
+.dash-input:focus{border-color:var(--g,#0C7D1D);background:#fff;outline:none;box-shadow:0 0 0 3px rgba(12,125,29,.12)}
+.dash-profit{display:flex;flex-direction:column;align-items:stretch;gap:16px;padding:20px}
+.dash-profit .dash-grid{margin-top:0}
+.dash-figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.dash-fig{padding:14px 16px;border-radius:14px;background:#F6F9F6}
+.dash-fig span{display:block;color:var(--muted,#5F6B63);font-size:13.5px}
+.dash-fig b{display:block;margin-top:4px;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.dash-fig.hl{background:#EEF9F0}.dash-fig.hl b{color:#0C7D1D}
+.dash-fig.neg{background:#FEF3F2}.dash-fig.neg b{color:#C0261B}
+.dash-row .ui-who{gap:14px}
+.dash-row .adm-av{flex:none}
+.dash-card>.dash-note{margin-top:14px}
+.dash-card .ui-table-wrap{border-radius:16px}
+.dash-card .ui-table th{background:#F6F9F6}
+
+/* pages other than Orders have no welcome line, so leave room for the profile at the top right */
+.dash-offset{padding-top:72px}
+@media(max-width:1023px){.dash-offset{padding-top:0}}
+
+.dash-card-head+.dash-list,.dash-card-head+.dash-grid{margin-top:20px}
+.dash-card .ui-th{border:0}

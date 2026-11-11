@@ -7,7 +7,7 @@ import HeroAdmin from "@/components/HeroAdmin";
 import * as catLib from "@/lib/categories";
 import "./admin.css";
 import "./dash.css";
-import { PageHead, Search, Tabs, DataTable, Stop, SidePanel, KV, type Col } from "./ui";
+import { DataTable, Stop, SidePanel, KV, type Col } from "./ui";
 import { IBag, IClock, IRider, IShop, ICash, ICheck, ICross, IArrow, ISearch } from "./icons";
 
 type Tab = "orders" | "riders" | "shops" | "commission" | "settlement" | "cash" | "fees" | "hero";
@@ -15,10 +15,6 @@ type Tab = "orders" | "riders" | "shops" | "commission" | "settlement" | "cash" 
 const SLUG: Record<string, Tab> = { orders: "orders", riders: "riders", shops: "shops", commission: "commission", payouts: "settlement", "rider-cash": "cash", fees: "fees", banners: "hero" };
 type Filter = "all" | "active" | "delayed" | "delivered" | "cancelled";
 
-const TAB_LABEL: Record<Tab, string> = {
-  orders: "Orders", riders: "Riders", shops: "Shops", commission: "Commission",
-  settlement: "Shop payouts", cash: "Rider cash", fees: "Fees and limits", hero: "Banners",
-};
 const STATUS_LABEL: Record<string, string> = {
   placed: "Placed", accepted: "Accepted", packed: "Packed", picked_up: "On the way", delivered: "Delivered", cancelled: "Cancelled",
 };
@@ -52,6 +48,25 @@ function CatPic({ name }: { name: string }) {
   return src ? <img className="adm-cat-img" src={src} alt="" loading="lazy" /> : <span className="adm-av">{String(name).charAt(0)}</span>;
 }
 
+const Card = ({ title, sub, tools, children }: { title: string; sub?: React.ReactNode; tools?: React.ReactNode; children: React.ReactNode }) => (
+  <section className="dash-card" aria-label={title}>
+    <div className="dash-card-head">
+      <div><h3>{title}</h3>{sub && <p className="dash-sub">{sub}</p>}</div>
+      {tools && <div className="dash-tools">{tools}</div>}
+    </div>
+    {children}
+  </section>
+);
+const DSearch = ({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) => (
+  <label className="dash-search"><ISearch />
+    <input type="search" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} aria-label={placeholder} /></label>
+);
+function Pills<K extends string>({ items, value, onChange }: { items: [K, string, number][]; value: K; onChange: (k: K) => void }) {
+  return (<div className="dash-pills" role="tablist">
+    {items.map(([k, label, n]) => (
+      <button key={k} role="tab" aria-selected={value === k} className={"dash-pill" + (value === k ? " on" : "")} onClick={() => onChange(k)}>{label} ({n})</button>))}
+  </div>);
+}
 const Empty = ({ children }: { children: React.ReactNode }) => <p className="adm-empty">{children}</p>;
 const Fig = ({ label, value, cls = "" }: { label: string; value: React.ReactNode; cls?: string }) => (
   <div className={"adm-fig " + cls}><span>{label}</span><b>{value}</b></div>
@@ -204,10 +219,10 @@ export default function Admin() {
       ? `${shops.length} shop${shops.length === 1 ? "" : "s"}${toApprove && role === "admin" ? ` · ${toApprove} waiting for approval` : ""}`
       : undefined;
 
-  return (<div className="adm">
+  return (<div className={"adm" + (tab === "orders" ? "" : " dash-offset")}>
     {tab === "orders"
       ? <div className="dash-welcome"><h2>{userName ? `Welcome back, ${userName}!` : "Welcome back!"}</h2><p>Here&apos;s what&apos;s happening with your platform.</p></div>
-      : <PageHead title={TAB_LABEL[tab]} sub={headSub} />}
+      : null}
     {tab === "orders" && (
     <div className="dash-stats">
       {([
@@ -270,101 +285,104 @@ export default function Admin() {
       </div>}
     </section>}
 
-    {tab === "riders" && <>
-      <div className="ui-bar"><Search value={q} onChange={setQ} placeholder="Search by phone number" /></div>
-      <Tabs value={rTab} onChange={setRTab} items={[
+    {tab === "riders" && <Card title="Riders" sub={headSub} tools={<DSearch value={q} onChange={setQ} placeholder="Search by phone number" />}>
+      <Pills value={rTab} onChange={setRTab} items={[
         ["all", "All", riders.length], ["online", "Online", ridersOnline], ["offline", "Offline", riders.length - ridersOnline], ["pending", "Waiting for approval", ridersWaiting]]} />
       <DataTable cols={riderCols} rows={riderRows} rowKey={(r) => r.id} onOpen={(r) => setOpenId(r.id)}
         empty={<Empty>{riders.length === 0 ? "No riders have signed up yet." : "No riders match."}</Empty>} />
-    </>}
+    </Card>}
 
-    {tab === "shops" && <>
-      <div className="ui-bar"><Search value={q} onChange={setQ} placeholder="Search by shop name or address" /></div>
-      <Tabs value={sTab} onChange={setSTab} items={[
+    {tab === "shops" && <Card title="Shops" sub={headSub} tools={<DSearch value={q} onChange={setQ} placeholder="Search by shop name or address" />}>
+      <Pills value={sTab} onChange={setSTab} items={[
         ["all", "All", shops.length], ["pending", "Pending", shops.filter((x) => x.status === "pending").length],
         ["approved", "Approved", shops.filter((x) => x.status === "approved").length], ["suspended", "Suspended", shops.filter((x) => x.status === "suspended").length]]} />
       <DataTable cols={shopCols} rows={shopRows} rowKey={(x) => x.id} onOpen={(x) => setOpenId(x.id)}
         empty={<Empty>{shops.length === 0 ? "No shops have signed up yet." : "No shops match."}</Empty>} />
-    </>}
+    </Card>}
 
-    {tab === "commission" && <>
-      <p className="adm-hint">Commission % by category. Changes apply to new orders only.</p>
-      {rates.length === 0 ? <Empty>No categories set up yet.</Empty> : <div className="adm-grid">
-        {rates.map((c) => (<div className="adm-field" key={c.category}>
+    {tab === "commission" && <Card title="Commission" sub="Commission % by category. Changes apply to new orders only.">
+      {rates.length === 0 ? <Empty>No categories set up yet.</Empty> : <div className="dash-grid">
+        {rates.map((c) => (<div className="dash-tile" key={c.category}>
           <span className="adm-cat"><CatPic name={c.category} /><span>{c.category}</span></span>
-          <span><input className="adm-input" style={{ width: 80 }} defaultValue={c.rate} inputMode="decimal" aria-label={c.category + " commission percent"}
+          <span className="dash-pct"><input className="dash-input" style={{ width: 84 }} defaultValue={c.rate} inputMode="decimal" aria-label={c.category + " commission percent"}
             onBlur={(e) => Number(e.target.value) !== Number(c.rate) && run(supabase.from("category_commissions").update({ rate: Number(e.target.value) }).eq("category", c.category))} /> %</span>
         </div>))}
       </div>}
-    </>}
+    </Card>}
 
-    {tab === "settlement" && (settle.length === 0 ? <Empty>No shop earnings yet. They appear after the first delivered order.</Empty> : <div className="adm-grid">
-      {settle.map((r) => (
-        <div className="adm-card" key={r.out_shop_id}>
-          <div className="adm-head">
-            <span className="adm-av">{String(r.out_name || "?").charAt(0).toUpperCase()}</span>
-            <div><span className="adm-name">{r.out_name}</span><span className="adm-sub">{r.orders_count} delivered orders</span></div>
-          </div>
-          <div className="adm-figs">
-            <Fig label="Earned" value={rupee(r.earned)} />
-            <Fig label="Paid out" value={rupee(r.paid)} />
-            <Fig label="Balance due" value={rupee(r.balance)} cls="hl" />
-          </div>
-          <span className="adm-sub">Item value {rupee(r.gross)} minus commission {rupee(r.commission)}</span>
-          <div className="adm-actions">
-            <button onClick={() => { const a = Number(window.prompt("Payout amount (₹)?")); if (a > 0) run(supabase.rpc("record_payout", { p_shop: r.out_shop_id, p_amount: a, p_note: "" })); }}>Record payout</button>
-          </div>
-        </div>))}
-    </div>)}
+    {tab === "settlement" && <Card title="Shop Payouts" sub={settle.length ? `${settle.length} shop${settle.length === 1 ? "" : "s"}` : undefined}>
+      {settle.length === 0 ? <Empty>No shop earnings yet. They appear after the first delivered order.</Empty> : <div className="dash-list">
+        {settle.map((r) => (
+          <article className="dash-row" key={r.out_shop_id}>
+            <div className="dash-main">
+              <div className="ui-who"><span className="adm-av">{String(r.out_name || "?").charAt(0).toUpperCase()}</span>
+                <div><p className="dash-addr">{r.out_name}</p><p className="dash-id" style={{ margin: "2px 0 0" }}>{r.orders_count} delivered orders</p></div></div>
+              <p className="dash-id">Item value {rupee(r.gross)} minus commission {rupee(r.commission)}</p>
+            </div>
+            <div className="dash-cell c1"><ICash /><div><span>Earned</span><b>{rupee(r.earned)}</b></div></div>
+            <div className="dash-cell c2"><ICash /><div><span>Paid out</span><b>{rupee(r.paid)}</b></div></div>
+            <div className="dash-cell c3"><ICash /><div><span>Balance due</span><b className="dash-hl">{rupee(r.balance)}</b></div></div>
+            <div className="dash-end">
+              <button className="dash-view" onClick={() => { const a = Number(window.prompt("Payout amount (₹)?")); if (a > 0) run(supabase.rpc("record_payout", { p_shop: r.out_shop_id, p_amount: a, p_note: "" })); }}>Record payout <IArrow /></button>
+            </div>
+          </article>))}
+      </div>}
+    </Card>}
 
-    {tab === "cash" && (cash.length === 0 ? <Empty>No rider cash to show yet.</Empty> : <div className="adm-grid">
-      {cash.map((r) => (
-        <div className="adm-card" key={r.out_rider}>
-          <div className="adm-head">
-            <span className="adm-av">{String(r.rider_phone || "?").slice(-2)}</span>
-            <div><span className="adm-name">{r.rider_phone}</span><span className="adm-sub">{r.deliveries} deliveries</span></div>
-            {Number(r.pending) > Number(fees?.rider_cash_limit ?? Infinity) && <span className="adm-badge bad">Over limit</span>}
-          </div>
-          <div className="adm-figs">
-            <Fig label="Collected" value={rupee(r.collected)} />
-            <Fig label="Deposited" value={rupee(r.deposited)} />
-            <Fig label={Number(r.pending) < 0 ? "Advance balance" : "Still to deposit"} value={rupee(Math.abs(Number(r.pending)))} cls="hl" />
-          </div>
-          <div className="adm-actions">
-            <button onClick={() => { const a = Number(window.prompt("Cash deposited by rider (₹)?")); if (a > 0) run(supabase.rpc("record_cash_deposit", { p_rider: r.out_rider, p_amount: a })); }}>Record deposit</button>
-          </div>
-        </div>))}
-    </div>)}
+    {tab === "cash" && <Card title="Rider Cash" sub={cash.length ? `${cash.length} rider${cash.length === 1 ? "" : "s"}` : undefined}>
+      {cash.length === 0 ? <Empty>No rider cash to show yet.</Empty> : <div className="dash-list">
+        {cash.map((r) => {
+          const over = Number(r.pending) > Number(fees?.rider_cash_limit ?? Infinity);
+          return (<article className={"dash-row" + (over ? " late" : "")} key={r.out_rider}>
+            <div className="dash-main">
+              <div className="ui-who"><span className="adm-av">{String(r.rider_phone || "?").slice(-2)}</span>
+                <div><p className="dash-addr">{r.rider_phone}</p><p className="dash-id" style={{ margin: "2px 0 0" }}>{r.deliveries} deliveries</p></div></div>
+              {over && <div className="dash-badges" style={{ marginTop: 10 }}><span className="dash-badge bad">Over limit</span></div>}
+            </div>
+            <div className="dash-cell c1"><ICash /><div><span>Collected</span><b>{rupee(r.collected)}</b></div></div>
+            <div className="dash-cell c2"><ICash /><div><span>Deposited</span><b>{rupee(r.deposited)}</b></div></div>
+            <div className="dash-cell c3"><ICash /><div><span>{Number(r.pending) < 0 ? "Advance balance" : "Still to deposit"}</span><b className="dash-hl">{rupee(Math.abs(Number(r.pending)))}</b></div></div>
+            <div className="dash-end">
+              <button className="dash-view" onClick={() => { const a = Number(window.prompt("Cash deposited by rider (₹)?")); if (a > 0) run(supabase.rpc("record_cash_deposit", { p_rider: r.out_rider, p_amount: a })); }}>Record deposit <IArrow /></button>
+            </div>
+          </article>);
+        })}
+      </div>}
+    </Card>}
 
-    {tab === "fees" && (fees ? <>
-      <div className="adm-grid">
-        {[["delivery_fee", "Delivery fee (₹)"], ["free_delivery_above", "Free delivery above (₹)"], ["small_cart_threshold", "Small cart fee applies below (₹)"], ["small_cart_fee", "Small cart fee (₹)"], ["rider_cash_limit", "Rider cash limit (₹)"]].map(([k, l]) => (
-          <label className="adm-field" key={k}><span>{l}</span>
-            <input className="adm-input" defaultValue={fees[k]} inputMode="decimal"
-              onBlur={(e) => Number(e.target.value) !== Number(fees[k]) && run(supabase.from("fee_settings").update({ [k]: Number(e.target.value) }).eq("id", 1))} /></label>))}
-      </div>
-      <p className="adm-hint">Rider cash limit: a rider sees the Deposit option once they hold more than this much of Quicky&apos;s money.</p>
-      <h3 className="adm-h">Profit per delivered order</h3>
-      {summary && Number(summary.delivered) > 0 ? (() => {
-        const n = Number(summary.delivered);
-        const rev = (Number(summary.commission) + Number(summary.fees)) / n;
-        const profit = rev - Number(riderCost || 0) - Number(packCost || 0);
-        return (<div className="adm-card">
-          <div className="adm-figs">
-            <Fig label="Delivered orders" value={n} />
-            <Fig label="Quicky revenue per order" value={rupee(rev.toFixed(2))} />
-            <Fig label="Profit per order" value={rupee(profit.toFixed(2))} cls={profit < 0 ? "neg" : "hl"} />
-          </div>
-          <span className="adm-sub">Revenue is commission {rupee(summary.commission)} plus delivery and small cart fees {rupee(summary.fees)}.</span>
-          <label className="adm-field"><span>Rider cost per order (₹)</span>
-            <input className="adm-input" value={riderCost} onChange={(e) => setRiderCost(e.target.value)} inputMode="decimal" /></label>
-          <label className="adm-field"><span>Packing and other cost per order (₹)</span>
-            <input className="adm-input" value={packCost} onChange={(e) => setPackCost(e.target.value)} inputMode="decimal" /></label>
-        </div>);
-      })() : <Empty>No delivered orders with the new fees yet.</Empty>}
-    </> : <Empty>Fee settings could not be loaded.</Empty>)}
+    {tab === "fees" && <Card title="Fees & Limits" sub="Changes save when you leave the box.">
+      {fees ? <>
+        <div className="dash-grid">
+          {[["delivery_fee", "Delivery fee (₹)"], ["free_delivery_above", "Free delivery above (₹)"], ["small_cart_threshold", "Small cart fee applies below (₹)"], ["small_cart_fee", "Small cart fee (₹)"], ["rider_cash_limit", "Rider cash limit (₹)"]].map(([k, l]) => (
+            <label className="dash-tile dash-field" key={k}><span>{l}</span>
+              <input className="dash-input" defaultValue={fees[k]} inputMode="decimal"
+                onBlur={(e) => Number(e.target.value) !== Number(fees[k]) && run(supabase.from("fee_settings").update({ [k]: Number(e.target.value) }).eq("id", 1))} /></label>))}
+        </div>
+        <p className="dash-note">Rider cash limit: a rider sees the Deposit option once they hold more than this much of Quicky&apos;s money.</p>
+        <h4 className="dash-h">Profit per delivered order</h4>
+        {summary && Number(summary.delivered) > 0 ? (() => {
+          const n = Number(summary.delivered);
+          const rev = (Number(summary.commission) + Number(summary.fees)) / n;
+          const profit = rev - Number(riderCost || 0) - Number(packCost || 0);
+          return (<div className="dash-tile dash-profit">
+            <div className="dash-figs">
+              <div className="dash-fig"><span>Delivered orders</span><b>{n}</b></div>
+              <div className="dash-fig"><span>Quicky revenue per order</span><b>{rupee(rev.toFixed(2))}</b></div>
+              <div className={"dash-fig " + (profit < 0 ? "neg" : "hl")}><span>Profit per order</span><b>{rupee(profit.toFixed(2))}</b></div>
+            </div>
+            <p className="dash-note" style={{ margin: 0 }}>Revenue is commission {rupee(summary.commission)} plus delivery and small cart fees {rupee(summary.fees)}.</p>
+            <div className="dash-grid">
+              <label className="dash-field"><span>Rider cost per order (₹)</span>
+                <input className="dash-input" value={riderCost} onChange={(e) => setRiderCost(e.target.value)} inputMode="decimal" /></label>
+              <label className="dash-field"><span>Packing and other cost per order (₹)</span>
+                <input className="dash-input" value={packCost} onChange={(e) => setPackCost(e.target.value)} inputMode="decimal" /></label>
+            </div>
+          </div>);
+        })() : <Empty>No delivered orders with the new fees yet.</Empty>}
+      </> : <Empty>Fee settings could not be loaded.</Empty>}
+    </Card>}
 
-    {tab === "hero" && <HeroAdmin freeAbove={fees ? Number(fees.free_delivery_above) : undefined} />}
+    {tab === "hero" && <Card title="Banners"><HeroAdmin freeAbove={fees ? Number(fees.free_delivery_above) : undefined} /></Card>}
 
     {selOrder && (
       <SidePanel title={"Order #" + String(selOrder.id).slice(0, 6)} onClose={closePanel}

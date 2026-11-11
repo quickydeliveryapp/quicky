@@ -1,0 +1,72 @@
+/* Shared admin UI: header, search, tabs, table, side panel. Scoped so other pages are untouched. */
+.ui-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:6px 16px}
+.ui-head .adm-title{margin:0}
+.ui-sub-head{margin:4px 0 0;color:var(--muted);font-size:14px}
+.ui-head-actions{display:flex;gap:8px}
+
+.ui-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.ui-search{position:relative;display:block;flex:1 1 240px;max-width:380px;margin:0}
+.ui-search svg{position:absolute;top:50%;left:12px;color:var(--muted);transform:translateY(-50%);pointer-events:none}
+.ui-search input{width:100%;height:42px;margin:0;padding:0 12px 0 40px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:15px}
+.ui-search input:focus{border-color:var(--g);outline:none;box-shadow:0 0 0 3px rgba(12,125,29,.12)}
+
+/* tabs with counts: underline style */
+.ui-tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none}
+.ui-tabs::-webkit-scrollbar{display:none}
+.adm .ui-tab{flex:none;display:inline-flex;align-items:center;gap:8px;padding:11px 14px;border-radius:0;background:transparent;color:var(--muted);font-size:14px;font-weight:600;white-space:nowrap;box-shadow:none}
+.adm .ui-tab:hover{background:var(--tint);color:var(--ink)}
+.adm .ui-tab.on{color:var(--g);box-shadow:inset 0 -2px 0 var(--g)}
+.ui-tab i{min-width:22px;padding:1px 7px;border-radius:999px;background:#EEF1EE;color:var(--muted);font-size:12px;font-style:normal;font-weight:700;text-align:center}
+.ui-tab.on i{background:#E3F4DA;color:var(--g)}
+
+/* table */
+.ui-table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.ui-table{width:100%;border-collapse:collapse;font-size:14px}
+.ui-table th{padding:10px 16px;border-bottom:1px solid var(--line);background:#F8FAF7;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.04em;text-align:left;text-transform:uppercase;white-space:nowrap}
+.ui-table td{padding:10px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+.ui-table tbody tr:last-child td{border-bottom:0}
+.ui-table tr.click{cursor:pointer}
+.ui-table tr.click:hover td{background:var(--tint)}
+.ui-table .num{text-align:right;font-variant-numeric:tabular-nums}
+.adm .ui-th{padding:0;border-radius:0;background:transparent;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;box-shadow:none}
+.adm .ui-th:hover{background:transparent;color:var(--ink)}
+.ui-who{display:flex;align-items:center;gap:12px;min-width:0}
+.ui-who>div{min-width:0}
+.ui-name{display:block;overflow:hidden;font-size:14.5px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
+.ui-meta{display:block;overflow:hidden;color:var(--muted);font-size:12.5px;text-overflow:ellipsis;white-space:nowrap}
+.ui-state{display:inline-flex;align-items:center;gap:8px;color:var(--ink);white-space:nowrap}
+.ui-act{display:flex;justify-content:flex-end;gap:8px}
+.ui-stop{display:inline-flex}
+.adm .ui-table button.sm,.adm .ui-panel button.sm{padding:7px 14px;font-size:13px;white-space:nowrap}
+.ui-neg{color:var(--red);font-weight:700}
+
+/* side panel */
+.ui-over{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.4)}
+.ui-panel{position:fixed;top:0;right:0;bottom:0;display:flex;flex-direction:column;width:min(440px,100vw);background:#fff;box-shadow:-8px 0 32px rgba(0,0,0,.18);animation:ui-in .18s ease-out}
+.ui-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.ui-panel-head h3{margin:0;font-size:18px;font-weight:700}
+.ui-panel-head p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.adm .ui-x{display:grid;flex:none;place-items:center;width:40px;height:40px;padding:0;border-radius:10px;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.adm .ui-x:hover{background:var(--tint)}
+.ui-panel-body{display:flex;flex:1;flex-direction:column;gap:18px;padding:20px;overflow-y:auto}
+.ui-panel-foot{display:flex;flex-wrap:wrap;gap:8px;padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.ui-kv{display:flex;flex-direction:column;margin:0;border:1px solid var(--line);border-radius:12px}
+.ui-kv>div{display:flex;justify-content:space-between;gap:16px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.ui-kv>div:last-child{border-bottom:0}
+.ui-kv dt{color:var(--muted);font-size:13px}
+.ui-kv dd{margin:0;font-size:14px;font-weight:600;text-align:right;word-break:break-word}
+@keyframes ui-in{from{transform:translateX(100%)}to{transform:none}}
+@media(prefers-reduced-motion:reduce){.ui-panel{animation:none}}
+.ui-over *:focus-visible,.ui-table-wrap *:focus-visible,.ui-tabs *:focus-visible{outline:3px solid var(--g);outline-offset:2px}
+
+.show-sm{display:none}
+.ui-panel .adm-figs{grid-template-columns:1fr 1fr}
+
+@media(max-width:719px){
+.show-sm{display:inline}
+.ui-name{white-space:normal}
+.ui-table .hide-sm{display:none}
+.ui-table th,.ui-table td{padding:10px 12px}
+.adm .ui-table button.sm{padding:7px 12px}
+.ui-meta{white-space:normal}
+}

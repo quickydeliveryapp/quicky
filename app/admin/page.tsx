@@ -6,7 +6,9 @@ import { friendly } from "@/lib/messages";
 import HeroAdmin from "@/components/HeroAdmin";
 import * as catLib from "@/lib/categories";
 import "./admin.css";
+import "./dash.css";
 import { PageHead, Search, Tabs, DataTable, Stop, SidePanel, KV, type Col } from "./ui";
+import { IBag, IClock, IRider, IShop, ICash, ICheck, ICross, IArrow, ISearch } from "./icons";
 
 type Tab = "orders" | "riders" | "shops" | "commission" | "settlement" | "cash" | "fees" | "hero";
 // the sidebar address -> the section it shows
@@ -25,6 +27,9 @@ const FILTERS: [Filter, string][] = [["all", "All"], ["active", "In progress"], 
 const SHOP_TONE: Record<string, string> = { approved: "ok", suspended: "bad", pending: "" };
 const SHOP_ORDER: Record<string, number> = { pending: 0, suspended: 1, approved: 2 };
 
+const RANGES: [string, string][] = [["7", "Last 7 Days"], ["30", "Last 30 Days"], ["90", "Last 90 Days"], ["0", "All time"]];
+const shortDate = (ts: string) => new Date(ts).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+const longDate = (ts: string) => new Date(ts).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" });
 const rupee = (n: any) => "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
 const clock = (ts: string) => new Date(ts).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" });
 function ago(ts: string, now: number) {
@@ -72,6 +77,8 @@ export default function Admin() {
   const [q, setQ] = useState("");
   const [rTab, setRTab] = useState<"all" | "online" | "offline" | "pending">("all");
   const [sTab, setSTab] = useState<"all" | "pending" | "approved" | "suspended">("all");
+  const [range, setRange] = useState("30");
+  const [userName, setUserName] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const closePanel = useCallback(() => setOpenId(null), []);
   useEffect(() => { setQ(""); setOpenId(null); }, [tab]);
@@ -79,6 +86,8 @@ export default function Admin() {
   async function load() {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return; // logged-out visitors get the login dialog from the role gate in app/admin/layout.tsx
+    const meta: any = u.user.user_metadata ?? {};
+    setUserName(String(meta.full_name ?? meta.name ?? "").trim());
     const { data: me } = await supabase.from("profiles").select("role").eq("id", u.user.id).single();
     const r = me?.role ?? "customer"; setRole(r);
     if (r !== "admin" && r !== "area_manager") return;
@@ -116,15 +125,27 @@ export default function Admin() {
   const isActive = (o: any) => o.status !== "delivered" && o.status !== "cancelled";
   const shopName = (id: string) => shops.find((s) => s.id === id)?.name;
   const riderPhone = (id: string) => riders.find((r) => r.id === id)?.phone;
+  // Orders in the chosen date range that match the search box; the pill counts are taken from this list
+  const orderNeedle = q.trim().toLowerCase();
+  const inRange = orders.filter((o) => {
+    if (range !== "0" && now - new Date(o.created_at).getTime() > Number(range) * 86400000) return false;
+    if (!orderNeedle) return true;
+    return [String(o.id).slice(0, 6), o.id, o.address, o.fulfilment_shop_id && shopName(o.fulfilment_shop_id), o.rider_id && riderPhone(o.rider_id)]
+      .some((v) => v && String(v).toLowerCase().includes(orderNeedle));
+  });
   const counts: Record<Filter, number> = {
-    all: orders.length,
-    active: orders.filter(isActive).length,
-    delayed: orders.filter(delayed).length,
-    delivered: orders.filter((o) => o.status === "delivered").length,
-    cancelled: orders.filter((o) => o.status === "cancelled").length,
+    all: inRange.length,
+    active: inRange.filter(isActive).length,
+    delayed: inRange.filter(delayed).length,
+    delivered: inRange.filter((o) => o.status === "delivered").length,
+    cancelled: inRange.filter((o) => o.status === "cancelled").length,
   };
-  const shown = orders.filter((o) =>
+  // the four top cards always show the live picture, whatever range or search is chosen
+  const liveActive = orders.filter(isActive).length;
+  const liveDelayed = orders.filter(delayed).length;
+  const shown = inRange.filter((o) =>
     filter === "all" ? true : filter === "active" ? isActive(o) : filter === "delayed" ? delayed(o) : o.status === filter);
+  const selOrder = tab === "orders" ? orders.find((o) => o.id === openId) : undefined;
   const toApprove = role === "admin" ? shops.filter((s) => s.status === "pending").length : riders.filter((r) => !r.rider_approved).length;
   const sortedShops = [...shops].sort((a, b) => (SHOP_ORDER[a.status] ?? 3) - (SHOP_ORDER[b.status] ?? 3));
 
@@ -184,48 +205,70 @@ export default function Admin() {
       : undefined;
 
   return (<div className="adm">
-    <PageHead title={TAB_LABEL[tab]} sub={headSub} />
+    {tab === "orders"
+      ? <div className="dash-welcome"><h2>{userName ? `Welcome back, ${userName}!` : "Welcome back!"}</h2><p>Here&apos;s what&apos;s happening with your platform.</p></div>
+      : <PageHead title={TAB_LABEL[tab]} sub={headSub} />}
     {tab === "orders" && (
-    <div className="adm-stats">
-      <div className="adm-stat"><b>{counts.active}</b><span>Orders in progress</span></div>
-      <div className={"adm-stat" + (counts.delayed ? " bad" : "")}><b>{counts.delayed}</b><span>Delayed orders</span></div>
-      <div className="adm-stat"><b>{riders.filter((r) => r.is_online).length}</b><span>Riders online</span></div>
-      <div className={"adm-stat" + (toApprove ? " warn" : "")}><b>{toApprove}</b><span>{role === "admin" ? "Shops waiting for approval" : "Riders waiting for approval"}</span></div>
+    <div className="dash-stats">
+      {([
+        ["green", <IBag key="i" />, liveActive, "Orders in progress"],
+        [liveDelayed ? "bad" : "blue", <IClock key="i" />, liveDelayed, "Delayed orders"],
+        ["green", <IRider key="i" />, ridersOnline, "Riders online"],
+        ["purple", <IShop key="i" />, toApprove, role === "admin" ? "Shops waiting for approval" : "Riders waiting for approval"],
+      ] as [string, React.ReactNode, number, string][]).map(([tone, icon, n, label]) => (
+        <div className={"dash-stat " + tone} key={label}>
+          <span className="dash-stat-ic">{icon}</span>
+          <div><b>{n}</b><span className="dash-stat-l">{label}</span></div>
+        </div>))}
     </div>
-
     )}
     {toast && <p className={"adm-toast" + (toast.ok ? "" : " bad")} role="status">{toast.text}</p>}
 
-    {tab === "orders" && <>
-      <div className="adm-chips">
+    {tab === "orders" && <section className="dash-card" aria-label="Orders">
+      <div className="dash-card-head">
+        <h3>Orders</h3>
+        <div className="dash-tools">
+          <label className="dash-search"><ISearch />
+            <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search orders..." aria-label="Search orders" /></label>
+          <select className="dash-range" value={range} onChange={(e) => setRange(e.target.value)} aria-label="Date range">
+            {RANGES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="dash-pills" role="tablist">
         {FILTERS.map(([k, label]) => (
-          <button key={k} className={"adm-chip" + (filter === k ? " on" : "")} onClick={() => setFilter(k)}>
-            {label} <i>{counts[k]}</i>
+          <button key={k} role="tab" aria-selected={filter === k} className={"dash-pill" + (filter === k ? " on" : "")} onClick={() => setFilter(k)}>
+            {label} ({counts[k]})
           </button>))}
       </div>
-      <p className="adm-hint">Showing your latest 50 orders.</p>
-      {shown.length === 0 ? <Empty>No orders here yet.</Empty> : <div className="adm-list">
+      {orders.length >= 50 && <p className="dash-note">Showing your latest 50 orders.</p>}
+      {shown.length === 0 ? <Empty>{orders.length === 0 ? "No orders here yet." : "No orders match."}</Empty> : <div className="dash-list">
         {shown.map((o) => {
           const late = delayed(o);
-          return (<article className={"adm-order" + (late ? " late" : "")} key={o.id}>
-            <div className="adm-o-top">
-              <span className={"adm-badge " + (STATUS_TONE[o.status] ?? "")}>{STATUS_LABEL[o.status] ?? o.status}</span>
-              {late && <span className="adm-badge bad">Delayed</span>}
-              <span className="adm-o-id">#{String(o.id).slice(0, 6)}</span>
-              <span className="adm-o-time">{ago(o.created_at, now)}</span>
-              <b className="adm-o-amt">{rupee(o.total)}</b>
+          const shop = o.fulfilment_shop_id && shopName(o.fulfilment_shop_id);
+          return (<article className={"dash-row" + (late ? " late" : "")} key={o.id}>
+            <div className="dash-main">
+              <div className="dash-badges">
+                <span className={"dash-badge " + (STATUS_TONE[o.status] ?? "")}>
+                  {o.status === "delivered" ? <ICheck /> : o.status === "cancelled" ? <ICross /> : <IClock size={20} />}
+                  {STATUS_LABEL[o.status] ?? o.status}
+                </span>
+                {late && <span className="dash-badge bad">Delayed</span>}
+              </div>
+              <p className="dash-id">#{String(o.id).slice(0, 6)} • {shortDate(o.created_at)}</p>
+              <p className="dash-addr">{o.address}</p>
             </div>
-            <div className="adm-o-addr">{o.address}</div>
-            <dl className="adm-meta">
-              <div><dt>Shop</dt><dd>{(o.fulfilment_shop_id && shopName(o.fulfilment_shop_id)) || "—"}</dd></div>
-              <div><dt>Rider</dt><dd>{o.rider_id ? (riderPhone(o.rider_id) ?? "—") : "Not assigned yet"}</dd></div>
-              {o.status === "picked_up" && o.expected_delivery_at && <div><dt>Expected by</dt><dd>{clock(o.expected_delivery_at)}</dd></div>}
-              {o.cash_collected != null && <div><dt>Cash received</dt><dd>{rupee(o.cash_collected)}</dd></div>}
-            </dl>
+            <div className="dash-cell c1"><IShop size={22} /><div><span>Shop</span><b>{shop || "—"}</b></div></div>
+            <div className="dash-cell c2"><IRider size={22} /><div><span>Rider</span><b>{o.rider_id ? (riderPhone(o.rider_id) ?? "—") : "Not assigned yet"}</b></div></div>
+            <div className="dash-cell c3">{o.cash_collected != null && <><ICash /><div><span>Cash received</span><b>{rupee(o.cash_collected)}</b></div></>}</div>
+            <div className="dash-end">
+              <b className="dash-amt">{rupee(o.total)}</b>
+              <button className="dash-view" onClick={() => setOpenId(o.id)}>View Details <IArrow /></button>
+            </div>
           </article>);
         })}
       </div>}
-    </>}
+    </section>}
 
     {tab === "riders" && <>
       <div className="ui-bar"><Search value={q} onChange={setQ} placeholder="Search by phone number" /></div>
@@ -322,6 +365,24 @@ export default function Admin() {
     </> : <Empty>Fee settings could not be loaded.</Empty>)}
 
     {tab === "hero" && <HeroAdmin freeAbove={fees ? Number(fees.free_delivery_above) : undefined} />}
+
+    {selOrder && (
+      <SidePanel title={"Order #" + String(selOrder.id).slice(0, 6)} onClose={closePanel}
+        sub={<>{STATUS_LABEL[selOrder.status] ?? selOrder.status} · {ago(selOrder.created_at, now)}</>}>
+        <div className="adm-figs">
+          <Fig label="Order total" value={rupee(selOrder.total)} cls="hl" />
+          <Fig label="Cash received" value={selOrder.cash_collected != null ? rupee(selOrder.cash_collected) : "—"} />
+        </div>
+        <KV rows={[
+          ["Status", (STATUS_LABEL[selOrder.status] ?? selOrder.status) + (delayed(selOrder) ? " (delayed)" : "")],
+          ["Placed on", longDate(selOrder.created_at)],
+          ...(selOrder.status === "picked_up" && selOrder.expected_delivery_at ? [["Expected by", clock(selOrder.expected_delivery_at)] as [string, React.ReactNode]] : []),
+          ["Address", selOrder.address || "—"],
+          ["Shop", (selOrder.fulfilment_shop_id && shopName(selOrder.fulfilment_shop_id)) || "—"],
+          ["Rider", selOrder.rider_id ? (riderPhone(selOrder.rider_id) ?? "—") : "Not assigned yet"],
+          ["Order ID", String(selOrder.id)],
+        ]} />
+      </SidePanel>)}
 
     {selRider && (() => { const c = cashOf.get(selRider.id); return (
       <SidePanel title={selRider.phone || "Rider"} onClose={closePanel}

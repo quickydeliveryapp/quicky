@@ -119,3 +119,4 @@
 
 .dash-card-head+.dash-list,.dash-card-head+.dash-grid{margin-top:20px}
 .dash-card .ui-th{border:0}
+.dash-offset{padding-top:0!important}

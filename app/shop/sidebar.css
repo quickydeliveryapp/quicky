@@ -1,0 +1,10 @@
+/* Shop pages next to the sidebar: the sidebar takes width, so the 3-column order board needs a wider screen than before. */
+.dsb .shp-chips{display:flex}
+.dsb .shp-board{display:block}
+.dsb .shp-col{display:none}
+.dsb .shp-col.on{display:flex}
+@media(min-width:1240px){
+.dsb .shp-chips{display:none}
+.dsb .shp-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.dsb .shp-col{display:flex}
+}

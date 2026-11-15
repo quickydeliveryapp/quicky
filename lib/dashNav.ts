@@ -32,3 +32,11 @@ export const AREA_NAV: NavGroup[] = [
     { href: "/areamanager/deposits", label: "Rider cash", icon: "cash" },
   ] },
 ];
+
+export const SHOP_NAV: NavGroup[] = [
+  { items: [
+    { href: "/shop", label: "Dashboard", icon: "home" },
+    { href: "/shop/inventory", label: "Inventory", icon: "box" },
+    { href: "/shop/earnings", label: "Earnings", icon: "wallet" },
+  ] },
+];

@@ -1,0 +1,14 @@
+/* Admin dashboard and Orders page: reuse the shop dashboard look (app/shop/shop.css), with room for the sidebar. */
+/* The sidebar takes width, so the 3-column board needs a wider screen than on the shop page */
+.shp.adm-home .shp-chips{display:flex}
+.shp.adm-home .shp-board{display:block}
+.shp.adm-home .shp-col{display:none}
+.shp.adm-home .shp-col.on{display:flex}
+@media(min-width:1240px){
+.shp.adm-home .shp-chips{display:none}
+.shp.adm-home .shp-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.shp.adm-home .shp-col{display:flex}
+}
+.adm-pills{display:flex;flex-wrap:wrap;gap:8px}
+.adm-orderlist{display:flex;flex-direction:column;gap:12px}
+.shp.adm-home .shp-hist a{color:var(--g);font-weight:600}

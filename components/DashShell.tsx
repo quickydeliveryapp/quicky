@@ -5,12 +5,8 @@ import { usePathname } from "next/navigation";
 import type { NavGroup } from "@/lib/dashNav";
 import "./dash-sidebar.css";
 
-// Change this if your support contact is different.
-const SUPPORT_HREF = "mailto:support@quicky.app";
-
 // Outline icons (24x24, drawn in the text colour). The names match lib/dashNav.ts.
 const ICONS: Record<string, React.ReactNode> = {
-  home: <><path d="M4 11 12 4l8 7" /><path d="M6 10v10h12V10" /><path d="M10 20v-5h4v5" /></>,
   orders: <><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /><rect x="9" y="3" width="6" height="4" rx="1" /><path d="M9 12h6M9 16h4" /></>,
   bike: <><circle cx="5.5" cy="17.5" r="3.5" /><circle cx="18.5" cy="17.5" r="3.5" /><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM12 17.5V14l-3-3 4-3 2 3h2" /></>,
   store: <><path d="M3 9l1-5h16l1 5" /><path d="M4 9v11h16V9" /><path d="M9 20v-6h6v6" /><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0" /></>,
@@ -20,11 +16,11 @@ const ICONS: Record<string, React.ReactNode> = {
   sliders: <><line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" /><line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" /><line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" /><line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="17" y1="16" x2="23" y2="16" /></>,
   image: <><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></>,
   grid: <><rect x="4" y="4" width="6.5" height="6.5" rx="1.5" /><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" /><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" /><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" /></>,
+  home: <><path d="M3 11l9-8 9 8" /><path d="M5 10v10h14V10" /><path d="M10 20v-6h4v6" /></>,
   users: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></>,
   userplus: <><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" /></>,
   menu: <><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></>,
   close: <><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></>,
-  help: <><path d="M5 14v-2a7 7 0 0 1 14 0v2" /><rect x="3.5" y="13" width="4" height="6" rx="1.5" /><rect x="16.5" y="13" width="4" height="6" rx="1.5" /><path d="M19 19c0 1.5-2 2-5 2" /></>,
 };
 
 function Icon({ name }: { name: string }) {
@@ -40,8 +36,8 @@ function isCurrent(path: string, href: string) {
 }
 
 function Menu({ groups, path, onGo }: { groups: NavGroup[]; path: string; onGo?: () => void }) {
-  return (<nav className="dsb-nav" aria-label="Dashboard sections">
-    {groups.map((g, gi) => (<div key={gi} className="dsb-group">
+  return (<nav aria-label="Dashboard sections" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+    {groups.map((g, gi) => (<div key={gi}>
       {g.title && <p className="dsb-gt">{g.title}</p>}
       <div className="dsb-list">
         {g.items.map((it) => (
@@ -53,10 +49,7 @@ function Menu({ groups, path, onGo }: { groups: NavGroup[]; path: string; onGo?:
   </nav>);
 }
 
-const Help = () => (<a className="dsb-help" href={SUPPORT_HREF}><Icon name="help" /><div><b>Need Help?</b><span>Contact Support →</span></div></a>);
-
-// Sidebar for the admin and area manager dashboards: a column on a laptop, a top bar with a slide-in menu on a phone.
-// The page header above (logo, title, Logout) is not touched.
+// Sidebar for the admin and area manager dashboards: a fixed column on a laptop, a top bar with a slide-in menu on a phone.
 export default function DashShell({ groups, title, children }: { groups: NavGroup[]; title?: string; children: React.ReactNode }) {
   const path = usePathname() || "";
   const [open, setOpen] = useState(false);
@@ -71,8 +64,8 @@ export default function DashShell({ groups, title, children }: { groups: NavGrou
 
   return (<div className="dsb">
     <aside className="dsb-side">
+      {title && <p className="dsb-title">{title}</p>}
       <Menu groups={groups} path={path} />
-      <Help />
     </aside>
     <div className="dsb-content">
       <div className="dsb-bar">
@@ -86,7 +79,6 @@ export default function DashShell({ groups, title, children }: { groups: NavGrou
         <div className="dsb-dh"><b>{title ?? "Menu"}</b>
           <button type="button" className="dsb-x" aria-label="Close menu" onClick={() => setOpen(false)}><Icon name="close" /></button></div>
         <Menu groups={groups} path={path} onGo={() => setOpen(false)} />
-        <Help />
       </div>
     </div>)}
   </div>);

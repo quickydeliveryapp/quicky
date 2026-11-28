@@ -8,6 +8,7 @@ export const ADMIN_NAV: NavGroup[] = [
     { href: "/admin/orders", label: "Orders", icon: "orders" },
     { href: "/admin/riders", label: "Riders", icon: "bike" },
     { href: "/admin/shops", label: "Shops", icon: "store" },
+    { href: "/admin/pincodes", label: "Pincodes", icon: "pin" },
   ] },
   { title: "Money", items: [
     { href: "/admin/commission", label: "Commission", icon: "percent" },

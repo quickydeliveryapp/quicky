@@ -1,6 +1,6 @@
 import { setState } from "./store";
 
-type Place = { label: string; city: string };
+type Place = { label: string; city: string; postcode?: string };
 
 // OpenStreetMap ke address se: poora label (area, shehar, district, state) aur sirf shehar (header ke liye)
 function parse(a: any, fallback?: string): Place {
@@ -10,12 +10,14 @@ function parse(a: any, fallback?: string): Place {
   const uniq = [...new Set(parts)];
   if (uniq.length < 3 && a.state) uniq.push(String(a.state));
   const label = uniq.slice(0, 4).join(", ") || fallback || "Current location";
-  return { label, city: city || uniq[0] || label };
+  // 6-digit pincode if the map has one ("173 205" and "173205;173206" both work)
+  const postcode = String(a.postcode ?? "").replace(/\s/g, "").match(/[1-9]\d{5}/)?.[0];
+  return { label, city: city || uniq[0] || label, postcode };
 }
 
 // Nominatim fair use: sirf button/Enter pe search, reverse result localStorage mein cache
 export async function reverse(lat: number, lng: number): Promise<Place> {
-  const key = `qk_rev3_${lat.toFixed(3)}_${lng.toFixed(3)}`;
+  const key = `qk_rev4_${lat.toFixed(3)}_${lng.toFixed(3)}`;
   try { const c = localStorage.getItem(key); if (c) return JSON.parse(c); } catch {}
   try {
     const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&lat=${lat}&lon=${lng}`);
@@ -29,7 +31,10 @@ export async function reverse(lat: number, lng: number): Promise<Place> {
 export async function searchPlaces(q: string) {
   const r = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&countrycodes=in&limit=5&q=${encodeURIComponent(q)}`);
   const j = await r.json();
-  return (j as any[]).map((x) => ({ lat: Number(x.lat), lng: Number(x.lon), label: String(x.display_name), city: parse(x.address || {}, String(x.display_name)).city }));
+  return (j as any[]).map((x) => {
+    const p = parse(x.address || {}, String(x.display_name));
+    return { lat: Number(x.lat), lng: Number(x.lon), label: String(x.display_name), city: p.city, pincode: p.postcode };
+  });
 }
 
 export function detectAndSet(): Promise<void> {
@@ -38,7 +43,7 @@ export function detectAndSet(): Promise<void> {
     navigator.geolocation.getCurrentPosition(async (p) => {
       const lat = p.coords.latitude, lng = p.coords.longitude;
       const place = await reverse(lat, lng);
-      setState({ loc: { lat, lng, label: place.label, city: place.city }, locOpen: false });
+      setState({ loc: { lat, lng, label: place.label, city: place.city, pincode: place.postcode }, locOpen: false });
       resolve();
     }, () => reject(new Error("Location permission was denied")), { timeout: 10000 });
   });

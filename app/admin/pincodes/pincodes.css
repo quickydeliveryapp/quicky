@@ -1,0 +1,11 @@
+/* Admin > Pincodes */
+.pin-add{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px}
+.pin-add label{display:block;margin:0}
+.pin-add label>span{display:block;margin:0 0 3px;color:var(--muted);font-size:12px;font-weight:600}
+.pin-add input{width:100%;margin:0;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:16px}
+.pin-add input:focus{border-color:var(--g);outline:none;box-shadow:0 0 0 3px rgba(12,125,29,.12)}
+.pin-add .pin-codes{flex:2 1 260px}
+.pin-add .pin-label{flex:1 1 200px}
+.pin-note{margin:0;padding:10px 14px;border-radius:10px;background:#E6F0FB;color:#1C4E8C;font-size:13.5px;line-height:1.45}
+.pin-note.warn{background:#FFF4D6;color:#7A5B00}
+.pin-code{font-size:15px;font-weight:700;letter-spacing:.03em;font-variant-numeric:tabular-nums}

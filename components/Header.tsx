@@ -29,7 +29,7 @@ export default function Header() {
     if (!saved) { if (!skipLoc) detectAndSet().catch(() => setState({ locOpen: true })); }
     else reverse(saved.lat, saved.lng).then((p) => {
       const cur = getState().loc;
-      if (cur && cur.lat === saved.lat && cur.lng === saved.lng && p.label !== "Current location" && (cur.city !== p.city || cur.label !== p.label)) setState({ loc: { ...cur, label: p.label, city: p.city } });
+      if (cur && cur.lat === saved.lat && cur.lng === saved.lng && p.label !== "Current location" && (cur.city !== p.city || cur.label !== p.label || cur.pincode !== p.postcode)) setState({ loc: { ...cur, label: p.label, city: p.city, pincode: p.postcode } });
     });
     supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
@@ -51,8 +51,14 @@ export default function Header() {
 
   useEffect(() => {
     if (!loc) { setEta(undefined); return; }
-    supabase.rpc("delivery_eta", { p_lat: loc.lat, p_lng: loc.lng }).then(({ data, error }) => setEta(error ? undefined : (data as number | null)));
-  }, [loc?.lat, loc?.lng]);
+    Promise.all([
+      supabase.rpc("delivery_eta", { p_lat: loc.lat, p_lng: loc.lng }),
+      loc.pincode ? supabase.rpc("pincode_serviceable", { p_pincode: loc.pincode }) : Promise.resolve({ data: true, error: null }),
+    ]).then(([e, pc]) => {
+      const outside = !pc.error && pc.data === false; // this pincode is not switched on in Admin > Pincodes
+      setEta(outside ? null : e.error ? undefined : (e.data as number | null));
+    });
+  }, [loc?.lat, loc?.lng, loc?.pincode]);
 
   const items = Object.values(cart);
   const count = items.reduce((s, i) => s + i.qty, 0);
